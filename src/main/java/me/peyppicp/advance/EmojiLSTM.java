@@ -1,5 +1,6 @@
 package me.peyppicp.advance;
 
+import com.google.common.base.Preconditions;
 import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.datasets.iterator.AsyncDataSetIterator;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -37,24 +39,54 @@ public class EmojiLSTM {
 
     private static final Logger log = LoggerFactory.getLogger(EmojiLSTM.class);
 
-    public static void main(String[] args) throws IOException {
+    public static void operationFunctionRebuildWordVector(Scanner scanner) throws IOException {
+        String[] word2VecArgs = new String[6];
+        System.out.println("Please set origin file path:");
+        String originPath = scanner.nextLine();
+        File file = new File(originPath);
+        Preconditions.checkArgument(file.exists());
+        word2VecArgs[0] = originPath;
+        System.out.println("Please set min word frequency:");
+        word2VecArgs[1] = scanner.nextLine();
+        System.out.println("Please set iterations:");
+        word2VecArgs[2] = scanner.nextLine();
+        System.out.println("Please set layerSize:");
+        word2VecArgs[3] = scanner.nextLine();
+        System.out.println("Please set seed:");
+        word2VecArgs[4] = scanner.nextLine();
+        System.out.println("Please set window size:");
+        word2VecArgs[5] = scanner.nextLine();
+        System.out.println("Please set flag to determine weather continue or not: 1->true,0->false");
+        int flagInt = scanner.nextInt();
+        Preconditions.checkArgument(flagInt == 0 || flagInt == 1);
+        Word2VecMain.main(word2VecArgs);
+        if (flagInt == 1) {
+            System.exit(0);
+        }
+    }
 
-//        CudaEnvironment.getInstance().getConfiguration().setMaximumDeviceCache(5L * 1024 * 1024 * 1024);
+    public static void operationFunctionRebuildModel(Scanner scanner) throws IOException {
+        System.out.println("Please set train data path:");
+        String trainDataPath = scanner.nextLine();
+        System.out.println("Please set label data path:");
+        String labelDataPath = scanner.nextLine();
+        System.out.println("Please set word vector data path(Please use look up table):");
+        String wordVectorPath = scanner.nextLine();
+        System.out.println("Please set batch size:");
+        int batchSize = scanner.nextInt();
+        System.out.println("Please set nEpochs:");
+        int nEpochs = scanner.nextInt();
+        System.out.println("Please set truncateReviewsToLength:");
+        int truncateReviewsToLength = scanner.nextInt();
+        System.out.println("Please set learning rate(0.00xx):");
+        double learningRate = scanner.nextDouble();
 
-
-
-        int batchSize = 100;
-        int nEpochs = 5;
-        int truncateReviewsToLength = 300;
-        String path = "F:\\WorkSpace\\idea project location\\AI-Emoji\\src\\main\\resources\\distinctLines.txt";
-        String labelPath = "F:\\WorkSpace\\idea project location\\AI-Emoji\\src\\main\\resources\\commonLabelWithIndex.txt";
-        String word2VecPath = "F:\\WorkSpace\\idea project location\\AI-Emoji\\word2vecLookUpTable.txt";
         ExecutorService executorService = Executors.newFixedThreadPool(1);
 
-        WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(word2VecPath);
+        WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(wordVectorPath);
 
-        EDataSetIterator eDataSetIterator = new EDataSetIterator(path, labelPath, wordVectors, batchSize, truncateReviewsToLength, false);
-        EDataSetIterator eDataSetIteratorTest = new EDataSetIterator(path, labelPath, wordVectors, batchSize, truncateReviewsToLength, true);
+        EDataSetIterator eDataSetIterator = new EDataSetIterator(trainDataPath, labelDataPath, wordVectors, batchSize, truncateReviewsToLength, false);
+        EDataSetIterator eDataSetIteratorTest = new EDataSetIterator(trainDataPath, labelDataPath, wordVectors, batchSize, truncateReviewsToLength, true);
         AsyncDataSetIterator asyncDataSetIterator = new AsyncDataSetIterator(eDataSetIterator);
 
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
@@ -64,7 +96,7 @@ public class EmojiLSTM {
                 .weightInit(WeightInit.XAVIER)
                 .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
                 .gradientNormalizationThreshold(1.0)
-                .learningRate(0.04)
+                .learningRate(learningRate)
                 .trainingWorkspaceMode(WorkspaceMode.SEPARATE)
                 .inferenceWorkspaceMode(WorkspaceMode.SEPARATE)
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
@@ -98,9 +130,9 @@ public class EmojiLSTM {
 
             @Override
             public void iterationDone(Model model, int i) {
-                log.info("Now is at:" + eDataSetIterator.cursor() + ",total :" + eDataSetIterator.totalExamples());
                 i++;
                 if (i % 500 == 0) {
+                    log.info("Now is at:" + eDataSetIterator.cursor() + ",total :" + eDataSetIterator.totalExamples());
 //                    executorService.submit(new HibernateRunner(i, model, eDataSetIteratorTest));
                 }
             }
@@ -115,7 +147,21 @@ public class EmojiLSTM {
         File file = new File("model-full.txt");
         file.createNewFile();
         ModelSerializer.writeModel(multiLayerNetwork, file, true);
+    }
 
+    public static void main(String[] args) throws IOException {
+
+//        CudaEnvironment.getInstance().getConfiguration().setMaximumDeviceCache(5L * 1024 * 1024 * 1024);
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Please select operation: 0:rebuild wordVector 1:rebuild model");
+        int operationCode = scanner.nextInt();
+        Preconditions.checkArgument(operationCode == 0 || operationCode == 1);
+        if (operationCode == 0) {
+            operationFunctionRebuildWordVector(scanner);
+        } else {
+            operationFunctionRebuildModel(scanner);
+        }
 //        Runtime.getRuntime().exec("shutdown -s -t 10");
     }
 }

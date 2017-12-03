@@ -16,21 +16,29 @@ import java.io.IOException;
 public class Word2VecMain {
 
     public static void main(String[] args) throws IOException {
-        BasicLineIterator lineIterator = new BasicLineIterator("F:\\WorkSpace\\idea project location\\AI-Emoji\\src\\main\\resources\\distinctLines2.txt");
+
+        String filePath = args[0];
+        int minWordFrequency = Integer.parseInt(args[1]);
+        int iterations = Integer.parseInt(args[2]);
+        int layerSize = Integer.parseInt(args[3]);
+        int seed = Integer.parseInt(args[4]);
+        int windowSize = Integer.parseInt(args[5]);
+
+        BasicLineIterator lineIterator = new BasicLineIterator(filePath);
         DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
         tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
         Word2Vec vec = new Word2Vec.Builder()
-                .minWordFrequency(5)
-                .iterations(5)
-                .layerSize(100)
-                .seed(42)
-                .windowSize(20)
+                .minWordFrequency(minWordFrequency)
+                .iterations(iterations)
+                .layerSize(layerSize)
+                .seed(seed)
+                .windowSize(windowSize)
                 .iterate(lineIterator)
                 .tokenizerFactory(tokenizerFactory)
                 .build();
         vec.fit();
 
-        WordVectorSerializer.writeWordVectors(vec,"word2vec.txt");
+        WordVectorSerializer.writeWordVectors(vec, "word2vec.txt");
         WordVectorSerializer.writeWordVectors(vec.lookupTable(), "word2vecLookUpTable.txt");
 
 //        Collection<String> lst = vec.wordsNearest("day", 10);

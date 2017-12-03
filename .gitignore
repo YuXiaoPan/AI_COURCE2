@@ -143,3 +143,6 @@ Temporary Items
 /emoji_sample.txt
 /emoji_sample_head.txt
 /standardData.txt
+/label.txt
+/word2vec.txt
+/word2vecLookUpTable.txt

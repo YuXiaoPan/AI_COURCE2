@@ -17,10 +17,10 @@ import java.util.*;
 public class RemoveEmoji {
 
     public static void main(String[] args) throws IOException {
-        String path = "F:\\WorkSpace\\idea project location\\AI-Emoji\\src\\main\\resources\\standardData.txt";
-        String labelPath = "F:\\WorkSpace\\idea project location\\AI-Emoji\\label.txt";
-        String path1 = "F:\\WorkSpace\\idea project location\\AI-Emoji\\src\\main\\resources\\distinctLines.txt";
-        String path2 = "F:\\WorkSpace\\idea project location\\AI-Emoji\\src\\main\\resources\\commonLabel.txt";
+        String path = "standardData.txt";
+        String labelPath = "label.txt";
+        String path1 = "distinctLines.txt";
+        String path2 = "commonLabel.txt";
         List<String> dataLines = FileUtils.readLines(new File(path), Charsets.UTF_8);
         List<String> emojiLines = FileUtils.readLines(new File(labelPath), Charsets.UTF_8);
         Map<String, String> map = new HashMap<>();
