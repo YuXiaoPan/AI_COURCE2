@@ -21,6 +21,7 @@ import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
+import org.nd4j.nativeblas.NativeOpsHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,6 +92,11 @@ public class EmojiLSTM {
         double learningRate = 0.018;
         int nEpochs = 200;
         String prefix = "test01";
+
+        NativeOpsHolder.getInstance().getDeviceNativeOps().setOmpMinThreads(20);
+        NativeOpsHolder.getInstance().getDeviceNativeOps().setOmpNumThreads(20);
+        NativeOpsHolder.getInstance().getDeviceNativeOps().setElementThreshold(16384);
+        NativeOpsHolder.getInstance().getDeviceNativeOps().setTADThreshold(64);
 
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(wordVectorPath);
