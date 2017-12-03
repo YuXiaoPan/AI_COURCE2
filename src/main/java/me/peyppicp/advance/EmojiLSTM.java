@@ -41,6 +41,8 @@ public class EmojiLSTM {
 
 //        CudaEnvironment.getInstance().getConfiguration().setMaximumDeviceCache(5L * 1024 * 1024 * 1024);
 
+
+
         int batchSize = 100;
         int nEpochs = 5;
         int truncateReviewsToLength = 300;
