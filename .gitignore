@@ -146,3 +146,6 @@ Temporary Items
 /label.txt
 /word2vec.txt
 /word2vecLookUpTable.txt
+/commonLabel.txt
+/distinctLines.txt
+/commonLabelWithIndex.txt

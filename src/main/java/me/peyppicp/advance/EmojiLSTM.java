@@ -39,7 +39,7 @@ public class EmojiLSTM {
 
     private static final Logger log = LoggerFactory.getLogger(EmojiLSTM.class);
 
-    public static void operationFunctionRebuildWordVector(Scanner scanner) throws IOException {
+    private static void operationFunctionRebuildWordVector(Scanner scanner) throws IOException {
         String[] word2VecArgs = new String[6];
         System.out.println("Please set origin file path:");
         String originPath = scanner.nextLine();
@@ -65,7 +65,9 @@ public class EmojiLSTM {
         }
     }
 
-    public static void operationFunctionRebuildModel(Scanner scanner) throws IOException {
+    private static void operationFunctionRebuildModel(Scanner scanner) throws IOException {
+        System.out.println("Please specify prefix for model:");
+        String prefix = scanner.nextLine();
         System.out.println("Please set train data path:");
         String trainDataPath = scanner.nextLine();
         System.out.println("Please set label data path:");
@@ -82,7 +84,6 @@ public class EmojiLSTM {
         double learningRate = scanner.nextDouble();
 
         ExecutorService executorService = Executors.newFixedThreadPool(1);
-
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(wordVectorPath);
 
         EDataSetIterator eDataSetIterator = new EDataSetIterator(trainDataPath, labelDataPath, wordVectors, batchSize, truncateReviewsToLength, false);
@@ -132,7 +133,7 @@ public class EmojiLSTM {
             public void iterationDone(Model model, int i) {
                 i++;
                 if (i % 500 == 0) {
-                    log.info("Now is at:" + eDataSetIterator.cursor() + ",total :" + eDataSetIterator.totalExamples());
+                    log.info("Now is at prefix: " + prefix + ", cursor:" + eDataSetIterator.cursor() + ", total :" + eDataSetIterator.totalExamples());
 //                    executorService.submit(new HibernateRunner(i, model, eDataSetIteratorTest));
                 }
             }
@@ -142,11 +143,15 @@ public class EmojiLSTM {
         for (int j = 0; j < nEpochs; j++) {
             multiLayerNetwork.fit(asyncDataSetIterator);
             eDataSetIterator.reset();
-            executorService.submit(new HibernateRunner(j, multiLayerNetwork, eDataSetIteratorTest));
+            executorService.submit(new HibernateRunner(j, multiLayerNetwork, eDataSetIteratorTest, prefix));
         }
-        File file = new File("model-full.txt");
+        File file = new File("model-" + prefix + "-full" + ".txt");
         file.createNewFile();
         ModelSerializer.writeModel(multiLayerNetwork, file, true);
+    }
+
+    private static void operationFunctionTestModel(Scanner scanner) {
+
     }
 
     public static void main(String[] args) throws IOException {
@@ -156,11 +161,13 @@ public class EmojiLSTM {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Please select operation: 0:rebuild wordVector 1:rebuild model");
         int operationCode = scanner.nextInt();
-        Preconditions.checkArgument(operationCode == 0 || operationCode == 1);
+        Preconditions.checkArgument(operationCode == 0 || operationCode == 1 || operationCode == 2);
         if (operationCode == 0) {
             operationFunctionRebuildWordVector(scanner);
-        } else {
+        } else if (operationCode == 1) {
             operationFunctionRebuildModel(scanner);
+        } else {
+            operationFunctionTestModel(scanner);
         }
 //        Runtime.getRuntime().exec("shutdown -s -t 10");
     }
@@ -170,13 +177,15 @@ class HibernateRunner implements Runnable {
 
     private int anInt;
     private String path;
-    private MultiLayerNetwork model;
-    private DataSetIterator dataSetIterator;
+    private final String prefix;
+    private final MultiLayerNetwork model;
+    private final DataSetIterator dataSetIterator;
 
-    public HibernateRunner(int anInt, Model model, DataSetIterator iterator) {
+    public HibernateRunner(int anInt, Model model, DataSetIterator iterator, String prefix) {
         this.dataSetIterator = iterator;
         this.anInt = anInt;
-        this.path = "model-" + anInt + ".txt";
+        this.prefix = prefix;
+        this.path = "model-" + prefix + "-" + anInt + ".txt";
         this.model = (MultiLayerNetwork) model;
     }
 

@@ -7,7 +7,7 @@ import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
-import org.deeplearning4j.models.word2vec.Word2Vec;
+import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 
 import java.io.File;
@@ -90,7 +90,7 @@ public class RemoveEmoji {
         Preconditions.checkState(postKeys.size() == postValues.size());
         DefaultTokenizerFactory defaultTokenizerFactory = new DefaultTokenizerFactory();
 
-        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel("word2vecFull.txt");
+        WordVectors wordVectors = WordVectorSerializer.readWord2VecModel("word2vecLookUpTable.txt");
 
 //        去除句子长度为一个
         for (int i = 0; i < postKeys.size(); i++) {
@@ -100,7 +100,7 @@ public class RemoveEmoji {
                 trueValues.add(postValues.get(i));
             } else if (tokens.size() == 1) {
                 String s = tokens.get(0);
-                Collection<String> strings = word2Vec.wordsNearest(s, 10);
+                Collection<String> strings = wordVectors.wordsNearest(s, 10);
                 if (strings.size() > 0) {
                     trueKeys.add(postKeys.get(i));
                     trueValues.add(postValues.get(i));
