@@ -66,22 +66,31 @@ public class EmojiLSTM {
     }
 
     private static void operationFunctionRebuildModel(Scanner scanner) throws IOException {
-        System.out.println("Please specify prefix for model:");
-        String prefix = scanner.nextLine();
-        System.out.println("Please set train data path:");
-        String trainDataPath = scanner.nextLine();
-        System.out.println("Please set label data path:");
-        String labelDataPath = scanner.nextLine();
-        System.out.println("Please set word vector data path(Please use look up table):");
-        String wordVectorPath = scanner.nextLine();
-        System.out.println("Please set batch size:");
-        int batchSize = scanner.nextInt();
-        System.out.println("Please set nEpochs:");
-        int nEpochs = scanner.nextInt();
-        System.out.println("Please set truncateReviewsToLength:");
-        int truncateReviewsToLength = scanner.nextInt();
-        System.out.println("Please set learning rate(0.00xx):");
-        double learningRate = scanner.nextDouble();
+//        System.out.println("Please specify prefix for model:");
+//        String prefix = scanner.nextLine();
+//        System.out.println("Please set train data path:");
+//        String trainDataPath = scanner.nextLine();
+//        System.out.println("Please set label data path:");
+//        String labelDataPath = scanner.nextLine();
+//        System.out.println("Please set word vector data path(Please use look up table):");
+//        String wordVectorPath = scanner.nextLine();
+//        System.out.println("Please set batch size:");
+//        int batchSize = scanner.nextInt();
+//        System.out.println("Please set nEpochs:");
+//        int nEpochs = scanner.nextInt();
+//        System.out.println("Please set truncateReviewsToLength:");
+//        int truncateReviewsToLength = scanner.nextInt();
+//        System.out.println("Please set learning rate(0.00xx):");
+//        double learningRate = scanner.nextDouble();
+
+        String wordVectorPath = "/home/peyppicp/data/word2Vec.txt";
+        String trainDataPath = "/home/peyppicp/data/distinctLines.txt";
+        String labelDataPath = "/home/peyppicp/data/commonLabelWithIndex.txt";
+        int batchSize = 150;
+        int truncateReviewsToLength = 300;
+        double learningRate = 0.018;
+        int nEpochs = 200;
+        String prefix = "test01";
 
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(wordVectorPath);
@@ -175,7 +184,7 @@ public class EmojiLSTM {
 
 class HibernateRunner implements Runnable {
 
-    private int anInt;
+    private final int anInt;
     private String path;
     private final String prefix;
     private final MultiLayerNetwork model;
