@@ -92,14 +92,12 @@ public class EmojiLSTM {
         double learningRate = 0.018;
         int nEpochs = 200;
         String prefix = "test01";
+//
+        ExecutorService executorService = Executors.newFixedThreadPool(1);
+        WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(wordVectorPath);
 
         NativeOpsHolder.getInstance().getDeviceNativeOps().setOmpMinThreads(20);
         NativeOpsHolder.getInstance().getDeviceNativeOps().setOmpNumThreads(20);
-        NativeOpsHolder.getInstance().getDeviceNativeOps().setElementThreshold(16384);
-        NativeOpsHolder.getInstance().getDeviceNativeOps().setTADThreshold(64);
-
-        ExecutorService executorService = Executors.newFixedThreadPool(1);
-        WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(wordVectorPath);
 
         EDataSetIterator eDataSetIterator = new EDataSetIterator(trainDataPath, labelDataPath, wordVectors, batchSize, truncateReviewsToLength, false);
         EDataSetIterator eDataSetIteratorTest = new EDataSetIterator(trainDataPath, labelDataPath, wordVectors, batchSize, truncateReviewsToLength, true);
@@ -130,6 +128,9 @@ public class EmojiLSTM {
         UIServer uiServer = UIServer.getInstance();
         StatsStorage statsStorage = new InMemoryStatsStorage();
         uiServer.attach(statsStorage);
+
+//        NativeOpsHolder.getInstance().getDeviceNativeOps().setElementThreshold(16384);
+//        NativeOpsHolder.getInstance().getDeviceNativeOps().setTADThreshold(64);
 
         MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
         multiLayerNetwork.init();
