@@ -22,7 +22,6 @@ import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.factory.Nd4jBackend;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
-import org.nd4j.nativeblas.NativeOpsHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,12 +93,8 @@ public class EmojiLSTM {
         int nEpochs = 200;
         String prefix = "test01";
 
-        NativeOpsHolder.getInstance().getDeviceNativeOps().setOmpNumThreads(20);
-
-//
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(wordVectorPath);
-
 
         EDataSetIterator eDataSetIterator = new EDataSetIterator(trainDataPath, labelDataPath, wordVectors, batchSize, truncateReviewsToLength, false);
         EDataSetIterator eDataSetIteratorTest = new EDataSetIterator(trainDataPath, labelDataPath, wordVectors, batchSize, truncateReviewsToLength, true);
