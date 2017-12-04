@@ -91,7 +91,7 @@ public class EmojiLSTM {
         int truncateReviewsToLength = 300;
         double learningRate = 0.018;
         int nEpochs = 200;
-        String prefix = "test01";
+        String prefix = "test02";
 
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(wordVectorPath);
@@ -128,7 +128,7 @@ public class EmojiLSTM {
 
 //        NativeOpsHolder.getInstance().getDeviceNativeOps().setElementThreshold(16384);
 //        NativeOpsHolder.getInstance().getDeviceNativeOps().setTADThreshold(64);
-        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork(OUTPUT + "model-test01-4.txt");
+        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork(OUTPUT + "model-test01-1.txt");
 //        MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
 //        multiLayerNetwork.init();
         int i = 0;
