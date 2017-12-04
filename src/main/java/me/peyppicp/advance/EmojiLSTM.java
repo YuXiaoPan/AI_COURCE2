@@ -20,6 +20,7 @@ import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
+import org.nd4j.linalg.factory.Nd4jBackend;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.nd4j.nativeblas.NativeOpsHolder;
 import org.slf4j.Logger;
@@ -66,7 +67,7 @@ public class EmojiLSTM {
         }
     }
 
-    private static void operationFunctionRebuildModel(Scanner scanner) throws IOException {
+    private static void operationFunctionRebuildModel(Scanner scanner) throws IOException, Nd4jBackend.NoAvailableBackendException {
 //        System.out.println("Please specify prefix for model:");
 //        String prefix = scanner.nextLine();
 //        System.out.println("Please set train data path:");
@@ -92,12 +93,13 @@ public class EmojiLSTM {
         double learningRate = 0.018;
         int nEpochs = 200;
         String prefix = "test01";
+
+        NativeOpsHolder.getInstance().getDeviceNativeOps().setOmpNumThreads(20);
+
 //
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(wordVectorPath);
 
-        NativeOpsHolder.getInstance().getDeviceNativeOps().setOmpMinThreads(20);
-        NativeOpsHolder.getInstance().getDeviceNativeOps().setOmpNumThreads(20);
 
         EDataSetIterator eDataSetIterator = new EDataSetIterator(trainDataPath, labelDataPath, wordVectors, batchSize, truncateReviewsToLength, false);
         EDataSetIterator eDataSetIteratorTest = new EDataSetIterator(trainDataPath, labelDataPath, wordVectors, batchSize, truncateReviewsToLength, true);
@@ -170,21 +172,22 @@ public class EmojiLSTM {
 
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, Nd4jBackend.NoAvailableBackendException {
 
 //        CudaEnvironment.getInstance().getConfiguration().setMaximumDeviceCache(5L * 1024 * 1024 * 1024);
 
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Please select operation: 0:rebuild wordVector 1:rebuild model");
-        int operationCode = scanner.nextInt();
-        Preconditions.checkArgument(operationCode == 0 || operationCode == 1 || operationCode == 2);
-        if (operationCode == 0) {
-            operationFunctionRebuildWordVector(scanner);
-        } else if (operationCode == 1) {
-            operationFunctionRebuildModel(scanner);
-        } else {
-            operationFunctionTestModel(scanner);
-        }
+//        System.out.println("Please select operation: 0:rebuild wordVector 1:rebuild model");
+//        int operationCode = scanner.nextInt();
+//        Preconditions.checkArgument(operationCode == 0 || operationCode == 1 || operationCode == 2);
+//        if (operationCode == 0) {
+//            operationFunctionRebuildWordVector(scanner);
+//        } else if (operationCode == 1) {
+//            operationFunctionRebuildModel(scanner);
+//        } else {
+//            operationFunctionTestModel(scanner);
+//        }
+        operationFunctionRebuildModel(scanner);
 //        Runtime.getRuntime().exec("shutdown -s -t 10");
     }
 }
