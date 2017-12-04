@@ -2,7 +2,6 @@ package me.peyppicp.advance;
 
 import com.google.common.base.Preconditions;
 import org.deeplearning4j.api.storage.StatsStorage;
-import org.deeplearning4j.datasets.iterator.AsyncDataSetIterator;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.nn.api.Model;
@@ -98,7 +97,7 @@ public class EmojiLSTM {
 
         EDataSetIterator eDataSetIterator = new EDataSetIterator(trainDataPath, labelDataPath, wordVectors, batchSize, truncateReviewsToLength, false);
         EDataSetIterator eDataSetIteratorTest = new EDataSetIterator(trainDataPath, labelDataPath, wordVectors, batchSize, truncateReviewsToLength, true);
-        AsyncDataSetIterator asyncDataSetIterator = new AsyncDataSetIterator(eDataSetIterator);
+//        AsyncDataSetIterator asyncDataSetIterator = new AsyncDataSetIterator(eDataSetIterator);
 
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .updater(Updater.RMSPROP)
@@ -128,9 +127,9 @@ public class EmojiLSTM {
 
 //        NativeOpsHolder.getInstance().getDeviceNativeOps().setElementThreshold(16384);
 //        NativeOpsHolder.getInstance().getDeviceNativeOps().setTADThreshold(64);
-
-        MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
-        multiLayerNetwork.init();
+        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork("model-test01-4.txt");
+//        MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
+//        multiLayerNetwork.init();
         int i = 0;
         multiLayerNetwork.setListeners(new ScoreIterationListener(1), new StatsListener(statsStorage), new IterationListener() {
             @Override
@@ -154,7 +153,7 @@ public class EmojiLSTM {
         log.info("Starting training");
 
         for (int j = 0; j < nEpochs; j++) {
-            multiLayerNetwork.fit(asyncDataSetIterator);
+            multiLayerNetwork.fit(eDataSetIterator);
             eDataSetIterator.reset();
             executorService.submit(new HibernateRunner(j, multiLayerNetwork, eDataSetIteratorTest, prefix));
         }
