@@ -2,7 +2,6 @@ package me.peyppicp.advance;
 
 import com.google.common.base.Preconditions;
 import org.deeplearning4j.api.storage.StatsStorage;
-import org.deeplearning4j.datasets.iterator.AsyncDataSetIterator;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.nn.api.Model;
@@ -20,6 +19,7 @@ import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
+import org.nd4j.linalg.factory.Nd4jBackend;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +65,7 @@ public class EmojiLSTM {
         }
     }
 
-    private static void operationFunctionRebuildModel(Scanner scanner) throws IOException {
+    private static void operationFunctionRebuildModel(Scanner scanner) throws IOException, Nd4jBackend.NoAvailableBackendException {
 //        System.out.println("Please specify prefix for model:");
 //        String prefix = scanner.nextLine();
 //        System.out.println("Please set train data path:");
@@ -86,18 +86,17 @@ public class EmojiLSTM {
         String wordVectorPath = "/home/peyppicp/data/word2vecLookUpTable.txt";
         String trainDataPath = "/home/peyppicp/data/distinctLines.txt";
         String labelDataPath = "/home/peyppicp/data/commonLabelWithIndex.txt";
-        int batchSize = 150;
+        int batchSize = 100;
         int truncateReviewsToLength = 300;
         double learningRate = 0.018;
         int nEpochs = 200;
-        String prefix = "test01";
+        String prefix = "test03";
 
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(wordVectorPath);
 
         EDataSetIterator eDataSetIterator = new EDataSetIterator(trainDataPath, labelDataPath, wordVectors, batchSize, truncateReviewsToLength, false);
         EDataSetIterator eDataSetIteratorTest = new EDataSetIterator(trainDataPath, labelDataPath, wordVectors, batchSize, truncateReviewsToLength, true);
-        AsyncDataSetIterator asyncDataSetIterator = new AsyncDataSetIterator(eDataSetIterator);
 
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .updater(Updater.RMSPROP)
@@ -112,10 +111,10 @@ public class EmojiLSTM {
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
-                .layer(0, new GravesLSTM.Builder().nIn(eDataSetIterator.inputColumns()).nOut(250)
+                .layer(0, new GravesLSTM.Builder().nIn(eDataSetIterator.inputColumns()).nOut(1000)
                         .activation(Activation.TANH).build())
                 .layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(250).nOut(eDataSetIterator.totalOutcomes()).build())
+                        .activation(Activation.SOFTMAX).nIn(1000).nOut(eDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
                 .build();
@@ -150,7 +149,7 @@ public class EmojiLSTM {
         log.info("Starting training");
 
         for (int j = 0; j < nEpochs; j++) {
-            multiLayerNetwork.fit(asyncDataSetIterator);
+            multiLayerNetwork.fit(eDataSetIterator);
             eDataSetIterator.reset();
             executorService.submit(new HibernateRunner(j, multiLayerNetwork, eDataSetIteratorTest, prefix));
         }
