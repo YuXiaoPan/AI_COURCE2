@@ -162,7 +162,7 @@ public class EmojiLSTM {
 
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, Nd4jBackend.NoAvailableBackendException {
 
 //        CudaEnvironment.getInstance().getConfiguration().setMaximumDeviceCache(5L * 1024 * 1024 * 1024);
 
