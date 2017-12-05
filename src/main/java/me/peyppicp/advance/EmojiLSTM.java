@@ -167,16 +167,16 @@ public class EmojiLSTM {
 //        CudaEnvironment.getInstance().getConfiguration().setMaximumDeviceCache(5L * 1024 * 1024 * 1024);
 
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Please select operation: 0:rebuild wordVector 1:rebuild model");
-        int operationCode = scanner.nextInt();
-        Preconditions.checkArgument(operationCode == 0 || operationCode == 1 || operationCode == 2);
-        if (operationCode == 0) {
-            operationFunctionRebuildWordVector(scanner);
-        } else if (operationCode == 1) {
+//        System.out.println("Please select operation: 0:rebuild wordVector 1:rebuild model");
+//        int operationCode = scanner.nextInt();
+//        Preconditions.checkArgument(operationCode == 0 || operationCode == 1 || operationCode == 2);
+//        if (operationCode == 0) {
+//            operationFunctionRebuildWordVector(scanner);
+//        } else if (operationCode == 1) {
             operationFunctionRebuildModel(scanner);
-        } else {
-            operationFunctionTestModel(scanner);
-        }
+//        } else {
+//            operationFunctionTestModel(scanner);
+//        }
 //        Runtime.getRuntime().exec("shutdown -s -t 10");
     }
 }
