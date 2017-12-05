@@ -86,7 +86,7 @@ public class EmojiLSTM {
         String wordVectorPath = "/home/peyppicp/data/word2vecLookUpTable.txt";
         String trainDataPath = "/home/peyppicp/data/distinctLines.txt";
         String labelDataPath = "/home/peyppicp/data/commonLabelWithIndex.txt";
-        int batchSize = 100;
+        int batchSize = 300;
         int truncateReviewsToLength = 300;
         double learningRate = 0.018;
         int nEpochs = 200;
