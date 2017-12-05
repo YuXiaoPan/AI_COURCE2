@@ -60,10 +60,10 @@
             <artifactId>deeplearning4j-ui_${scala.binary.version}</artifactId>
             <version>${dl4j.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.nd4j</groupId>
-            <artifactId>${nd4j.backend}</artifactId>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.nd4j</groupId>-->
+            <!--<artifactId>${nd4j.backend}</artifactId>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.deeplearning4j</groupId>
             <artifactId>deeplearning4j-nlp</artifactId>
