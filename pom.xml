@@ -15,7 +15,7 @@
         <scala.binary.version>2.11</scala.binary.version>
         <dl4j.version>0.9.1</dl4j.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <kotlin.version>1.1.60</kotlin.version>
+        <kotlin.version>1.2.0</kotlin.version>
         <nd4j.version>0.9.1</nd4j.version>
         <nd4j.backend>nd4j-cuda-8.0-platform</nd4j.backend>
         <logback.version>1.1.7</logback.version>
@@ -31,11 +31,11 @@
                 <artifactId>nd4j-native-platform</artifactId>
                 <version>${nd4j.version}</version>
             </dependency>
-            <!--<dependency>-->
-            <!--<groupId>org.nd4j</groupId>-->
-            <!--<artifactId>nd4j-cuda-8.0-platform</artifactId>-->
-            <!--<version>${nd4j.version}</version>-->
-            <!--</dependency>-->
+            <dependency>
+                <groupId>org.nd4j</groupId>
+                <artifactId>nd4j-cuda-8.0-platform</artifactId>
+                <version>${nd4j.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -60,10 +60,10 @@
             <artifactId>deeplearning4j-ui_${scala.binary.version}</artifactId>
             <version>${dl4j.version}</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.nd4j</groupId>-->
-            <!--<artifactId>${nd4j.backend}</artifactId>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>${nd4j.backend}</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.deeplearning4j</groupId>
             <artifactId>deeplearning4j-nlp</artifactId>
@@ -103,7 +103,7 @@
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-test</artifactId>
             <version>${kotlin.version}</version>
-            <scope>compile</scope>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -116,6 +116,11 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>${logback.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib-jre8</artifactId>
+            <version>${kotlin.version}</version>
         </dependency>
     </dependencies>
 
@@ -147,6 +152,20 @@
                     <!--<goal>test-compile</goal>-->
                     <!--</goals>-->
                     <!--</execution>-->
+                    <execution>
+                        <id>compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>test-compile</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>test-compile</goal>
+                        </goals>
+                    </execution>
                 </executions>
                 <configuration>
                     <jvmTarget>1.8</jvmTarget>
@@ -156,6 +175,22 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.5.1</version>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>testCompile</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>

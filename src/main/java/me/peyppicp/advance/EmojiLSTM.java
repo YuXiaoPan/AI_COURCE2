@@ -83,10 +83,10 @@ public class EmojiLSTM {
 //        System.out.println("Please set learning rate(0.00xx):");
 //        double learningRate = scanner.nextDouble();
 
-        String wordVectorPath = "/home/peyppicp/data/word2vecLookUpTable.txt";
-        String trainDataPath = "/home/peyppicp/data/distinctLines.txt";
-        String labelDataPath = "/home/peyppicp/data/commonLabelWithIndex.txt";
-        int batchSize = 150;
+        String wordVectorPath = "F:\\WorkSpace\\idea project location\\AI-Emoji\\word2vecLookUpTable.txt";
+        String trainDataPath = "F:\\WorkSpace\\idea project location\\AI-Emoji\\distinctLines.txt";
+        String labelDataPath = "F:\\WorkSpace\\idea project location\\AI-Emoji\\commonLabelWithIndex.txt";
+        int batchSize = 120;
         int truncateReviewsToLength = 300;
         double learningRate = 0.018;
         int nEpochs = 200;
