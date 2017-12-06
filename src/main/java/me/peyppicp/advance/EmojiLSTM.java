@@ -38,6 +38,7 @@ import java.util.concurrent.Executors;
 public class EmojiLSTM {
 
     private static final Logger log = LoggerFactory.getLogger(EmojiLSTM.class);
+    public static final String OUTPUT = "/home/peyppicp/output/";
 
     private static void operationFunctionRebuildWordVector(Scanner scanner) throws IOException {
         String[] word2VecArgs = new String[6];
@@ -90,13 +91,14 @@ public class EmojiLSTM {
         int truncateReviewsToLength = 300;
         double learningRate = 0.018;
         int nEpochs = 200;
-        String prefix = "test03";
+        String prefix = "test04";
 
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(wordVectorPath);
 
         EDataSetIterator eDataSetIterator = new EDataSetIterator(trainDataPath, labelDataPath, wordVectors, batchSize, truncateReviewsToLength, false);
         EDataSetIterator eDataSetIteratorTest = new EDataSetIterator(trainDataPath, labelDataPath, wordVectors, batchSize, truncateReviewsToLength, true);
+//        AsyncDataSetIterator asyncDataSetIterator = new AsyncDataSetIterator(eDataSetIterator);
 
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .updater(Updater.RMSPROP)
@@ -124,8 +126,11 @@ public class EmojiLSTM {
         StatsStorage statsStorage = new InMemoryStatsStorage();
         uiServer.attach(statsStorage);
 
-        MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
-        multiLayerNetwork.init();
+//        NativeOpsHolder.getInstance().getDeviceNativeOps().setElementThreshold(16384);
+//        NativeOpsHolder.getInstance().getDeviceNativeOps().setTADThreshold(64);
+        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork(OUTPUT + "model-test01-1.txt");
+//        MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
+//        multiLayerNetwork.init();
         int i = 0;
         multiLayerNetwork.setListeners(new ScoreIterationListener(1), new StatsListener(statsStorage), new IterationListener() {
             @Override
@@ -153,7 +158,7 @@ public class EmojiLSTM {
             eDataSetIterator.reset();
             executorService.submit(new HibernateRunner(j, multiLayerNetwork, eDataSetIteratorTest, prefix));
         }
-        File file = new File("model-" + prefix + "-full" + ".txt");
+        File file = new File(OUTPUT + "model-" + prefix + "-full" + ".txt");
         file.createNewFile();
         ModelSerializer.writeModel(multiLayerNetwork, file, true);
     }
@@ -173,10 +178,11 @@ public class EmojiLSTM {
 //        if (operationCode == 0) {
 //            operationFunctionRebuildWordVector(scanner);
 //        } else if (operationCode == 1) {
-            operationFunctionRebuildModel(scanner);
+//            operationFunctionRebuildModel(scanner);
 //        } else {
 //            operationFunctionTestModel(scanner);
 //        }
+        operationFunctionRebuildModel(scanner);
 //        Runtime.getRuntime().exec("shutdown -s -t 10");
     }
 }
@@ -193,7 +199,7 @@ class HibernateRunner implements Runnable {
         this.dataSetIterator = iterator;
         this.anInt = anInt;
         this.prefix = prefix;
-        this.path = "model-" + prefix + "-" + anInt + ".txt";
+        this.path = EmojiLSTM.OUTPUT + "model-" + prefix + "-" + anInt + ".txt";
         this.model = (MultiLayerNetwork) model;
     }
 
