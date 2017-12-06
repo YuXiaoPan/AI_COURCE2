@@ -32,7 +32,9 @@ public class FrequencyStatisticsMain {
             }
         }
         LinkedHashMap<String, Integer> tempMap = new LinkedHashMap<>();
-        map.entrySet().parallelStream().sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+        map.entrySet().parallelStream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                .filter(entry -> entry.getValue() >= 50)
                 .forEachOrdered(e -> tempMap.put(e.getKey(), e.getValue()));
         System.out.println(Joiner.on("\n").skipNulls().join(tempMap.entrySet()));
     }
