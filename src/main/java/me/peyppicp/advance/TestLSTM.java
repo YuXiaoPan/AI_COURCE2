@@ -4,16 +4,18 @@ import com.vdurmont.emoji.Emoji;
 import com.vdurmont.emoji.EmojiManager;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
-import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 import org.deeplearning4j.util.ModelSerializer;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.indexing.INDArrayIndex;
+import org.nd4j.linalg.indexing.NDArrayIndex;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,8 +30,9 @@ public class TestLSTM {
         String path = "distinctLines.txt";
         String labelPath = "commonLabelWithIndex.txt";
         String word2VecPath = "word2vecLookUpTable.txt";
+        String totalExamplesPath = "emoji_sample.txt";
 
-        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork("model-test01-4.txt");
+        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork("model-test04-0.txt");
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(word2VecPath);
         TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
 
@@ -42,6 +45,24 @@ public class TestLSTM {
         Collections.shuffle(labels, random);
         List<String> subTestLines = testLines.subList(0, 1000);
         Map<String, String> map = new HashMap<>();
+
+        int testDataSize = 1000;
+
+        InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(new File(totalExamplesPath)), Charsets.UTF_8);
+        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+        List<String> testLines1 = new ArrayList<>();
+        String str = "";
+        int count = 0;
+        while ((str = bufferedReader.readLine()) != null) {
+            if (count <= testDataSize) {
+                testLines1.add(str);
+                count++;
+            } else {
+                break;
+            }
+        }
+        bufferedReader.close();
+        inputStreamReader.close();
 
         for (String line : subTestLines) {
             String emojiStr = "";
@@ -59,35 +80,38 @@ public class TestLSTM {
         EDataSetIterator eDataSetIterator = new EDataSetIterator(path, labelPath, wordVectors, batchSize, truncateReviewsToLength, true);
 
         System.out.println("Begin test.");
-        Evaluation evaluate = multiLayerNetwork.evaluate(eDataSetIterator);
-        System.out.println(evaluate.stats());
+//        Evaluation evaluate = multiLayerNetwork.evaluate(eDataSetIterator);
+//        System.out.println(evaluate.stats());
 
-//        for (Map.Entry<String, String> entry : map.entrySet()) {
-//            String line = entry.getKey();
-//            String emojiStr = entry.getValue();
-//            List<String> tokens = tokenizerFactory.create(line).getTokens();
-//            List<String> tokenFiltered = new ArrayList<>();
-//            for (String t : tokens) {
-//                if (word2Vec.hasWord(t)) {
-//                    tokenFiltered.add(t);
-//                }
-//            }
-//            int outputLength = Math.max(truncateReviewsToLength, tokenFiltered.size());
-//            INDArray features = Nd4j.create(1, vectorSize, outputLength);
-//            for (int j = 0; j < tokens.size() && j < truncateReviewsToLength; j++) {
-//                String token = tokens.get(j);
-//                INDArray vectorMatrix = word2Vec.getWordVectorMatrix(token);
-//                features.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all(), NDArrayIndex.point(j)}, vectorMatrix);
-//            }
-//
-//            INDArray output = multiLayerNetwork.output(features);
-//            int size = output.size(2);
-//            INDArray probabilitiesAtLastWord = output.get(NDArrayIndex.point(0), NDArrayIndex.all(), NDArrayIndex.point(size - 1));
-//
+        for (String line : testLines1) {
+            List<String> tokens = tokenizerFactory.create(line).getTokens();
+            List<String> tokenFiltered = new ArrayList<>();
+            for (String t : tokens) {
+                if (wordVectors.hasWord(t)) {
+                    tokenFiltered.add(t);
+                }
+            }
+            int outputLength = Math.max(truncateReviewsToLength, tokenFiltered.size());
+            INDArray features = Nd4j.create(1, vectorSize, outputLength);
+            for (int j = 0; j < tokens.size() && j < truncateReviewsToLength; j++) {
+                String token = tokens.get(j);
+                INDArray vectorMatrix = wordVectors.getWordVectorMatrix(token);
+                features.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all(), NDArrayIndex.point(j)}, vectorMatrix);
+            }
+
+            INDArray output = multiLayerNetwork.output(features, false);
+            int size = output.size(2);
+            System.out.println();
+            INDArray probabilitiesAtLastWord = output.get(NDArrayIndex.point(0), NDArrayIndex.all(), NDArrayIndex.point(size - 1));
+
+            Number number = probabilitiesAtLastWord.maxNumber();
+            long l = number.longValue();
+            List<String> unqiueLabelList = eDataSetIterator.getUnqiueLabelList();
+            System.out.println(probabilitiesAtLastWord.toString());
 //            System.out.println("\n-------------------------------");
 //            System.out.println("review: " + line);
 //            System.out.println("Prefer:" + emojiStr);
 //            System.out.println("label: " + probabilitiesAtLastWord.getDouble(1));
-//        }
+        }
     }
 }

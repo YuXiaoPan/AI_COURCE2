@@ -42,6 +42,10 @@ public class EDataSetIterator implements DataSetIterator {
     private List<String> unqiueLabelList;
     private final TokenizerFactory tokenizerFactory;
 
+    public List<String> getUnqiueLabelList() {
+        return unqiueLabelList;
+    }
+
     public EDataSetIterator(String path, String labelPath,
                             WordVectors wordVectors, int batchSize,
                             int truncateLength, boolean isTest) throws IOException {

@@ -18,7 +18,7 @@ public class Word2VecMain {
     public static final String OUTPUT = "/home/peyppicp/output/";
 
     public static void main(String[] args) throws IOException {
-        String filePath = "emoji_sample.txt";
+        String filePath = "new_sample.txt";
         int minWordFrequency = 50;
         int iterations = 2;
         int layerSize = 100;
