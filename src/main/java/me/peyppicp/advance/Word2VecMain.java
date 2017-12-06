@@ -15,14 +15,15 @@ import java.io.IOException;
  */
 public class Word2VecMain {
 
-    public static void main(String[] args) throws IOException {
+    public static final String OUTPUT = "/home/peyppicp/output/";
 
-        String filePath = args[0];
-        int minWordFrequency = Integer.parseInt(args[1]);
-        int iterations = Integer.parseInt(args[2]);
-        int layerSize = Integer.parseInt(args[3]);
-        int seed = Integer.parseInt(args[4]);
-        int windowSize = Integer.parseInt(args[5]);
+    public static void main(String[] args) throws IOException {
+        String filePath = "emoji_sample.txt";
+        int minWordFrequency = 50;
+        int iterations = 2;
+        int layerSize = 100;
+        int seed = 3543;
+        int windowSize = 10;
 
         BasicLineIterator lineIterator = new BasicLineIterator(filePath);
         DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
@@ -38,8 +39,8 @@ public class Word2VecMain {
                 .build();
         vec.fit();
 
-        WordVectorSerializer.writeWordVectors(vec, "word2vec.txt");
-        WordVectorSerializer.writeWordVectors(vec.lookupTable(), "word2vecLookUpTable.txt");
+        WordVectorSerializer.writeWordVectors(vec, OUTPUT + "word2vec.txt");
+        WordVectorSerializer.writeWordVectors(vec.lookupTable(), OUTPUT + "word2vecLookUpTable.txt");
 
 //        Collection<String> lst = vec.wordsNearest("day", 10);
 //        System.out.println(lst);
