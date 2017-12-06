@@ -23,13 +23,13 @@ public class ReformatEmojiSample {
         File file = new File("emoji_sample.txt");
         List<String> samples = FileUtils.readLines(file, Charsets.UTF_8);
         List<String> newSamples = new ArrayList<>(samples.size());
+        List<String> emojiUnicodes = EmojiManager.getAll().parallelStream().map(Emoji::getUnicode).collect(Collectors.toList());
         int i = 0;
         int total = samples.size() / 10000;
         for (String sample : samples) {
             char[] tempChars = new char[sample.length() + 1];
             boolean ischange = false;
-            for (Emoji emoji : EmojiManager.getAll()) {
-                String unicode = emoji.getUnicode();
+            for (String unicode : emojiUnicodes) {
                 if (sample.contains(unicode)) {
                     int firstIndex = sample.indexOf(unicode);
                     char[] chars = sample.toCharArray();
@@ -45,7 +45,7 @@ public class ReformatEmojiSample {
             if (ischange) {
                 String s = new String(tempChars);
                 newSamples.add(s);
-            }else{
+            } else {
                 newSamples.add(sample);
             }
             if (i % 10000 == 0) {
