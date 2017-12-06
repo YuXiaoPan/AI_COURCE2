@@ -91,7 +91,7 @@ public class EmojiLSTM {
         int truncateReviewsToLength = 300;
         double learningRate = 0.018;
         int nEpochs = 200;
-        String prefix = "test02";
+        String prefix = "test04";
 
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(wordVectorPath);
@@ -113,10 +113,10 @@ public class EmojiLSTM {
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
-                .layer(0, new GravesLSTM.Builder().nIn(eDataSetIterator.inputColumns()).nOut(250)
+                .layer(0, new GravesLSTM.Builder().nIn(eDataSetIterator.inputColumns()).nOut(1000)
                         .activation(Activation.TANH).build())
                 .layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(250).nOut(eDataSetIterator.totalOutcomes()).build())
+                        .activation(Activation.SOFTMAX).nIn(1000).nOut(eDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
                 .build();
