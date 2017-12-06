@@ -27,6 +27,7 @@ public class ReformatEmojiSample {
         int total = samples.size() / 10000;
         for (String sample : samples) {
             char[] tempChars = new char[sample.length() + 1];
+            boolean ischange = false;
             for (Emoji emoji : EmojiManager.getAll()) {
                 String unicode = emoji.getUnicode();
                 if (sample.contains(unicode)) {
@@ -36,12 +37,17 @@ public class ReformatEmojiSample {
                         System.arraycopy(chars, 0, tempChars, 0, firstIndex);
                         tempChars[firstIndex] = ' ';
                         System.arraycopy(chars, firstIndex, tempChars, firstIndex + 1, tempChars.length - firstIndex - 1);
+                        ischange = true;
                         break;
                     }
                 }
             }
-            String s = new String(tempChars);
-            newSamples.add(s);
+            if (ischange) {
+                String s = new String(tempChars);
+                newSamples.add(s);
+            }else{
+                newSamples.add(sample);
+            }
             if (i % 10000 == 0) {
                 System.out.println("Finish batch: " + i / 10000 + ", remain: " + (total - i / 10000));
             }
