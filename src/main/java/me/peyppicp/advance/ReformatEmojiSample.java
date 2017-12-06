@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author YuXiao Pan
@@ -51,7 +52,7 @@ public class ReformatEmojiSample {
 //        去重
         FileUtils.writeLines(new File("new_sample.txt"),
                 "UTF-8",
-                newSamples,
+                newSamples.parallelStream().distinct().collect(Collectors.toList()),
                 "\n",
                 false);
     }

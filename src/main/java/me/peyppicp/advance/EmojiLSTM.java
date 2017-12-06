@@ -38,7 +38,7 @@ import java.util.concurrent.Executors;
 public class EmojiLSTM {
 
     private static final Logger log = LoggerFactory.getLogger(EmojiLSTM.class);
-    public static final String OUTPUT = "/home/peyppicp/output/";
+//    public static final String OUTPUT = "/home/peyppicp/output/";
 
     private static void operationFunctionRebuildWordVector(Scanner scanner) throws IOException {
         String[] word2VecArgs = new String[6];
@@ -87,7 +87,7 @@ public class EmojiLSTM {
         String wordVectorPath = "F:\\WorkSpace\\idea project location\\AI-Emoji\\word2vecLookUpTable.txt";
         String trainDataPath = "F:\\WorkSpace\\idea project location\\AI-Emoji\\distinctLines.txt";
         String labelDataPath = "F:\\WorkSpace\\idea project location\\AI-Emoji\\commonLabelWithIndex.txt";
-        int batchSize = 120;
+        int batchSize = 100;
         int truncateReviewsToLength = 300;
         double learningRate = 0.018;
         int nEpochs = 200;
@@ -128,9 +128,9 @@ public class EmojiLSTM {
 
 //        NativeOpsHolder.getInstance().getDeviceNativeOps().setElementThreshold(16384);
 //        NativeOpsHolder.getInstance().getDeviceNativeOps().setTADThreshold(64);
-        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork(OUTPUT + "model-test01-1.txt");
-//        MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
-//        multiLayerNetwork.init();
+//        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork(OUTPUT + "model-test01-1.txt");
+        MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
+        multiLayerNetwork.init();
         int i = 0;
         multiLayerNetwork.setListeners(new ScoreIterationListener(1), new StatsListener(statsStorage), new IterationListener() {
             @Override
@@ -158,7 +158,7 @@ public class EmojiLSTM {
             eDataSetIterator.reset();
             executorService.submit(new HibernateRunner(j, multiLayerNetwork, eDataSetIteratorTest, prefix));
         }
-        File file = new File(OUTPUT + "model-" + prefix + "-full" + ".txt");
+        File file = new File("model-" + prefix + "-full" + ".txt");
         file.createNewFile();
         ModelSerializer.writeModel(multiLayerNetwork, file, true);
     }
@@ -199,7 +199,7 @@ class HibernateRunner implements Runnable {
         this.dataSetIterator = iterator;
         this.anInt = anInt;
         this.prefix = prefix;
-        this.path = EmojiLSTM.OUTPUT + "model-" + prefix + "-" + anInt + ".txt";
+        this.path = "model-" + prefix + "-" + anInt + ".txt";
         this.model = (MultiLayerNetwork) model;
     }
 
