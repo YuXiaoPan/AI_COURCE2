@@ -37,8 +37,6 @@ import java.util.concurrent.Executors;
  */
 public class EmojiLSTM {
 
-    private boolean isTest = false;
-
     private static final Logger log = LoggerFactory.getLogger(EmojiLSTM.class);
 
     private static void operationFunctionRebuildWordVector(Scanner scanner) throws IOException {
