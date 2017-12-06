@@ -35,8 +35,8 @@ public class ReformatEmojiSample {
                         System.arraycopy(chars, 0, tempChars, 0, firstIndex);
                         tempChars[firstIndex] = ' ';
                         System.arraycopy(chars, firstIndex, tempChars, firstIndex + 1, tempChars.length - firstIndex - 1);
+                        break;
                     }
-                    break;
                 }
             }
             String s = new String(tempChars);
