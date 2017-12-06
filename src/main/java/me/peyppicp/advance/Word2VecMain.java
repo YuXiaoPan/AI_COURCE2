@@ -20,7 +20,7 @@ public class Word2VecMain {
     public static void main(String[] args) throws IOException {
         String filePath = "new_sample.txt";
         int minWordFrequency = 50;
-        int iterations = 2;
+        int iterations = 5;
         int layerSize = 100;
         int seed = 3543;
         int windowSize = 10;
