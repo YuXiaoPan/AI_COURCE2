@@ -60,7 +60,7 @@ public class SampleDataSetIterator implements DataSetIterator {
         for (String sample : batchSizeSamples) {
 
         }
-
+        return null;
     }
 
     public int totalExamples() {
@@ -85,7 +85,6 @@ public class SampleDataSetIterator implements DataSetIterator {
 
     public void reset() {
         this.cursor = 0;
-        this.currentLineCursor = 0;
     }
 
     public int batch() {

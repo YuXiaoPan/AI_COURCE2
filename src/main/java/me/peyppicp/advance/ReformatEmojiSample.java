@@ -20,39 +20,72 @@ public class ReformatEmojiSample {
 
     public static void main(String[] args) throws IOException {
 
-        File file = new File("emoji_sample.txt");
+        File file = new File("new_sample.txt");
         List<String> samples = FileUtils.readLines(file, Charsets.UTF_8);
-        List<String> newSamples = new ArrayList<>(samples.size());
         List<String> emojiUnicodes = EmojiManager.getAll().parallelStream().map(Emoji::getUnicode).collect(Collectors.toList());
-        int i = 0;
-        int total = samples.size() / 10000;
+//        int i = 0;
+//        int total = samples.size() / 10000;
+
+        int preSize = samples.size();
+        int nowSize = 0;
+
+        List<String> newSamples = new ArrayList<>(samples.size());
         for (String sample : samples) {
-            char[] tempChars = new char[sample.length() + 1];
-            boolean ischange = false;
-            for (String unicode : emojiUnicodes) {
-                if (sample.contains(unicode)) {
-                    int firstIndex = sample.indexOf(unicode);
-                    char[] chars = sample.toCharArray();
-                    if (firstIndex >= 1) {
-                        System.arraycopy(chars, 0, tempChars, 0, firstIndex);
-                        tempChars[firstIndex] = ' ';
-                        System.arraycopy(chars, firstIndex, tempChars, firstIndex + 1, tempChars.length - firstIndex - 1);
-                        ischange = true;
-                        break;
+            try {
+                int firstEmojiIndex = sample.length();
+                int lastEmojiIndex = -1;
+                boolean hasEmoji = false;
+                for (String unicode : emojiUnicodes) {
+                    if (sample.contains(unicode)) {
+                        firstEmojiIndex = Math.min(firstEmojiIndex, sample.indexOf(unicode));
+                        lastEmojiIndex = Math.max(lastEmojiIndex, sample.lastIndexOf(unicode));
+                        hasEmoji = true;
                     }
                 }
+                if (hasEmoji && sample.length() > 0) {
+                    char[] sampleChars = sample.substring(0, firstEmojiIndex).toCharArray();
+                    char[] emojiChars = sample.substring(firstEmojiIndex, lastEmojiIndex).toCharArray();
+                    char[] chars = new char[sampleChars.length + emojiChars.length + 1];
+                    System.arraycopy(sampleChars, 0, chars, 0, sampleChars.length);
+                    chars[firstEmojiIndex] = ' ';
+                    System.arraycopy(emojiChars, 0, chars, firstEmojiIndex + 1, emojiChars.length);
+                    newSamples.add(new String(chars));
+                } else {
+
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            if (ischange) {
-                String s = new String(tempChars);
-                newSamples.add(s);
-            } else {
-                newSamples.add(sample);
-            }
-            if (i % 10000 == 0) {
-                System.out.println("Finish batch: " + i / 10000 + ", remain: " + (total - i / 10000));
-            }
-            i++;
         }
+
+
+//        for (String sample : samples) {
+//            char[] tempChars = new char[sample.length() + 1];
+//            boolean ischange = false;
+//            for (String unicode : emojiUnicodes) {
+//                if (sample.contains(unicode)) {
+//                    int firstIndex = sample.indexOf(unicode);
+//                    char[] chars = sample.toCharArray();
+//                    if (firstIndex >= 1) {
+//                        System.arraycopy(chars, 0, tempChars, 0, firstIndex);
+//                        tempChars[firstIndex] = ' ';
+//                        System.arraycopy(chars, firstIndex, tempChars, firstIndex + 1, tempChars.length - firstIndex - 1);
+//                        ischange = true;
+//                        break;
+//                    }
+//                }
+//            }
+//            if (ischange) {
+//                String s = new String(tempChars);
+//                newSamples.add(s);
+//            } else {
+//                newSamples.add(sample);
+//            }
+//            if (i % 10000 == 0) {
+//                System.out.println("Finish batch: " + i / 10000 + ", remain: " + (total - i / 10000));
+//            }
+//            i++;
+//        }
 
 
 //        去重
