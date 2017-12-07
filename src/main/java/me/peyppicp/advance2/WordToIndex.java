@@ -1,0 +1,84 @@
+package me.peyppicp.advance2;
+
+import com.vdurmont.emoji.EmojiParser;
+import lombok.Data;
+import org.apache.commons.io.Charsets;
+import org.apache.commons.io.FileUtils;
+import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
+import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
+import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
+import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Data
+public class WordToIndex {
+
+    public static final String UNKNOWN = "$UNKNOWN";
+    public static final String STOP = "$STOP";
+
+    private String samplesFilePath;
+    private String wordVectorPath;
+    private TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
+    private File samplesFile;
+    private WordVectors wordVectors;
+
+    private Map<String, Integer> wordIndexMap;
+
+    public WordToIndex(String samplesFilePath, String wordVectorPath) throws IOException {
+        this.samplesFilePath = samplesFilePath;
+        this.wordVectorPath = wordVectorPath;
+        init();
+    }
+
+    private void init() throws IOException {
+        samplesFile = new File(samplesFilePath);
+        wordVectors = WordVectorSerializer.readWord2VecModel(new File(wordVectorPath));
+        wordIndexMap = new HashMap<>();
+        List<String> samples = FileUtils.readLines(samplesFile, Charsets.UTF_8);
+        for (String sample : samples) {
+            List<String> extractEmojis = EmojiParser.extractEmojis(sample);
+            for (String extractEmoji : extractEmojis) {
+                wordIndexMap.merge(extractEmoji, 1, (o, n) -> o + n);
+            }
+        }
+
+//        按照value排序
+        Map<String, Integer> temp = new LinkedHashMap<>();
+        wordIndexMap.entrySet()
+                .parallelStream().sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                .filter(entry -> entry.getValue() >= 1000)
+                .forEachOrdered(entry -> temp.put(entry.getKey(), entry.getValue()));
+
+        wordIndexMap = new HashMap<>();
+        int index = 0;
+        for (String emoji : temp.keySet()) {
+            wordIndexMap.putIfAbsent(emoji, index++);
+        }
+        addUnknown();
+    }
+
+    public int getIndex(String word) {
+        return wordIndexMap.getOrDefault(word, -1);
+    }
+
+    public void addUnknown() {
+        int size = wordIndexMap.values().size();
+        wordIndexMap.putIfAbsent(UNKNOWN, ++size);
+//        wordIndexMap.putIfAbsent(STOP, ++size);
+    }
+
+    public int totalIndexNum() {
+        return wordIndexMap.values().size();
+    }
+
+    public List<String> totalLabels() {
+        return wordIndexMap.keySet().parallelStream().collect(Collectors.toList());
+    }
+}

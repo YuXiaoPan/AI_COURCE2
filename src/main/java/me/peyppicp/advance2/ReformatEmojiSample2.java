@@ -1,4 +1,4 @@
-package me.peyppicp.advance;
+package me.peyppicp.advance2;
 
 import com.vdurmont.emoji.Emoji;
 import com.vdurmont.emoji.EmojiManager;
@@ -27,6 +27,8 @@ public class ReformatEmojiSample2 {
         List<String> errorLines = new ArrayList<>();
         int count = 0;
         int totalSize = sampleLines.size() / 1000;
+
+//        按照emoji进行切分
         for (String line : sampleLines) {
             try {
                 int emojiLength = 2;
@@ -61,6 +63,7 @@ public class ReformatEmojiSample2 {
         temp = temp.parallelStream().filter(s -> EmojiParser.extractEmojis(s).size() != s.length() / 2).distinct().collect(Collectors.toList());
         List<String> temp1 = new ArrayList<>();
 
+//        添加空格
         for (String sample : temp) {
             String emoji = EmojiParser.extractEmojis(sample).get(0);
             int i = sample.indexOf(emoji);
@@ -75,6 +78,7 @@ public class ReformatEmojiSample2 {
             }
         }
 
+//
 
         FileUtils.writeLines(new File("EmojiSample.txt"),
                 "UTF-8",
