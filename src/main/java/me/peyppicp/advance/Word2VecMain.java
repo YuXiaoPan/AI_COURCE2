@@ -18,8 +18,8 @@ public class Word2VecMain {
 //    public static final String OUTPUT = "/home/peyppicp/output/";
 
     public static void main(String[] args) throws IOException {
-        String filePath = "new_sample.txt";
-        int minWordFrequency = 50;
+        String filePath = "EmojiSample.txt";
+        int minWordFrequency = 10;
         int iterations = 5;
         int layerSize = 100;
         int seed = 3543;
@@ -39,8 +39,8 @@ public class Word2VecMain {
                 .build();
         vec.fit();
 
-        WordVectorSerializer.writeWordVectors(vec, "word2vec.txt");
-        WordVectorSerializer.writeWordVectors(vec.lookupTable(), "word2vecLookUpTable.txt");
+        WordVectorSerializer.writeWordVectors(vec, "WordVector.txt");
+        WordVectorSerializer.writeWordVectors(vec.lookupTable(), "LookUpTable.txt");
 
 //        Collection<String> lst = vec.wordsNearest("day", 10);
 //        System.out.println(lst);

@@ -11,10 +11,6 @@ import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 import org.deeplearning4j.util.ModelSerializer;
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.indexing.INDArrayIndex;
-import org.nd4j.linalg.indexing.NDArrayIndex;
 
 import java.io.*;
 import java.util.*;
@@ -33,7 +29,7 @@ public class TestLSTM {
         String word2VecPath = "word2vecLookUpTable.txt";
         String totalExamplesPath = "emoji_sample.txt";
 
-        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork("model-test04-32.txt");
+        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork("model-test04-98.txt");
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(word2VecPath);
         TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
 
@@ -84,35 +80,35 @@ public class TestLSTM {
         Evaluation evaluate = multiLayerNetwork.evaluate(eDataSetIterator);
         System.out.println(evaluate.stats());
 
-        for (String line : testLines1) {
-            List<String> tokens = tokenizerFactory.create(line).getTokens();
-            List<String> tokenFiltered = new ArrayList<>();
-            for (String t : tokens) {
-                if (wordVectors.hasWord(t)) {
-                    tokenFiltered.add(t);
-                }
-            }
-            int outputLength = Math.max(truncateReviewsToLength, tokenFiltered.size());
-            INDArray features = Nd4j.create(1, vectorSize, outputLength);
-            for (int j = 0; j < tokens.size() && j < truncateReviewsToLength; j++) {
-                String token = tokens.get(j);
-                INDArray vectorMatrix = wordVectors.getWordVectorMatrix(token);
-                features.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all(), NDArrayIndex.point(j)}, vectorMatrix);
-            }
-
-            INDArray output = multiLayerNetwork.output(features, false);
-            int size = output.size(2);
-            System.out.println();
-            INDArray probabilitiesAtLastWord = output.get(NDArrayIndex.point(0), NDArrayIndex.all(), NDArrayIndex.point(size - 1));
-
-            Number number = probabilitiesAtLastWord.maxNumber();
-            long l = number.longValue();
-            List<String> unqiueLabelList = eDataSetIterator.getUnqiueLabelList();
-            System.out.println(probabilitiesAtLastWord.toString());
+//        for (String line : testLines1) {
+//            List<String> tokens = tokenizerFactory.create(line).getTokens();
+//            List<String> tokenFiltered = new ArrayList<>();
+//            for (String t : tokens) {
+//                if (wordVectors.hasWord(t)) {
+//                    tokenFiltered.add(t);
+//                }
+//            }
+//            int outputLength = Math.max(truncateReviewsToLength, tokenFiltered.size());
+//            INDArray features = Nd4j.create(1, vectorSize, outputLength);
+//            for (int j = 0; j < tokens.size() && j < truncateReviewsToLength; j++) {
+//                String token = tokens.get(j);
+//                INDArray vectorMatrix = wordVectors.getWordVectorMatrix(token);
+//                features.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all(), NDArrayIndex.point(j)}, vectorMatrix);
+//            }
+//
+//            INDArray output = multiLayerNetwork.output(features, false);
+//            int size = output.size(2);
+//            System.out.println();
+//            INDArray probabilitiesAtLastWord = output.get(NDArrayIndex.point(0), NDArrayIndex.all(), NDArrayIndex.point(size - 1));
+//
+//            Number number = probabilitiesAtLastWord.maxNumber();
+//            long l = number.longValue();
+//            List<String> unqiueLabelList = eDataSetIterator.getUnqiueLabelList();
+//            System.out.println(probabilitiesAtLastWord.toString());
 //            System.out.println("\n-------------------------------");
 //            System.out.println("review: " + line);
 //            System.out.println("Prefer:" + emojiStr);
 //            System.out.println("label: " + probabilitiesAtLastWord.getDouble(1));
-        }
+//        }
     }
 }
