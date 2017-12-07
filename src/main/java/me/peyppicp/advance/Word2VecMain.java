@@ -15,7 +15,7 @@ import java.io.IOException;
  */
 public class Word2VecMain {
 
-    public static final String OUTPUT = "/home/peyppicp/output/";
+//    public static final String OUTPUT = "/home/peyppicp/output/";
 
     public static void main(String[] args) throws IOException {
         String filePath = "new_sample.txt";
@@ -39,8 +39,8 @@ public class Word2VecMain {
                 .build();
         vec.fit();
 
-        WordVectorSerializer.writeWordVectors(vec, OUTPUT + "word2vec.txt");
-        WordVectorSerializer.writeWordVectors(vec.lookupTable(), OUTPUT + "word2vecLookUpTable.txt");
+        WordVectorSerializer.writeWordVectors(vec, "word2vec.txt");
+        WordVectorSerializer.writeWordVectors(vec.lookupTable(), "word2vecLookUpTable.txt");
 
 //        Collection<String> lst = vec.wordsNearest("day", 10);
 //        System.out.println(lst);
