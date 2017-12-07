@@ -30,6 +30,7 @@ public class WordToIndex {
     private WordVectors wordVectors;
 
     private Map<String, Integer> wordIndexMap;
+    private int outComesNum;
 
     public WordToIndex(String samplesFilePath, String wordVectorPath) throws IOException {
         this.samplesFilePath = samplesFilePath;
@@ -62,6 +63,7 @@ public class WordToIndex {
             wordIndexMap.putIfAbsent(emoji, index++);
         }
         addUnknown();
+        this.outComesNum = wordIndexMap.keySet().size();
     }
 
     public int getIndex(String word) {
