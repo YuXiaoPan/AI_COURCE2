@@ -4,6 +4,7 @@ import com.vdurmont.emoji.Emoji;
 import com.vdurmont.emoji.EmojiManager;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
+import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
@@ -32,7 +33,7 @@ public class TestLSTM {
         String word2VecPath = "word2vecLookUpTable.txt";
         String totalExamplesPath = "emoji_sample.txt";
 
-        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork("model-test04-0.txt");
+        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork("model-test04-32.txt");
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(word2VecPath);
         TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
 
@@ -80,8 +81,8 @@ public class TestLSTM {
         EDataSetIterator eDataSetIterator = new EDataSetIterator(path, labelPath, wordVectors, batchSize, truncateReviewsToLength, true);
 
         System.out.println("Begin test.");
-//        Evaluation evaluate = multiLayerNetwork.evaluate(eDataSetIterator);
-//        System.out.println(evaluate.stats());
+        Evaluation evaluate = multiLayerNetwork.evaluate(eDataSetIterator);
+        System.out.println(evaluate.stats());
 
         for (String line : testLines1) {
             List<String> tokens = tokenizerFactory.create(line).getTokens();
