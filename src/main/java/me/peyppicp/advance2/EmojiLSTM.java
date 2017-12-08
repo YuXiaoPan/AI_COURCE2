@@ -113,10 +113,10 @@ public class EmojiLSTM {
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
-                .layer(0, new GravesLSTM.Builder().nIn(eDataSetIterator.inputColumns()).nOut(200)
+                .layer(0, new GravesLSTM.Builder().nIn(eDataSetIterator.inputColumns()).nOut(150)
                         .activation(Activation.TANH).build())
                 .layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(200).nOut(eDataSetIterator.totalOutcomes()).build())
+                        .activation(Activation.SOFTMAX).nIn(150).nOut(eDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
                 .build();
@@ -158,7 +158,8 @@ public class EmojiLSTM {
             eDataSetIterator.reset();
             executorService.submit(new HibernateRunner(j, multiLayerNetwork, eDataSetIteratorTest, prefix));
         }
-        File file = new File(OUTPUT + "model-" + prefix + "-full" + ".txt");
+        File file = new File("model-" + prefix + "-full" + ".txt");
+//        File file = new File(OUTPUT + "model-" + prefix + "-full" + ".txt");
         file.createNewFile();
         ModelSerializer.writeModel(multiLayerNetwork, file, true);
     }
@@ -199,7 +200,8 @@ class HibernateRunner implements Runnable {
         this.dataSetIterator = iterator;
         this.anInt = anInt;
         this.prefix = prefix;
-        this.path = EmojiLSTM.OUTPUT + "model-" + prefix + "-" + anInt + ".txt";
+//        this.path = EmojiLSTM.OUTPUT + "model-" + prefix + "-" + anInt + ".txt";
+        this.path = "model-" + prefix + "-" + anInt + ".txt";
         this.model = (MultiLayerNetwork) model;
     }
 

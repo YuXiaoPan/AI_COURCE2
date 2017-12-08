@@ -75,10 +75,7 @@ public class EDataSetIterator implements DataSetIterator {
             String line = totalLines.get(currentLineCursor);
             reviews.add(line);
             labelInts[i] = Integer
-                    .parseInt(totalLabelLinesWithIndex
-                            .get(currentLineCursor)
-                            .split(",")[0]
-                            .split("-")[1]);
+                    .parseInt(totalLabelLinesWithIndex.get(currentLineCursor).split(",")[0]);
         }
         List<List<String>> allTokens = new ArrayList<>();
         maxLength = 0;

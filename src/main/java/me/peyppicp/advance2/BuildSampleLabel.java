@@ -29,12 +29,13 @@ public class BuildSampleLabel {
             StringBuilder sb = new StringBuilder();
             for (String emoji : emojis) {
                 int index = wordToIndex.getIndex(emoji);
-                if (index == -1) {
-                    index = wordToIndex.getIndex(WordToIndex.UNKNOWN);
-                    sb.append(WordToIndex.UNKNOWN).append("-").append(index).append(",");
-                }else{
-                    sb.append(emoji).append("-").append(index).append(",");
-                }
+//                if (index == -1) {
+//                    index = wordToIndex.getIndex(WordToIndex.UNKNOWN);
+//                    sb.append(WordToIndex.UNKNOWN).append("-").append(index).append(",");
+//                }else{
+//                    sb.append(emoji).append("-").append(index).append(",");
+//                }
+                sb.append(index).append(",");
             }
             sb.deleteCharAt(sb.length() - 1);
             labels.add(sb.toString());
