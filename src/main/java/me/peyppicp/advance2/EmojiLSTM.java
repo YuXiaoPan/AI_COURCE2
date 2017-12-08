@@ -87,9 +87,9 @@ public class EmojiLSTM {
         String trainDataPath = "EmojiSampleWithoutEmoji.txt";
         String labelDataPath = "EmojiSampleLabels.txt";
         String sampleFilePath = "EmojiSample.txt";
-        int batchSize = 100;
+        int batchSize = 200;
         int truncateReviewsToLength = 300;
-        double learningRate = 0.002;
+        double learningRate = 0.01;
         int nEpochs = 200;
         String prefix = "main01";
 
