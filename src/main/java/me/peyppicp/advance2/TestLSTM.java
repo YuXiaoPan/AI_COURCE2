@@ -30,7 +30,7 @@ public class TestLSTM {
         String sampleFilePath = "EmojiSample.txt";
         String totalExamplesPath = "emoji_sample.txt";
 
-        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork("model-main01-12.txt");
+        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork("model-main01-0.txt");
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(wordVectorPath);
         TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
 
@@ -76,10 +76,13 @@ public class TestLSTM {
         int labelSize = labels.parallelStream().collect(Collectors.toSet()).size();
 
         EDataSetIterator eDataSetIterator = new EDataSetIterator(sampleFilePath, trainDataPath, labelDataPath, wordVectorPath, batchSize, truncateReviewsToLength, true);
+        WordToIndex wordToIndex = eDataSetIterator.getWordToIndex();
 
         System.out.println("Begin test.");
         Evaluation evaluate = multiLayerNetwork.evaluate(eDataSetIterator);
         System.out.println(evaluate.stats());
+
+        System.out.println(wordToIndex.getEmoji(0));
 
 //        for (String line : testLines1) {
 //            List<String> tokens = tokenizerFactory.create(line).getTokens();
