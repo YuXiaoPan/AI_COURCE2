@@ -38,6 +38,7 @@ public class EmojiLSTM {
 
     private static final Logger log = LoggerFactory.getLogger(EmojiLSTM.class);
     public static final String OUTPUT = "/home/peyppicp/output/";
+    public static final String PREFIX = "/home/peyppicp/data/new/";
 
     private static void operationFunctionRebuildWordVector(Scanner scanner) throws IOException {
         String[] word2VecArgs = new String[6];
@@ -83,15 +84,15 @@ public class EmojiLSTM {
 //        System.out.println("Please set learning rate(0.00xx):");
 //        double learningRate = scanner.nextDouble();
 
-        String wordVectorPath = "LookUpTable.txt";
-        String trainDataPath = "EmojiSampleWithoutEmoji.txt";
-        String labelDataPath = "EmojiSampleLabels.txt";
-        String sampleFilePath = "EmojiSample.txt";
+        String wordVectorPath = PREFIX + "LookUpTable.txt";
+        String trainDataPath = PREFIX + "EmojiSampleWithoutEmoji.txt";
+        String labelDataPath = PREFIX + "EmojiSampleLabels.txt";
+        String sampleFilePath = PREFIX + "EmojiSample.txt";
         int batchSize = 200;
         int truncateReviewsToLength = 300;
         double learningRate = 0.01;
         int nEpochs = 200;
-        String prefix = "main01";
+        String prefix = "main02";
 
         ExecutorService executorService = Executors.newFixedThreadPool(1);
 
@@ -158,8 +159,8 @@ public class EmojiLSTM {
             eDataSetIterator.reset();
             executorService.submit(new HibernateRunner(j, multiLayerNetwork, eDataSetIteratorTest, prefix));
         }
-        File file = new File("model-" + prefix + "-full" + ".txt");
-//        File file = new File(OUTPUT + "model-" + prefix + "-full" + ".txt");
+//        File file = new File("model-" + prefix + "-full" + ".txt");
+        File file = new File(OUTPUT + "model-" + prefix + "-full" + ".txt");
         file.createNewFile();
         ModelSerializer.writeModel(multiLayerNetwork, file, true);
     }
@@ -200,8 +201,8 @@ class HibernateRunner implements Runnable {
         this.dataSetIterator = iterator;
         this.anInt = anInt;
         this.prefix = prefix;
-//        this.path = EmojiLSTM.OUTPUT + "model-" + prefix + "-" + anInt + ".txt";
-        this.path = "model-" + prefix + "-" + anInt + ".txt";
+        this.path = EmojiLSTM.OUTPUT + "model-" + prefix + "-" + anInt + ".txt";
+//        this.path = "model-" + prefix + "-" + anInt + ".txt";
         this.model = (MultiLayerNetwork) model;
     }
 
