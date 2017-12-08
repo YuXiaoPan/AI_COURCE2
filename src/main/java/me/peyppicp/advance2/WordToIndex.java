@@ -54,7 +54,7 @@ public class WordToIndex {
         Map<String, Integer> temp = new LinkedHashMap<>();
         wordIndexMap.entrySet()
                 .parallelStream().sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .filter(entry -> entry.getValue() >= 1000)
+                .filter(entry -> entry.getValue() >= 1)
                 .forEachOrdered(entry -> temp.put(entry.getKey(), entry.getValue()));
 
         wordIndexMap = new HashMap<>();

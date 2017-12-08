@@ -61,7 +61,7 @@ public class EDataSetIterator implements DataSetIterator {
 
         this.totalLines = Files.readLines(file, Charsets.UTF_8);
         this.totalLabelLinesWithIndex = Files.readLines(labelFile, Charsets.UTF_8);
-        this.unqiueLabelList = totalLabelLinesWithIndex.parallelStream().map(s -> s.split(",")[0]).distinct().collect(Collectors.toList());
+        this.unqiueLabelList = totalLabelLinesWithIndex.parallelStream().map(s -> s.split(",")[0].split("-")[0]).distinct().collect(Collectors.toList());
         if (isTest) {
             Random random = new Random();
             Collections.shuffle(this.totalLines, random);
@@ -80,7 +80,7 @@ public class EDataSetIterator implements DataSetIterator {
         for (int i = 0; i < batchSize && cursor < totalExamples(); i++, cursor++, currentLineCursor++) {
             String line = totalLines.get(currentLineCursor);
             reviews.add(line);
-            labelInts[i] = Integer.parseInt(totalLabelLinesWithIndex.get(currentLineCursor).split(",")[1]);
+            labelInts[i] = Integer.parseInt(totalLabelLinesWithIndex.get(currentLineCursor).split(",")[0].split("-")[1]);
         }
         List<List<String>> allTokens = new ArrayList<>();
         maxLength = 0;

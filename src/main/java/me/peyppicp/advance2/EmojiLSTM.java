@@ -83,26 +83,27 @@ public class EmojiLSTM {
 //        System.out.println("Please set learning rate(0.00xx):");
 //        double learningRate = scanner.nextDouble();
 
-        String wordVectorPath = "/home/peyppicp/data/word2vecLookUpTable.txt";
-        String trainDataPath = "/home/peyppicp/data/distinctLines.txt";
-        String labelDataPath = "/home/peyppicp/data/commonLabelWithIndex.txt";
+        String wordVectorPath = "LookUpTable.txt";
+        String trainDataPath = "EmojiSampleWithoutEmoji.txt";
+        String labelDataPath = "EmojiSampleLabels.txt";
+        String sampleFilePath = "EmojiSample.txt";
         int batchSize = 100;
         int truncateReviewsToLength = 300;
-        double learningRate = 0.018;
+        double learningRate = 0.002;
         int nEpochs = 200;
-        String prefix = "test04";
+        String prefix = "main01";
 
         ExecutorService executorService = Executors.newFixedThreadPool(1);
 
-        EDataSetIterator eDataSetIterator = new EDataSetIterator(trainDataPath, labelDataPath, wordVectorPath, batchSize, truncateReviewsToLength, false);
-        EDataSetIterator eDataSetIteratorTest = new EDataSetIterator(trainDataPath, labelDataPath, wordVectorPath, batchSize, truncateReviewsToLength, true);
+        EDataSetIterator eDataSetIterator = new EDataSetIterator(sampleFilePath, trainDataPath, labelDataPath, wordVectorPath, batchSize, truncateReviewsToLength, false);
+        EDataSetIterator eDataSetIteratorTest = new EDataSetIterator(sampleFilePath, trainDataPath, labelDataPath, wordVectorPath, batchSize, truncateReviewsToLength, true);
 //        AsyncDataSetIterator asyncDataSetIterator = new AsyncDataSetIterator(eDataSetIterator);
 
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .updater(Updater.RMSPROP)
                 .regularization(true)
                 .l1(1e-4)
-                .l2(1e-4)
+                .l2(1e-5)
                 .weightInit(WeightInit.XAVIER)
                 .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
                 .gradientNormalizationThreshold(1.0)
@@ -127,9 +128,9 @@ public class EmojiLSTM {
 
 //        NativeOpsHolder.getInstance().getDeviceNativeOps().setElementThreshold(16384);
 //        NativeOpsHolder.getInstance().getDeviceNativeOps().setTADThreshold(64);
-        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork(OUTPUT + "model-test01-1.txt");
-//        MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
-//        multiLayerNetwork.init();
+//        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork(OUTPUT + "model-test01-1.txt");
+        MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
+        multiLayerNetwork.init();
         int i = 0;
         multiLayerNetwork.setListeners(new ScoreIterationListener(1), new StatsListener(statsStorage), new IterationListener() {
             @Override

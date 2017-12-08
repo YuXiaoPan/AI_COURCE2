@@ -1,7 +1,6 @@
 package me.peyppicp.advance2;
 
 import com.google.common.io.Files;
-import lombok.Data;
 import org.apache.commons.io.Charsets;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
@@ -24,7 +23,6 @@ import java.util.*;
  * @date 2017/11/27
  * @email yuxiao.pan@kikatech.com
  */
-@Data
 public class EDataSetIterator implements DataSetIterator {
 
     private final WordVectors wordVectors;
@@ -42,10 +40,10 @@ public class EDataSetIterator implements DataSetIterator {
     private final TokenizerFactory tokenizerFactory;
     private WordToIndex wordToIndex;
 
-    public EDataSetIterator(String path, String labelPath,
+    public EDataSetIterator(String sampleFilePath, String path, String labelPath,
                             String wordVectorPath, int batchSize,
                             int truncateLength, boolean isTest) throws IOException {
-        this.wordToIndex = new WordToIndex(path, wordVectorPath);
+        this.wordToIndex = new WordToIndex(sampleFilePath, wordVectorPath);
         this.wordVectors = wordToIndex.getWordVectors();
         this.batchSize = batchSize;
         this.truncateLength = truncateLength;
