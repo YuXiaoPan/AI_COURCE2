@@ -24,12 +24,12 @@ public class TestLSTM {
         int vectorSize = 0;
         int batchSize = 150;
         int nEpochs = 1;
-        String path = "distinctLines.txt";
-        String labelPath = "commonLabelWithIndex.txt";
-        String word2VecPath = "word2vecLookUpTable.txt";
+        String path = "EmojiSampleWithoutEmoji.txt";
+        String labelPath = "EmojiSampleLabels.txt";
+        String word2VecPath = "LookUpTable.txt";
         String totalExamplesPath = "emoji_sample.txt";
 
-        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork("model-test04-98.txt");
+        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork("model-main01-12.txt");
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(word2VecPath);
         TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
 
