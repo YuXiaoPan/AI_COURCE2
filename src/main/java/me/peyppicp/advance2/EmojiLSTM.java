@@ -5,7 +5,9 @@ import me.peyppicp.advance.Word2VecMain;
 import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.nn.api.Model;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
-import org.deeplearning4j.nn.conf.*;
+import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
+import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
+import org.deeplearning4j.nn.conf.Updater;
 import org.deeplearning4j.nn.conf.layers.GravesLSTM;
 import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
@@ -92,7 +94,7 @@ public class EmojiLSTM {
         int truncateReviewsToLength = 300;
         double learningRate = 0.01;
         int nEpochs = 200;
-        String prefix = "main02";
+        String prefix = "main03";
 
         ExecutorService executorService = Executors.newFixedThreadPool(1);
 
@@ -106,11 +108,12 @@ public class EmojiLSTM {
                 .l1(1e-4)
                 .l2(1e-5)
                 .weightInit(WeightInit.XAVIER)
-                .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
-                .gradientNormalizationThreshold(1.0)
+//                .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
+//                .gradientNormalizationThreshold(1.0)
                 .learningRate(learningRate)
-                .trainingWorkspaceMode(WorkspaceMode.SEPARATE)
-                .inferenceWorkspaceMode(WorkspaceMode.SEPARATE)
+                .learningRateScoreBasedDecayRate(0.8)
+//                .trainingWorkspaceMode(WorkspaceMode.SEPARATE)
+//                .inferenceWorkspaceMode(WorkspaceMode.SEPARATE)
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
