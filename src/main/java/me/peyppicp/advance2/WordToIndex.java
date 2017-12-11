@@ -57,7 +57,7 @@ public class WordToIndex {
                 .filter(entry -> entry.getValue() >= 1000)
                 .forEachOrdered(entry -> temp.put(entry.getKey(), entry.getValue()));
 
-        wordIndexMap = new HashMap<>();
+        wordIndexMap = new LinkedHashMap<>();
         int index = 0;
         for (String emoji : temp.keySet()) {
             wordIndexMap.putIfAbsent(emoji, index++);
@@ -74,6 +74,10 @@ public class WordToIndex {
         int size = wordIndexMap.values().size();
         wordIndexMap.putIfAbsent(UNKNOWN, ++size);
 //        wordIndexMap.putIfAbsent(STOP, ++size);
+    }
+
+    public String getEmoji(int index) {
+        return wordIndexMap.entrySet().parallelStream().filter(entry -> entry.getValue() == index).findFirst().get().getKey();
     }
 
     public int totalIndexNum() {

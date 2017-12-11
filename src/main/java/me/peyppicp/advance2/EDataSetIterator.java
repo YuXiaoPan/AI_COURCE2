@@ -1,6 +1,7 @@
 package me.peyppicp.advance2;
 
 import com.google.common.io.Files;
+import lombok.Data;
 import org.apache.commons.io.Charsets;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
@@ -23,6 +24,7 @@ import java.util.*;
  * @date 2017/11/27
  * @email yuxiao.pan@kikatech.com
  */
+@Data
 public class EDataSetIterator implements DataSetIterator {
 
     private final WordVectors wordVectors;
