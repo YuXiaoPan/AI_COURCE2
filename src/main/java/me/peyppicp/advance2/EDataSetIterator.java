@@ -56,12 +56,13 @@ public class EDataSetIterator implements DataSetIterator {
         this.file = new File(path);
         this.labelFile = new File(labelPath);
 
+        Random randomForSamples = new Random();
         this.totalLines = Files.readLines(file, Charsets.UTF_8);
         this.totalLabelLinesWithIndex = Files.readLines(labelFile, Charsets.UTF_8);
+        Collections.shuffle(totalLines, randomForSamples);
+        Collections.shuffle(totalLabelLinesWithIndex, randomForSamples);
+
         if (isTest) {
-            Random random = new Random();
-            Collections.shuffle(this.totalLines, random);
-            Collections.shuffle(this.totalLines, random);
             this.totalLabelLinesWithIndex = this.totalLabelLinesWithIndex.subList(0, 5000);
             this.totalLines = this.totalLines.subList(0, 5000);
         }
