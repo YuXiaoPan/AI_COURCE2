@@ -25,12 +25,12 @@ public class TestLSTM {
         int batchSize = 150;
         int nEpochs = 1;
         String wordVectorPath = "LookUpTable.txt";
-        String trainDataPath = "EmojiSampleWithoutEmoji.txt";
-        String labelDataPath = "EmojiSampleLabels.txt";
-        String sampleFilePath = "EmojiSample.txt";
+        String trainDataPath = "ReEnforcementEmojiSampleWithoutEmoji.txt";
+        String labelDataPath = "ReEnforcementEmojiSampleLabels.txt";
+        String sampleFilePath = "ReEnforcementEmojiSample.txt";
         String totalExamplesPath = "emoji_sample.txt";
 
-        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork("model-main03-0.txt");
+        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork("model-main04-2.txt");
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(wordVectorPath);
         TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
 

@@ -88,14 +88,14 @@ public class EmojiLSTM {
 //        double learningRate = scanner.nextDouble();
 
         String wordVectorPath = PREFIX + "LookUpTable.txt";
-        String trainDataPath = PREFIX + "EmojiSampleWithoutEmoji.txt";
-        String labelDataPath = PREFIX + "EmojiSampleLabels.txt";
-        String sampleFilePath = PREFIX + "EmojiSample.txt";
+        String trainDataPath = PREFIX + "ReEnforcementEmojiSampleWithoutEmoji.txt";
+        String labelDataPath = PREFIX + "ReEnforcementEmojiSampleLabels.txt";
+        String sampleFilePath = PREFIX + "ReEnforcementEmojiSample.txt";
         int batchSize = 200;
-        int truncateReviewsToLength = 64;
+        int truncateReviewsToLength = 20;
         double learningRate = 0.01;
         int nEpochs = 200;
-        String prefix = "main03";
+        String prefix = "main04";
 
         ExecutorService executorService = Executors.newFixedThreadPool(1);
 
@@ -106,7 +106,7 @@ public class EmojiLSTM {
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .updater(Updater.RMSPROP)
                 .regularization(true)
-                .l1(1e-4)
+//                .l1(1e-4)
                 .l2(1e-5)
                 .weightInit(WeightInit.XAVIER)
 //                .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
