@@ -73,6 +73,7 @@ public class WordToIndex {
     public void addUnknown() {
         int size = wordIndexMap.values().size();
         wordIndexMap.putIfAbsent(UNKNOWN, ++size);
+        wordIndexMap.putIfAbsent(STOP, ++size);
 //        wordIndexMap.putIfAbsent(STOP, ++size);
     }
 
