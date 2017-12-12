@@ -39,7 +39,7 @@ import java.util.concurrent.Executors;
 public class EmojiLSTM {
 
     private static final Logger log = LoggerFactory.getLogger(EmojiLSTM.class);
-//    public static final String OUTPUT = "/home/peyppicp/output/";
+    public static final String OUTPUT = "/home/peyppicp/output/";
     public static final String PREFIX = "/home/peyppicp/data/new/";
 //    public static final String PREFIX = "";
 

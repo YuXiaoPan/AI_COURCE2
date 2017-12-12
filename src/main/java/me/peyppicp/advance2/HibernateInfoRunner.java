@@ -30,8 +30,8 @@ public class HibernateInfoRunner implements Runnable {
         this.dataSetIterator = iterator;
         this.anInt = anInt;
         this.prefix = prefix;
-        this.path = EmojiLSTM.OUTPUT + "model-" + prefix + "-" + anInt + ".txt";
-        this.evaPath = EmojiLSTM.OUTPUT + "eva-" + prefix + "-" + anInt + ".txt";
+        this.path = FullOperationMain.OUTPUT + "model-" + prefix + "-" + anInt + ".txt";
+        this.evaPath = FullOperationMain.OUTPUT + "eva-" + prefix + "-" + anInt + ".txt";
 //        this.path = "model-" + prefix + "-" + anInt + ".txt";
         this.model = (MultiLayerNetwork) model;
         this.evaluation = evaluation;
