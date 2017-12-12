@@ -53,6 +53,7 @@ public class FullOperationMain {
 
     public static final String OUTPUT = "/home/peyppicp/output/";
     public static final String PREFIX = "/home/peyppicp/data/new/";
+//    public static final String PREFIX = "";
     private static final Logger log = LoggerFactory.getLogger(FullOperationMain.class);
 
     public static void main(String[] args) throws IOException, Nd4jBackend.NoAvailableBackendException {
