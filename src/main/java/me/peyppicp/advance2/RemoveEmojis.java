@@ -18,16 +18,16 @@ import java.util.List;
 public class RemoveEmojis {
 
     public static void main(String[] args) throws IOException {
-        File file = new File("EmojiSample.txt");
+        File file = new File("ReEnforcementEmojiSample.txt");
         List<String> samples = FileUtils.readLines(file, Charsets.UTF_8);
         ArrayList<String> result = new ArrayList<>();
         for (String sample : samples) {
             String s = EmojiParser.removeAllEmojis(sample);
-            result.add(s);
+            result.add(s.trim());
         }
 
         Preconditions.checkArgument(samples.size() == result.size());
-        FileUtils.writeLines(new File("EmojiSampleWithoutEmoji.txt"),
+        FileUtils.writeLines(new File("ReEnforcementEmojiSampleWithoutEmoji.txt"),
                 "UTF-8",
                 result,
                 "\n",

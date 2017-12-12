@@ -91,7 +91,7 @@ public class EmojiLSTM {
         String labelDataPath = PREFIX + "EmojiSampleLabels.txt";
         String sampleFilePath = PREFIX + "EmojiSample.txt";
         int batchSize = 200;
-        int truncateReviewsToLength = 300;
+        int truncateReviewsToLength = 64;
         double learningRate = 0.01;
         int nEpochs = 200;
         String prefix = "main03";
