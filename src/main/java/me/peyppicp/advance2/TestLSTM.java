@@ -30,7 +30,7 @@ public class TestLSTM {
         String sampleFilePath = "EmojiSample.txt";
         String totalExamplesPath = "emoji_sample.txt";
 
-        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork("model-main01-0.txt");
+        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork("model-main03-0.txt");
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(wordVectorPath);
         TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
 

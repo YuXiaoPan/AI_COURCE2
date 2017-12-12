@@ -38,7 +38,8 @@ public class EmojiLSTM {
 
     private static final Logger log = LoggerFactory.getLogger(EmojiLSTM.class);
     public static final String OUTPUT = "/home/peyppicp/output/";
-    public static final String PREFIX = "/home/peyppicp/data/new/";
+//    public static final String PREFIX = "/home/peyppicp/data/new/";
+    public static final String PREFIX = "";
 
     private static void operationFunctionRebuildWordVector(Scanner scanner) throws IOException {
         String[] word2VecArgs = new String[6];
@@ -92,7 +93,7 @@ public class EmojiLSTM {
         int truncateReviewsToLength = 300;
         double learningRate = 0.01;
         int nEpochs = 200;
-        String prefix = "main02";
+        String prefix = "main03";
 
         ExecutorService executorService = Executors.newFixedThreadPool(1);
 
@@ -159,8 +160,8 @@ public class EmojiLSTM {
             eDataSetIterator.reset();
             executorService.submit(new HibernateRunner(j, multiLayerNetwork, eDataSetIteratorTest, prefix));
         }
-//        File file = new File("model-" + prefix + "-full" + ".txt");
-        File file = new File(OUTPUT + "model-" + prefix + "-full" + ".txt");
+        File file = new File("model-" + prefix + "-full" + ".txt");
+//        File file = new File(OUTPUT + "model-" + prefix + "-full" + ".txt");
         file.createNewFile();
         ModelSerializer.writeModel(multiLayerNetwork, file, true);
     }
@@ -201,8 +202,8 @@ class HibernateRunner implements Runnable {
         this.dataSetIterator = iterator;
         this.anInt = anInt;
         this.prefix = prefix;
-        this.path = EmojiLSTM.OUTPUT + "model-" + prefix + "-" + anInt + ".txt";
-//        this.path = "model-" + prefix + "-" + anInt + ".txt";
+//        this.path = EmojiLSTM.OUTPUT + "model-" + prefix + "-" + anInt + ".txt";
+        this.path = "model-" + prefix + "-" + anInt + ".txt";
         this.model = (MultiLayerNetwork) model;
     }
 
