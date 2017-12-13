@@ -116,7 +116,7 @@ public class EDataSetIterator implements DataSetIterator {
             int index = labelInts[i];
             int lastIndex = Math.min(tokens.size(), maxLength);
             if (index == wordToIndex.getIndex(wordToIndex.STOP)) {
-                labels.putScalar(new int[]{i, index, lastIndex - 1}, 0.2);
+                labels.putScalar(new int[]{i, index, lastIndex - 1}, 0.1);
             } else {
                 labels.putScalar(new int[]{i, index, lastIndex - 1}, 1.0);
             }
@@ -148,6 +148,9 @@ public class EDataSetIterator implements DataSetIterator {
     public void reset() {
         this.cursor = 0;
         this.currentLineCursor = 0;
+        Random random = new Random();
+        Collections.shuffle(this.totalLines, random);
+        Collections.shuffle(this.totalLabelLinesWithIndex, random);
     }
 
     public int batch() {

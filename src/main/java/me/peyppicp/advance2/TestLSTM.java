@@ -24,7 +24,7 @@ public class TestLSTM {
         int vectorSize = 0;
         int batchSize = 200;
         int nEpochs = 1;
-        String wordVectorPath = "LookUpTable.txt";
+        String wordVectorPath = "glove.twitter.27B.100d.txt";
         String trainDataPath = "ReEnforcementEmojiSampleWithoutEmoji.txt";
         String labelDataPath = "ReEnforcementEmojiSampleLabels.txt";
         String sampleFilePath = "ReEnforcementEmojiSample.txt";

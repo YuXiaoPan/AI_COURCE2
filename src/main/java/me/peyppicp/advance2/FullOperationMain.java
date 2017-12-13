@@ -58,7 +58,7 @@ public class FullOperationMain {
 
     public static void main(String[] args) throws IOException, Nd4jBackend.NoAvailableBackendException {
         File file = new File(PREFIX + "emoji_sample.txt");
-        String prefix = "full01";
+        String prefix = "full02";
         Scanner scanner = new Scanner(System.in);
         String path = "";
         if (!file.exists()) {
