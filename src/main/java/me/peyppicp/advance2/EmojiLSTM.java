@@ -95,7 +95,7 @@ public class EmojiLSTM {
         int truncateReviewsToLength = 20;
         double learningRate = 0.01;
         int nEpochs = 50;
-        String prefix = "main05";
+        String prefix = "full02";
 
         ExecutorService executorService = Executors.newFixedThreadPool(1);
 
