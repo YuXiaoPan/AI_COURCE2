@@ -21,7 +21,7 @@ public class BuildSampleLabel2 {
     public static void main(String[] args) throws IOException {
         File file = new File("ReEnforcementEmojiSample.txt");
         List<String> samples = FileUtils.readLines(file, Charsets.UTF_8);
-        WordToIndex wordToIndex = new WordToIndex("ReEnforcementEmojiSample.txt", "LookUpTable.txt");
+        WordToIndex wordToIndex = new WordToIndex("ReEnforcementEmojiSample.txt");
         ArrayList<String> labels = new ArrayList<>();
         for (String sample : samples) {
             List<String> emojis = EmojiParser.extractEmojis(sample)

@@ -9,6 +9,7 @@ import org.apache.commons.io.FileUtils;
 import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
+import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.nn.api.Model;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
@@ -77,13 +78,17 @@ public class FullOperationMain {
         File emojiSampleFile = new File(PREFIX + "ReEnforcementEmojiSample.txt");
         File emojiSampleLabelFile = new File(PREFIX + "ReEnforcementEmojiSampleLabels.txt");
         File emijiSampleWithoutEmojiFile = new File(PREFIX + "ReEnforcementEmojiSampleWithoutEmoji.txt");
-        File lookUpTableFile = new File(PREFIX + "LookUpTable.txt");
+        File lookUpTableFile = new File(PREFIX + "glove.twitter.27B.100d.txt");
         if (!(emojiSampleFile.exists() && emojiSampleLabelFile.exists()
                 && emijiSampleWithoutEmojiFile.exists() && lookUpTableFile.exists())) {
+            System.out.println("Begin process original samples.");
             processOriginalSamples(file);
-            processWord2Vec();
+//            processWord2Vec();
+            System.out.println("Begin enforcement emoji samples.");
             enforcementEmojiSamples();
+            System.out.println("Begin mark labels.");
             markLabels();
+            System.out.println("Begin remove emojis.");
             removeEmojis();
         }
         train(emojiSampleFile, emojiSampleLabelFile, emijiSampleWithoutEmojiFile,
@@ -97,12 +102,13 @@ public class FullOperationMain {
         int truncateReviewsToLength = 20;
         int nEpochs = 50;
         ExecutorService executorService = Executors.newFixedThreadPool(1);
+        WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(lookUpTableFile);
 
         EDataSetIterator eDataSetIterator = new EDataSetIterator(emojiSampleFile.getCanonicalPath(), emijiSampleWithoutEmojiFile.getCanonicalPath(),
-                emojiSampleLabelFile.getCanonicalPath(), lookUpTableFile.getCanonicalPath(),
+                emojiSampleLabelFile.getCanonicalPath(), wordVectors,
                 batchSize, truncateReviewsToLength, false);
         EDataSetIterator eDataSetIteratorTest = new EDataSetIterator(emojiSampleFile.getCanonicalPath(), emijiSampleWithoutEmojiFile.getCanonicalPath(),
-                emojiSampleLabelFile.getCanonicalPath(), lookUpTableFile.getCanonicalPath(),
+                emojiSampleLabelFile.getCanonicalPath(), wordVectors,
                 batchSize, truncateReviewsToLength, true);
 
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
@@ -185,7 +191,7 @@ public class FullOperationMain {
     private static void markLabels() throws IOException {
         File file = new File("ReEnforcementEmojiSample.txt");
         List<String> samples = FileUtils.readLines(file, Charsets.UTF_8);
-        WordToIndex wordToIndex = new WordToIndex("ReEnforcementEmojiSample.txt", "LookUpTable.txt");
+        WordToIndex wordToIndex = new WordToIndex("ReEnforcementEmojiSample.txt");
         ArrayList<String> labels = new ArrayList<>();
         for (String sample : samples) {
             List<String> emojis = EmojiParser.extractEmojis(sample)

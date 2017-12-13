@@ -3,6 +3,8 @@ package me.peyppicp.advance2;
 import com.google.common.base.Preconditions;
 import me.peyppicp.advance.Word2VecMain;
 import org.deeplearning4j.api.storage.StatsStorage;
+import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
+import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.nn.api.Model;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -99,8 +101,9 @@ public class EmojiLSTM {
 
         ExecutorService executorService = Executors.newFixedThreadPool(1);
 
-        EDataSetIterator eDataSetIterator = new EDataSetIterator(sampleFilePath, trainDataPath, labelDataPath, wordVectorPath, batchSize, truncateReviewsToLength, false);
-        EDataSetIterator eDataSetIteratorTest = new EDataSetIterator(sampleFilePath, trainDataPath, labelDataPath, wordVectorPath, batchSize, truncateReviewsToLength, true);
+        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel("glove.twitter.27B.100d.txt");
+        EDataSetIterator eDataSetIterator = new EDataSetIterator(sampleFilePath, trainDataPath, labelDataPath, word2Vec, batchSize, truncateReviewsToLength, false);
+        EDataSetIterator eDataSetIteratorTest = new EDataSetIterator(sampleFilePath, trainDataPath, labelDataPath, word2Vec, batchSize, truncateReviewsToLength, true);
 //        AsyncDataSetIterator asyncDataSetIterator = new AsyncDataSetIterator(eDataSetIterator);
 
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()

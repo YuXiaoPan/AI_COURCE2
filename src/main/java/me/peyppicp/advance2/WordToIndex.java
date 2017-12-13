@@ -4,8 +4,6 @@ import com.vdurmont.emoji.EmojiParser;
 import lombok.Data;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
-import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
-import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 
@@ -27,20 +25,17 @@ public class WordToIndex {
     private String wordVectorPath;
     private TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
     private File samplesFile;
-    private WordVectors wordVectors;
 
     private Map<String, Integer> wordIndexMap;
     private int outComesNum;
 
-    public WordToIndex(String samplesFilePath, String wordVectorPath) throws IOException {
+    public WordToIndex(String samplesFilePath) throws IOException {
         this.samplesFilePath = samplesFilePath;
-        this.wordVectorPath = wordVectorPath;
         init();
     }
 
     private void init() throws IOException {
         samplesFile = new File(samplesFilePath);
-        wordVectors = WordVectorSerializer.readWord2VecModel(new File(wordVectorPath));
         wordIndexMap = new HashMap<>();
         List<String> samples = FileUtils.readLines(samplesFile, Charsets.UTF_8);
         for (String sample : samples) {
