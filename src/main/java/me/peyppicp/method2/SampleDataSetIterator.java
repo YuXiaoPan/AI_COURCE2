@@ -46,7 +46,6 @@ public class SampleDataSetIterator implements DataSetIterator {
         this.totalSamples = FileUtils.readLines(new File(samplePath), Charsets.UTF_8);
         this.totalSize = totalSamples.size();
         this.vectorSize = wordVectors.getWordVector(wordVectors.vocab().wordAtIndex(0)).length;
-
     }
 
     public DataSet next(int batchSize) {
