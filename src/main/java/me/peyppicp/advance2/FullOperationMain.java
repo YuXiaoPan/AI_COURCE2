@@ -12,6 +12,7 @@ import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.nn.api.Model;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
+import org.deeplearning4j.nn.conf.LearningRatePolicy;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.Updater;
@@ -115,12 +116,14 @@ public class FullOperationMain {
                 .l2(1e-5)
                 .weightInit(WeightInit.XAVIER)
                 .learningRate(0.01)
-                .learningRateScoreBasedDecayRate(0.8)
+                .learningRateDecayPolicy(LearningRatePolicy.Inverse)
+                .lrPolicyDecayRate(0.001)
+                .lrPolicyPower(0.75)
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
                 .layer(0, new GravesLSTM.Builder().nIn(eDataSetIterator.inputColumns()).nOut(100)
-                        .activation(Activation.TANH).build())
+                        .activation(Activation.SOFTMAX).build())
                 .layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
                         .activation(Activation.SOFTMAX).nIn(100).nOut(eDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
