@@ -50,9 +50,9 @@ import java.util.stream.Collectors;
  */
 public class FullOperationMain {
 
-//    public static final String OUTPUT = "/home/peyppicp/output/";
+    public static final String OUTPUT = "/home/peyppicp/output/";
     public static final String PREFIX = "/home/peyppicp/data/new/";
-    public static final String PREFIX = "";
+//    public static final String PREFIX = "";
     private static final Logger log = LoggerFactory.getLogger(FullOperationMain.class);
     private static final int truncateReviewsToLength = 20;
 
