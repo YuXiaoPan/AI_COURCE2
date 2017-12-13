@@ -10,7 +10,6 @@ import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
-import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.nn.api.Model;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -22,7 +21,6 @@ import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.api.IterationListener;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
-import org.deeplearning4j.text.sentenceiterator.BasicLineIterator;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
@@ -56,6 +54,7 @@ public class FullOperationMain {
     public static final String PREFIX = "/home/peyppicp/data/new/";
 //    public static final String PREFIX = "";
     private static final Logger log = LoggerFactory.getLogger(FullOperationMain.class);
+    private static final int truncateReviewsToLength = 20;
 
     public static void main(String[] args) throws IOException, Nd4jBackend.NoAvailableBackendException {
         File file = new File(PREFIX + "emoji_sample.txt");
@@ -99,7 +98,6 @@ public class FullOperationMain {
                               File emijiSampleWithoutEmojiFile, File lookUpTableFile,
                               File file, String prefix) throws IOException {
         int batchSize = 200;
-        int truncateReviewsToLength = 20;
         int nEpochs = 50;
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(lookUpTableFile);
@@ -121,10 +119,10 @@ public class FullOperationMain {
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
-                .layer(0, new GravesLSTM.Builder().nIn(eDataSetIterator.inputColumns()).nOut(150)
+                .layer(0, new GravesLSTM.Builder().nIn(eDataSetIterator.inputColumns()).nOut(100)
                         .activation(Activation.TANH).build())
                 .layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(150).nOut(eDataSetIterator.totalOutcomes()).build())
+                        .activation(Activation.SOFTMAX).nIn(100).nOut(eDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
                 .build();
@@ -172,7 +170,7 @@ public class FullOperationMain {
     }
 
     private static void removeEmojis() throws IOException {
-        File file = new File("ReEnforcementEmojiSample.txt");
+        File file = new File(PREFIX + "ReEnforcementEmojiSample.txt");
         List<String> samples = FileUtils.readLines(file, Charsets.UTF_8);
         ArrayList<String> result = new ArrayList<>();
         for (String sample : samples) {
@@ -181,7 +179,7 @@ public class FullOperationMain {
         }
 
         Preconditions.checkArgument(samples.size() == result.size());
-        FileUtils.writeLines(new File("ReEnforcementEmojiSampleWithoutEmoji.txt"),
+        FileUtils.writeLines(new File(PREFIX + "ReEnforcementEmojiSampleWithoutEmoji.txt"),
                 "UTF-8",
                 result,
                 "\n",
@@ -189,9 +187,9 @@ public class FullOperationMain {
     }
 
     private static void markLabels() throws IOException {
-        File file = new File("ReEnforcementEmojiSample.txt");
+        File file = new File(PREFIX + "ReEnforcementEmojiSample.txt");
         List<String> samples = FileUtils.readLines(file, Charsets.UTF_8);
-        WordToIndex wordToIndex = new WordToIndex("ReEnforcementEmojiSample.txt");
+        WordToIndex wordToIndex = new WordToIndex(PREFIX + "ReEnforcementEmojiSample.txt");
         ArrayList<String> labels = new ArrayList<>();
         for (String sample : samples) {
             List<String> emojis = EmojiParser.extractEmojis(sample)
@@ -210,7 +208,7 @@ public class FullOperationMain {
             labels.add(sb.toString());
         }
         Preconditions.checkArgument(samples.size() == labels.size());
-        FileUtils.writeLines(new File("ReEnforcementEmojiSampleLabels.txt"),
+        FileUtils.writeLines(new File(PREFIX + "ReEnforcementEmojiSampleLabels.txt"),
                 "UTF-8",
                 labels,
                 "\n",
@@ -218,13 +216,16 @@ public class FullOperationMain {
     }
 
     private static void enforcementEmojiSamples() throws IOException {
-        File file = new File("EmojiSample.txt");
+        File file = new File(PREFIX + "EmojiSample.txt");
         List<String> emojiSamples = FileUtils.readLines(file, Charsets.UTF_8);
         ArrayList<String> newData = new ArrayList<>();
         TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
         tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
         for (String sample : emojiSamples) {
             List<String> tokens = tokenizerFactory.create(sample).getTokens();
+            if (tokens.size() >= truncateReviewsToLength) {
+                continue;
+            }
             for (int i = 0; i < tokens.size() - 2; i++) {
                 StringBuilder sb = new StringBuilder();
                 for (int j = 0; j <= i; j++) {
@@ -235,37 +236,11 @@ public class FullOperationMain {
             newData.add(sample);
         }
 
-        FileUtils.writeLines(new File("ReEnforcementEmojiSample.txt"),
+        FileUtils.writeLines(new File(PREFIX + "ReEnforcementEmojiSample.txt"),
                 "UTF-8",
                 newData,
                 "\n",
                 false);
-    }
-
-    private static void processWord2Vec() throws IOException {
-        String filePath = "EmojiSample.txt";
-        int minWordFrequency = 10;
-        int iterations = 5;
-        int layerSize = 100;
-        int seed = 3543;
-        int windowSize = 10;
-
-        BasicLineIterator lineIterator = new BasicLineIterator(filePath);
-        DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
-        tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
-        Word2Vec vec = new Word2Vec.Builder()
-                .minWordFrequency(minWordFrequency)
-                .iterations(iterations)
-                .layerSize(layerSize)
-                .seed(seed)
-                .windowSize(windowSize)
-                .iterate(lineIterator)
-                .tokenizerFactory(tokenizerFactory)
-                .build();
-        vec.fit();
-
-        WordVectorSerializer.writeWordVectors(vec, "WordVector.txt");
-        WordVectorSerializer.writeWordVectors(vec.lookupTable(), "LookUpTable.txt");
     }
 
     private static void processOriginalSamples(File file) throws IOException {
@@ -326,7 +301,7 @@ public class FullOperationMain {
             }
         }
 
-        FileUtils.writeLines(new File("EmojiSample.txt"),
+        FileUtils.writeLines(new File(PREFIX + "EmojiSample.txt"),
                 "UTF-8",
                 temp1,
                 "\n",
