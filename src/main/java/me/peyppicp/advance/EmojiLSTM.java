@@ -38,7 +38,7 @@ import java.util.concurrent.Executors;
 public class EmojiLSTM {
 
     private static final Logger log = LoggerFactory.getLogger(EmojiLSTM.class);
-    public static final String OUTPUT = "/home/peyppicp/output/";
+//    public static final String OUTPUT = "/home/peyppicp/output/";
 
     private static void operationFunctionRebuildWordVector(Scanner scanner) throws IOException {
         String[] word2VecArgs = new String[6];
@@ -84,14 +84,14 @@ public class EmojiLSTM {
 //        System.out.println("Please set learning rate(0.00xx):");
 //        double learningRate = scanner.nextDouble();
 
-        String wordVectorPath = "/home/peyppicp/data/word2vecLookUpTable.txt";
-        String trainDataPath = "/home/peyppicp/data/distinctLines.txt";
-        String labelDataPath = "/home/peyppicp/data/commonLabelWithIndex.txt";
-        int batchSize = 150;
+        String wordVectorPath = "LookUpTable.txt";
+        String trainDataPath = "EmojiSampleWithoutEmoji.txt";
+        String labelDataPath = "EmojiSampleLabels.txt";
+        int batchSize = 100;
         int truncateReviewsToLength = 300;
         double learningRate = 0.018;
         int nEpochs = 200;
-        String prefix = "test04";
+        String prefix = "pe01";
 
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(wordVectorPath);
@@ -113,10 +113,10 @@ public class EmojiLSTM {
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
-                .layer(0, new GravesLSTM.Builder().nIn(eDataSetIterator.inputColumns()).nOut(1000)
+                .layer(0, new GravesLSTM.Builder().nIn(eDataSetIterator.inputColumns()).nOut(500)
                         .activation(Activation.TANH).build())
                 .layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(1000).nOut(eDataSetIterator.totalOutcomes()).build())
+                        .activation(Activation.SOFTMAX).nIn(500).nOut(eDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
                 .build();
@@ -128,9 +128,9 @@ public class EmojiLSTM {
 
 //        NativeOpsHolder.getInstance().getDeviceNativeOps().setElementThreshold(16384);
 //        NativeOpsHolder.getInstance().getDeviceNativeOps().setTADThreshold(64);
-        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork(OUTPUT + "model-test01-1.txt");
-//        MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
-//        multiLayerNetwork.init();
+//        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork(OUTPUT + "model-test01-1.txt");
+        MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
+        multiLayerNetwork.init();
         int i = 0;
         multiLayerNetwork.setListeners(new ScoreIterationListener(1), new StatsListener(statsStorage), new IterationListener() {
             @Override
@@ -158,7 +158,7 @@ public class EmojiLSTM {
             eDataSetIterator.reset();
             executorService.submit(new HibernateRunner(j, multiLayerNetwork, eDataSetIteratorTest, prefix));
         }
-        File file = new File(OUTPUT + "model-" + prefix + "-full" + ".txt");
+        File file = new File("model-" + prefix + "-full" + ".txt");
         file.createNewFile();
         ModelSerializer.writeModel(multiLayerNetwork, file, true);
     }
@@ -199,7 +199,7 @@ class HibernateRunner implements Runnable {
         this.dataSetIterator = iterator;
         this.anInt = anInt;
         this.prefix = prefix;
-        this.path = EmojiLSTM.OUTPUT + "model-" + prefix + "-" + anInt + ".txt";
+        this.path = "model-" + prefix + "-" + anInt + ".txt";
         this.model = (MultiLayerNetwork) model;
     }
 

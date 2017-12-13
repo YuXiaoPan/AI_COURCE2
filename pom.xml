@@ -32,14 +32,15 @@
                 <version>${nd4j.version}</version>
             </dependency>
             <!--<dependency>-->
-            <!--<groupId>org.nd4j</groupId>-->
-            <!--<artifactId>nd4j-cuda-8.0-platform</artifactId>-->
-            <!--<version>${nd4j.version}</version>-->
+                <!--<groupId>org.nd4j</groupId>-->
+                <!--<artifactId>nd4j-cuda-8.0-platform</artifactId>-->
+                <!--<version>${nd4j.version}</version>-->
             <!--</dependency>-->
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
+
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -204,7 +205,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>me.peyppicp.advance.EmojiLSTM</mainClass>
+                            <mainClass>me.peyppicp.advance2.FullOperationMain</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
