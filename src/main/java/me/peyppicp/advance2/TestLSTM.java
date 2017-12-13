@@ -20,9 +20,9 @@ public class TestLSTM {
 
     public static void main(String[] args) throws IOException {
 
-        int truncateReviewsToLength = 256;
+        int truncateReviewsToLength = 20;
         int vectorSize = 0;
-        int batchSize = 150;
+        int batchSize = 200;
         int nEpochs = 1;
         String wordVectorPath = "LookUpTable.txt";
         String trainDataPath = "ReEnforcementEmojiSampleWithoutEmoji.txt";
@@ -30,7 +30,7 @@ public class TestLSTM {
         String sampleFilePath = "ReEnforcementEmojiSample.txt";
         String totalExamplesPath = "emoji_sample.txt";
 
-        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork("model-main04-2.txt");
+        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork("model-full01-11.txt");
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(wordVectorPath);
         TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
 

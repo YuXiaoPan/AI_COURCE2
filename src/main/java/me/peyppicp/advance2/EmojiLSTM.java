@@ -106,7 +106,7 @@ public class EmojiLSTM {
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .updater(Updater.RMSPROP)
                 .regularization(true)
-//                .l1(1e-4)
+                .l1(1e-4)
                 .l2(1e-5)
                 .weightInit(WeightInit.XAVIER)
 //                .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)

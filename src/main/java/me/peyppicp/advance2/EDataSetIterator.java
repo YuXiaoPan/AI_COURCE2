@@ -57,15 +57,11 @@ public class EDataSetIterator implements DataSetIterator {
         this.labelFile = new File(labelPath);
 
         Random randomSample = new Random();
-
         this.totalLines = Files.readLines(file, Charsets.UTF_8);
         this.totalLabelLinesWithIndex = Files.readLines(labelFile, Charsets.UTF_8);
         Collections.shuffle(totalLines, randomSample);
         Collections.shuffle(totalLabelLinesWithIndex, randomSample);
         if (isTest) {
-            Random random = new Random();
-            Collections.shuffle(this.totalLines, random);
-            Collections.shuffle(this.totalLines, random);
             this.totalLabelLinesWithIndex = this.totalLabelLinesWithIndex.subList(0, 5000);
             this.totalLines = this.totalLines.subList(0, 5000);
         }
@@ -119,7 +115,11 @@ public class EDataSetIterator implements DataSetIterator {
             }
             int index = labelInts[i];
             int lastIndex = Math.min(tokens.size(), maxLength);
-            labels.putScalar(new int[]{i, index, lastIndex - 1}, 1.0);
+            if (index == wordToIndex.getIndex(wordToIndex.STOP)) {
+                labels.putScalar(new int[]{i, index, lastIndex - 1}, 0.2);
+            } else {
+                labels.putScalar(new int[]{i, index, lastIndex - 1}, 1.0);
+            }
             labelMask.putScalar(new int[]{i, lastIndex - 1}, 1.0);
         }
         return new DataSet(features, labels, featureMask, labelMask);
