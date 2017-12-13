@@ -62,7 +62,7 @@ public class WordToIndex {
     }
 
     public int getIndex(String word) {
-        return wordIndexMap.getOrDefault(word, -1);
+        return wordIndexMap.getOrDefault(word, wordIndexMap.get(UNKNOWN));
     }
 
     public void addUnknown() {
