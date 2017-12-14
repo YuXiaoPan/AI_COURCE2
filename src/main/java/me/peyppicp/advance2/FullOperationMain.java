@@ -21,6 +21,7 @@ import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.api.IterationListener;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
+import org.deeplearning4j.parallelism.ParallelWrapper;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
@@ -28,7 +29,9 @@ import org.deeplearning4j.ui.api.UIServer;
 import org.deeplearning4j.ui.stats.StatsListener;
 import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.deeplearning4j.util.ModelSerializer;
+import org.nd4j.jita.conf.CudaEnvironment;
 import org.nd4j.linalg.activations.Activation;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.factory.Nd4jBackend;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.slf4j.Logger;
@@ -80,7 +83,7 @@ public class FullOperationMain {
         File emojiSampleFile = new File(PREFIX + "ReEnforcementEmojiSample.txt");
         File emojiSampleLabelFile = new File(PREFIX + "ReEnforcementEmojiSampleLabels.txt");
         File emijiSampleWithoutEmojiFile = new File(PREFIX + "ReEnforcementEmojiSampleWithoutEmoji.txt");
-        File lookUpTableFile = new File(PREFIX + "glove.twitter.27B.50d.txt");
+        File lookUpTableFile = new File(PREFIX + "glove.twitter.27B.25d.txt");
         if (!(emojiSampleFile.exists() && emojiSampleLabelFile.exists()
                 && emijiSampleWithoutEmojiFile.exists() && lookUpTableFile.exists())) {
             System.out.println("Begin process original samples.");
@@ -100,6 +103,15 @@ public class FullOperationMain {
     private static void train(File emojiSampleFile, File emojiSampleLabelFile,
                               File emijiSampleWithoutEmojiFile, File lookUpTableFile,
                               File file, String prefix) throws IOException {
+
+        CudaEnvironment.getInstance().getConfiguration()
+                .allowMultiGPU(true)
+                .allowCrossDeviceAccess(true)
+                .setMaximumDeviceCacheableLength(1024 * 1024 * 1024L)
+                .setMaximumDeviceCache(4L * 1024 * 1024 * 1024L)
+                .setMaximumHostCacheableLength(1024 * 1024 * 1024L)
+                .setMaximumHostCache(4L * 1024 * 1024 * 1024L);
+
         int batchSize = 128;
         int nEpochs = 10;
         ExecutorService executorService = Executors.newFixedThreadPool(1);
@@ -139,6 +151,14 @@ public class FullOperationMain {
 
         MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
         multiLayerNetwork.init();
+
+        ParallelWrapper pw = new ParallelWrapper.Builder<>(multiLayerNetwork)
+                .prefetchBuffer(16 * Nd4j.getAffinityManager().getNumberOfDevices())
+                .reportScoreAfterAveraging(true)
+                .averagingFrequency(10)
+                .workers(Nd4j.getAffinityManager().getNumberOfDevices())
+                .build();
+
         int i = 0;
         multiLayerNetwork.setListeners(new ScoreIterationListener(1), new StatsListener(statsStorage), new IterationListener() {
             @Override
@@ -161,8 +181,10 @@ public class FullOperationMain {
         });
         log.info("Starting training");
 
+
+
         for (int j = 0; j < nEpochs; j++) {
-            multiLayerNetwork.fit(eDataSetIterator);
+            pw.fit(eDataSetIterator);
             Evaluation evaluate = multiLayerNetwork.evaluate(eDataSetIteratorTest);
             eDataSetIterator.reset();
             executorService.submit(new HibernateInfoRunner(j, multiLayerNetwork, eDataSetIteratorTest, prefix, evaluate));
