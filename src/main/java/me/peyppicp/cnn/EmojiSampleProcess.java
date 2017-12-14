@@ -19,6 +19,7 @@ public class EmojiSampleProcess {
         List<String> emojiSamples = FileUtils.readLines(file, Charsets.UTF_8);
         Map<String, Integer> wordIndexMap = wordToIndex.getWordIndexMap();
         ArrayListMultimap<String, String> emojiToSamples = ArrayListMultimap.create(); //emoji -> samples
+        System.out.println("Begin handle data.");
         for (String sample : emojiSamples) {
             List<String> emojis = EmojiParser.extractEmojis(sample);
             if (!emojis.isEmpty()) {
@@ -28,12 +29,19 @@ public class EmojiSampleProcess {
                         emojiToSamples.put(emoji, s);
                     }
                 }
+            } else {
+                String s = sample.trim().toLowerCase();
+                emojiToSamples.put(WordToIndex.STOP, s);
             }
         }
+        System.out.println("Begin output data to files.");
         File cnn = new File("cnn");
+        if (cnn.isDirectory() && cnn.exists()) {
+            cnn.delete();
+        }
         cnn.mkdir();
         for (String emoji : emojiToSamples.keySet()) {
-            File emojiFile = new File(cnn, emoji);
+            File emojiFile = new File(cnn, emoji + ".txt");
             FileUtils.writeLines(emojiFile,
                     "UTF-8",
                     emojiToSamples.get(emoji),
