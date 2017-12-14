@@ -117,11 +117,12 @@ public class FullOperationMain {
         int nEpochs = 10;
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(lookUpTableFile);
+        WordToIndex wordToIndex = new WordToIndex(emojiSampleFile.getCanonicalPath());
 
-        EDataSetIterator eDataSetIterator = new EDataSetIterator(emojiSampleFile.getCanonicalPath(), emijiSampleWithoutEmojiFile.getCanonicalPath(),
+        EDataSetIterator eDataSetIterator = new EDataSetIterator(wordToIndex, emijiSampleWithoutEmojiFile.getCanonicalPath(),
                 emojiSampleLabelFile.getCanonicalPath(), wordVectors,
                 batchSize, truncateReviewsToLength, false);
-        EDataSetIterator eDataSetIteratorTest = new EDataSetIterator(emojiSampleFile.getCanonicalPath(), emijiSampleWithoutEmojiFile.getCanonicalPath(),
+        EDataSetIterator eDataSetIteratorTest = new EDataSetIterator(wordToIndex, emijiSampleWithoutEmojiFile.getCanonicalPath(),
                 emojiSampleLabelFile.getCanonicalPath(), wordVectors,
                 batchSize, truncateReviewsToLength, true);
 

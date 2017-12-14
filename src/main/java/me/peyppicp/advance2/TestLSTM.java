@@ -77,7 +77,7 @@ public class TestLSTM {
         int labelSize = labels.parallelStream().collect(Collectors.toSet()).size();
         Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel("glove.twitter.27B.100d.txt");
 
-        EDataSetIterator eDataSetIterator = new EDataSetIterator(sampleFilePath, trainDataPath, labelDataPath, word2Vec, batchSize, truncateReviewsToLength, true);
+        EDataSetIterator eDataSetIterator = new EDataSetIterator(new WordToIndex(sampleFilePath), trainDataPath, labelDataPath, word2Vec, batchSize, truncateReviewsToLength, true);
         WordToIndex wordToIndex = eDataSetIterator.getWordToIndex();
 
         System.out.println("Begin test.");
