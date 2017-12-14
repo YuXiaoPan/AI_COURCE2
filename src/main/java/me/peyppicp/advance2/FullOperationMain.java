@@ -28,7 +28,6 @@ import org.deeplearning4j.ui.api.UIServer;
 import org.deeplearning4j.ui.stats.StatsListener;
 import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.deeplearning4j.util.ModelSerializer;
-import org.nd4j.jita.conf.CudaEnvironment;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.factory.Nd4jBackend;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
@@ -51,10 +50,10 @@ import java.util.stream.Collectors;
  */
 public class FullOperationMain {
 
-    //        public static final String OUTPUT = "/home/peyppicp/output/";
-//    public static final String PREFIX = "/home/peyppicp/data/new/";
-    public static final String PREFIX = "/home/panyuxiao/data/new/";
-    public static final String OUTPUT = "/home/panyuxiao/output/";
+            public static final String OUTPUT = "/home/peyppicp/output/";
+    public static final String PREFIX = "/home/peyppicp/data/new/";
+//    public static final String PREFIX = "/home/panyuxiao/data/new/";
+//    public static final String OUTPUT = "/home/panyuxiao/output/";
     //    public static final String PREFIX = "";
 //    public static final String OUTPUT = "";
     private static final Logger log = LoggerFactory.getLogger(FullOperationMain.class);
@@ -102,13 +101,13 @@ public class FullOperationMain {
                               File emijiSampleWithoutEmojiFile, File lookUpTableFile,
                               File file, String prefix) throws IOException {
 
-        CudaEnvironment.getInstance().getConfiguration()
+//        CudaEnvironment.getInstance().getConfiguration()
 //                .allowMultiGPU(true)
 //                .allowCrossDeviceAccess(true)
-                .setMaximumDeviceCacheableLength(1024 * 1024 * 1024L)
-                .setMaximumDeviceCache(4L * 1024 * 1024 * 1024L)
-                .setMaximumHostCacheableLength(1024 * 1024 * 1024L)
-                .setMaximumHostCache(4L * 1024 * 1024 * 1024L);
+//                .setMaximumDeviceCacheableLength(1024 * 1024 * 1024L)
+//                .setMaximumDeviceCache(4L * 1024 * 1024 * 1024L)
+//                .setMaximumHostCacheableLength(1024 * 1024 * 1024L)
+//                .setMaximumHostCache(4L * 1024 * 1024 * 1024L);
 
         int batchSize = 128;
         int nEpochs = 10;
@@ -127,7 +126,7 @@ public class FullOperationMain {
                 .regularization(true)
                 .l2(1e-5)
                 .weightInit(WeightInit.XAVIER)
-                .learningRate(0.01)
+                .learningRate(0.005)
 //                .learningRateDecayPolicy(LearningRatePolicy.Inverse)
 //                .lrPolicyDecayRate(0.001)
 //                .lrPolicyPower(0.75)
