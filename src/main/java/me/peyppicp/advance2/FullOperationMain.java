@@ -51,12 +51,12 @@ import java.util.stream.Collectors;
  */
 public class FullOperationMain {
 
-    public static final String OUTPUT = "/home/peyppicp/output/";
-    public static final String PREFIX = "/home/peyppicp/data/new/";
+//    public static final String OUTPUT = "/home/peyppicp/output/";
+//    public static final String PREFIX = "/home/peyppicp/data/new/";
     //    public static final String PREFIX = "/home/panyuxiao/data/new/";
 //    public static final String OUTPUT = "/home/panyuxiao/output/";
-//    public static final String PREFIX = "";
-//    public static final String OUTPUT = "";
+    public static final String PREFIX = "";
+    public static final String OUTPUT = "";
     private static final Logger log = LoggerFactory.getLogger(FullOperationMain.class);
     private static final int truncateReviewsToLength = 20;
 
@@ -114,11 +114,12 @@ public class FullOperationMain {
         int nEpochs = 10;
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(lookUpTableFile);
+        WordToIndex wordToIndex = new WordToIndex(emojiSampleFile.getCanonicalPath());
 
-        EDataSetIterator eDataSetIterator = new EDataSetIterator(emojiSampleFile.getCanonicalPath(), emijiSampleWithoutEmojiFile.getCanonicalPath(),
+        EDataSetIterator eDataSetIterator = new EDataSetIterator(wordToIndex, emijiSampleWithoutEmojiFile.getCanonicalPath(),
                 emojiSampleLabelFile.getCanonicalPath(), wordVectors,
                 batchSize, truncateReviewsToLength, false);
-        EDataSetIterator eDataSetIteratorTest = new EDataSetIterator(emojiSampleFile.getCanonicalPath(), emijiSampleWithoutEmojiFile.getCanonicalPath(),
+        EDataSetIterator eDataSetIteratorTest = new EDataSetIterator(wordToIndex, emijiSampleWithoutEmojiFile.getCanonicalPath(),
                 emojiSampleLabelFile.getCanonicalPath(), wordVectors,
                 batchSize, truncateReviewsToLength, true);
 
@@ -150,13 +151,6 @@ public class FullOperationMain {
 
         MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
         multiLayerNetwork.init();
-
-//        ParallelWrapper pw = new ParallelWrapper.Builder<>(multiLayerNetwork)
-//                .prefetchBuffer(16 * Nd4j.getAffinityManager().getNumberOfDevices())
-//                .reportScoreAfterAveraging(true)
-//                .averagingFrequency(10)
-//                .workers(Nd4j.getAffinityManager().getNumberOfDevices())
-//                .build();
 
         int i = 0;
         multiLayerNetwork.setListeners(new ScoreIterationListener(1), new StatsListener(statsStorage), new IterationListener() {
@@ -210,18 +204,13 @@ public class FullOperationMain {
                 result,
                 "\n",
                 false);
-//        FileUtils.writeLines(new File(PREFIX + "EmojiSampleWithoutEmoji.txt"),
-//                "UTF-8",
-//                result,
-//                "\n",
-//                false);
     }
 
     private static void markLabels() throws IOException {
         File file = new File(PREFIX + "ReEnforcementEmojiSample.txt");
 //        File file = new File(PREFIX + "EmojiSample.txt");
         List<String> samples = FileUtils.readLines(file, Charsets.UTF_8);
-        WordToIndex wordToIndex = new WordToIndex(PREFIX + "EmojiSample.txt");
+        WordToIndex wordToIndex = new WordToIndex(PREFIX + "ReEnforcementEmojiSample.txt");
         ArrayList<String> labels = new ArrayList<>();
         for (String sample : samples) {
             List<String> emojis = EmojiParser.extractEmojis(sample)

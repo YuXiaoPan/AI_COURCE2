@@ -42,10 +42,10 @@ public class EDataSetIterator implements DataSetIterator {
     private final TokenizerFactory tokenizerFactory;
     private WordToIndex wordToIndex;
 
-    public EDataSetIterator(String sampleFilePath, String path, String labelPath,
+    public EDataSetIterator(WordToIndex wordToIndex, String path, String labelPath,
                             WordVectors wordVectors, int batchSize,
                             int truncateLength, boolean isTest) throws IOException {
-        this.wordToIndex = new WordToIndex(sampleFilePath);
+        this.wordToIndex = wordToIndex;
         this.wordVectors = wordVectors;
         this.batchSize = batchSize;
         this.truncateLength = truncateLength;
