@@ -32,8 +32,13 @@ public class EmojiSampleProcess {
         }
         File cnn = new File("cnn");
         cnn.mkdir();
-        for (int i = 0; i < wordToIndex.getOutComesNum(); i++) {
-
+        for (String emoji : emojiToSamples.keySet()) {
+            File emojiFile = new File(cnn, emoji);
+            FileUtils.writeLines(emojiFile,
+                    "UTF-8",
+                    emojiToSamples.get(emoji),
+                    "\n",
+                    false);
         }
     }
 }
