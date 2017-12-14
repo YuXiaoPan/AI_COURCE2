@@ -50,15 +50,16 @@ import java.util.stream.Collectors;
  */
 public class FullOperationMain {
 
-    public static final String OUTPUT = "/home/peyppicp/output/";
+        public static final String OUTPUT = "/home/peyppicp/output/";
     public static final String PREFIX = "/home/peyppicp/data/new/";
 //    public static final String PREFIX = "";
+//    public static final String OUTPUT = "";
     private static final Logger log = LoggerFactory.getLogger(FullOperationMain.class);
     private static final int truncateReviewsToLength = 20;
 
     public static void main(String[] args) throws IOException, Nd4jBackend.NoAvailableBackendException {
         File file = new File(PREFIX + "emoji_sample.txt");
-        String prefix = "full02";
+        String prefix = "full01";
         Scanner scanner = new Scanner(System.in);
         String path = "";
         if (!file.exists()) {
@@ -97,8 +98,8 @@ public class FullOperationMain {
     private static void train(File emojiSampleFile, File emojiSampleLabelFile,
                               File emijiSampleWithoutEmojiFile, File lookUpTableFile,
                               File file, String prefix) throws IOException {
-        int batchSize = 200;
-        int nEpochs = 50;
+        int batchSize = 300;
+        int nEpochs = 10;
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(lookUpTableFile);
 
@@ -235,7 +236,9 @@ public class FullOperationMain {
                 }
                 newData.add(sb.toString().trim());
             }
-            newData.add(sample);
+            StringBuilder stringBuilder = new StringBuilder();
+            tokens.forEach(s -> stringBuilder.append(s).append(" "));
+            newData.add(stringBuilder.toString().trim());
         }
 
         FileUtils.writeLines(new File(PREFIX + "ReEnforcementEmojiSample.txt"),
