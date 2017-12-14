@@ -98,7 +98,7 @@ public class FullOperationMain {
     private static void train(File emojiSampleFile, File emojiSampleLabelFile,
                               File emijiSampleWithoutEmojiFile, File lookUpTableFile,
                               File file, String prefix) throws IOException {
-        int batchSize = 300;
+        int batchSize = 100;
         int nEpochs = 10;
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(lookUpTableFile);
@@ -123,7 +123,7 @@ public class FullOperationMain {
                 .iterations(1)
                 .list()
                 .layer(0, new GravesLSTM.Builder().nIn(eDataSetIterator.inputColumns()).nOut(120)
-                        .activation(Activation.SOFTMAX).build())
+                        .activation(Activation.TANH).build())
                 .layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
                         .activation(Activation.SOFTMAX).nIn(120).nOut(eDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
