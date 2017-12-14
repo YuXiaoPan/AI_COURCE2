@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class EmojiSampleProcess {
 
@@ -20,6 +21,7 @@ public class EmojiSampleProcess {
         Map<String, Integer> wordIndexMap = wordToIndex.getWordIndexMap();
         ArrayListMultimap<String, String> emojiToSamples = ArrayListMultimap.create(); //emoji -> samples
         System.out.println("Begin handle data.");
+        int i = 0;
         for (String sample : emojiSamples) {
             List<String> emojis = EmojiParser.extractEmojis(sample);
             if (!emojis.isEmpty()) {
@@ -33,6 +35,7 @@ public class EmojiSampleProcess {
                 String s = sample.trim().toLowerCase();
                 emojiToSamples.put(WordToIndex.STOP, s);
             }
+            System.out.println(i++);
         }
         System.out.println("Begin output data to files.");
         File cnn = new File("cnn");
@@ -44,7 +47,7 @@ public class EmojiSampleProcess {
             File emojiFile = new File(cnn, emoji + ".txt");
             FileUtils.writeLines(emojiFile,
                     "UTF-8",
-                    emojiToSamples.get(emoji),
+                    emojiToSamples.get(emoji).parallelStream().distinct().collect(Collectors.toList()),
                     "\n",
                     false);
         }
