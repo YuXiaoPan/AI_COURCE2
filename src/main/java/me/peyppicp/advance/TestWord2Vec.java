@@ -13,8 +13,8 @@ import java.util.Collection;
 public class TestWord2Vec {
 
     public static void main(String[] args) {
-        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel("word2vec.txt");
-        Collection<String> strings = word2Vec.wordsNearest("birthday", 10);
+        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel("glove.twitter.27B.100d.txt");
+        Collection<String> strings = word2Vec.wordsNearest("", 10);
         System.out.println(strings);
 //        int[] ints = new int[100];
 //        Arrays.stream(ints).parallel().forEach(System.out::println);
