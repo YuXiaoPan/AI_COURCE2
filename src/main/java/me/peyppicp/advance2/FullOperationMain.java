@@ -80,7 +80,7 @@ public class FullOperationMain {
         File emojiSampleFile = new File(PREFIX + "ReEnforcementEmojiSample.txt");
         File emojiSampleLabelFile = new File(PREFIX + "ReEnforcementEmojiSampleLabels.txt");
         File emijiSampleWithoutEmojiFile = new File(PREFIX + "ReEnforcementEmojiSampleWithoutEmoji.txt");
-        File lookUpTableFile = new File(PREFIX + "glove.twitter.27B.100d.txt");
+        File lookUpTableFile = new File(PREFIX + "glove.twitter.27B.50d.txt");
         if (!(emojiSampleFile.exists() && emojiSampleLabelFile.exists()
                 && emijiSampleWithoutEmojiFile.exists() && lookUpTableFile.exists())) {
             System.out.println("Begin process original samples.");
