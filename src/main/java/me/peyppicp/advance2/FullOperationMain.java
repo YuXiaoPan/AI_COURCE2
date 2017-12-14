@@ -136,10 +136,10 @@ public class FullOperationMain {
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
-                .layer(0, new GravesLSTM.Builder().nIn(eDataSetIterator.inputColumns()).nOut(120)
+                .layer(0, new GravesLSTM.Builder().nIn(eDataSetIterator.inputColumns()).nOut(100)
                         .activation(Activation.TANH).build())
                 .layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(120).nOut(eDataSetIterator.totalOutcomes()).build())
+                        .activation(Activation.SOFTMAX).nIn(100).nOut(eDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
                 .build();
