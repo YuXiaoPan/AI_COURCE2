@@ -342,7 +342,7 @@ public class FullOperationMain {
                     }
                 }
             }
-
+            temp1.add(sample);
         }
 
         FileUtils.writeLines(new File(PREFIX + "EmojiSample.txt"),
