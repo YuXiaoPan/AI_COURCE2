@@ -332,7 +332,7 @@ public class FullOperationMain {
                 if (i == emoji.length() - 1) {
                     continue;
                 } else {
-                    String head = sample.substring(0, i - 1);
+                    String head = sample.substring(0, i);
                     String last = sample.substring(i, sample.length());
                     temp1.add(head + " " + last);
                 }
