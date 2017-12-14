@@ -125,7 +125,7 @@ public class FullOperationMain {
 
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .seed(new Random().nextInt())
-                .updater(Updater.ADAM)
+                .updater(Updater.SGD)
                 .regularization(true)
                 .l2(1e-5)
                 .weightInit(WeightInit.XAVIER)
