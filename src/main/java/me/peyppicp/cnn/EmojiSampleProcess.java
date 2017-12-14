@@ -18,12 +18,22 @@ public class EmojiSampleProcess {
         WordToIndex wordToIndex = new WordToIndex(file.getCanonicalPath());
         List<String> emojiSamples = FileUtils.readLines(file, Charsets.UTF_8);
         Map<String, Integer> wordIndexMap = wordToIndex.getWordIndexMap();
-        ArrayListMultimap<String, String> labelToSamples = ArrayListMultimap.create(); //emoji -> samples
+        ArrayListMultimap<String, String> emojiToSamples = ArrayListMultimap.create(); //emoji -> samples
         for (String sample : emojiSamples) {
             List<String> emojis = EmojiParser.extractEmojis(sample);
             if (!emojis.isEmpty()) {
-
+                for (String emoji : emojis) {
+                    if (wordIndexMap.containsKey(emoji)) {
+                        String s = EmojiParser.removeAllEmojis(sample).trim().toLowerCase();
+                        emojiToSamples.put(emoji, s);
+                    }
+                }
             }
+        }
+        File cnn = new File("cnn");
+        cnn.mkdir();
+        for (int i = 0; i < wordToIndex.getOutComesNum(); i++) {
+
         }
     }
 }
