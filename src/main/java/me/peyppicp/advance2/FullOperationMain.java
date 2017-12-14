@@ -78,16 +78,19 @@ public class FullOperationMain {
         }
 
         scanner.close();
-        File emojiSampleFile = new File(PREFIX + "ReEnforcementEmojiSample.txt");
-        File emojiSampleLabelFile = new File(PREFIX + "ReEnforcementEmojiSampleLabels.txt");
-        File emijiSampleWithoutEmojiFile = new File(PREFIX + "ReEnforcementEmojiSampleWithoutEmoji.txt");
+//        File emojiSampleFile = new File(PREFIX + "ReEnforcementEmojiSample.txt");
+//        File emojiSampleLabelFile = new File(PREFIX + "ReEnforcementEmojiSampleLabels.txt");
+//        File emijiSampleWithoutEmojiFile = new File(PREFIX + "ReEnforcementEmojiSampleWithoutEmoji.txt");
+        File emojiSampleFile = new File(PREFIX + "EmojiSample.txt");
+        File emojiSampleLabelFile = new File(PREFIX + "EmojiSampleLabels.txt");
+        File emijiSampleWithoutEmojiFile = new File(PREFIX + "EmojiSampleWithoutEmoji.txt");
         File lookUpTableFile = new File(PREFIX + "glove.twitter.27B.25d.txt");
         if (!(emojiSampleFile.exists() && emojiSampleLabelFile.exists()
                 && emijiSampleWithoutEmojiFile.exists() && lookUpTableFile.exists())) {
             System.out.println("Begin process original samples.");
             processOriginalSamples(file);
 //            processWord2Vec();
-            System.out.println("Begin enforcement emoji samples.");
+//            System.out.println("Begin enforcement emoji samples.");
 //            enforcementEmojiSamples();
             System.out.println("Begin mark labels.");
             markLabels();
@@ -336,13 +339,14 @@ public class FullOperationMain {
                     if (i == emoji.length() - 1) {
                         continue;
                     } else {
-                        String head = sample.substring(0, i - 1);
+                        String head = sample.substring(0, i);
                         String last = sample.substring(i, sample.length());
                         temp1.add(head + " " + last);
                     }
                 }
+            } else {
+                temp1.add(sample);
             }
-            temp1.add(sample);
         }
 
         FileUtils.writeLines(new File(PREFIX + "EmojiSample.txt"),
