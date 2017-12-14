@@ -279,6 +279,8 @@ public class FullOperationMain {
         int count = 0;
         int totalSize = sampleLines.size() / 1000;
 
+//        sampleLines = sampleLines.parallelStream().map(EmojiParser::parseToUnicode).collect(Collectors.toList());
+
 //        按照emoji进行切分
         for (String line : sampleLines) {
             try {
