@@ -129,7 +129,7 @@ public class FullOperationMain {
                 .regularization(true)
                 .l2(1e-5)
                 .weightInit(WeightInit.XAVIER)
-                .learningRate(0.002)
+                .learningRate(0.005)
 //                .learningRateDecayPolicy(LearningRatePolicy.Inverse)
 //                .lrPolicyDecayRate(0.001)
 //                .lrPolicyPower(0.75)
