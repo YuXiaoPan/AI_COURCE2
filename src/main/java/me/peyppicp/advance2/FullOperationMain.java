@@ -51,12 +51,12 @@ import java.util.stream.Collectors;
  */
 public class FullOperationMain {
 
-            public static final String OUTPUT = "/home/peyppicp/output/";
-    public static final String PREFIX = "/home/peyppicp/data/new/";
+    //            public static final String OUTPUT = "/home/peyppicp/output/";
+//    public static final String PREFIX = "/home/peyppicp/data/new/";
 //    public static final String PREFIX = "/home/panyuxiao/data/new/";
 //    public static final String OUTPUT = "/home/panyuxiao/output/";
-    //    public static final String PREFIX = "";
-//    public static final String OUTPUT = "";
+    public static final String PREFIX = "";
+    public static final String OUTPUT = "";
     private static final Logger log = LoggerFactory.getLogger(FullOperationMain.class);
     private static final int truncateReviewsToLength = 20;
 
@@ -88,7 +88,7 @@ public class FullOperationMain {
             processOriginalSamples(file);
 //            processWord2Vec();
             System.out.println("Begin enforcement emoji samples.");
-            enforcementEmojiSamples();
+//            enforcementEmojiSamples();
             System.out.println("Begin mark labels.");
             markLabels();
             System.out.println("Begin remove emojis.");
@@ -181,7 +181,6 @@ public class FullOperationMain {
         log.info("Starting training");
 
 
-
         for (int j = 0; j < nEpochs; j++) {
             multiLayerNetwork.fit(eDataSetIterator);
             Evaluation evaluate = multiLayerNetwork.evaluate(eDataSetIteratorTest);
@@ -196,7 +195,8 @@ public class FullOperationMain {
     }
 
     private static void removeEmojis() throws IOException {
-        File file = new File(PREFIX + "ReEnforcementEmojiSample.txt");
+//        File file = new File(PREFIX + "ReEnforcementEmojiSample.txt");
+        File file = new File(PREFIX + "EmojiSample.txt");
         List<String> samples = FileUtils.readLines(file, Charsets.UTF_8);
         ArrayList<String> result = new ArrayList<>();
         for (String sample : samples) {
@@ -205,7 +205,12 @@ public class FullOperationMain {
         }
 
         Preconditions.checkArgument(samples.size() == result.size());
-        FileUtils.writeLines(new File(PREFIX + "ReEnforcementEmojiSampleWithoutEmoji.txt"),
+//        FileUtils.writeLines(new File(PREFIX + "ReEnforcementEmojiSampleWithoutEmoji.txt"),
+//                "UTF-8",
+//                result,
+//                "\n",
+//                false);
+        FileUtils.writeLines(new File(PREFIX + "EmojiSampleWithoutEmoji.txt"),
                 "UTF-8",
                 result,
                 "\n",
@@ -213,9 +218,10 @@ public class FullOperationMain {
     }
 
     private static void markLabels() throws IOException {
-        File file = new File(PREFIX + "ReEnforcementEmojiSample.txt");
+//        File file = new File(PREFIX + "ReEnforcementEmojiSample.txt");
+        File file = new File(PREFIX + "EmojiSample.txt");
         List<String> samples = FileUtils.readLines(file, Charsets.UTF_8);
-        WordToIndex wordToIndex = new WordToIndex(PREFIX + "ReEnforcementEmojiSample.txt");
+        WordToIndex wordToIndex = new WordToIndex(PREFIX + "EmojiSample.txt");
         ArrayList<String> labels = new ArrayList<>();
         for (String sample : samples) {
             List<String> emojis = EmojiParser.extractEmojis(sample)
@@ -234,7 +240,12 @@ public class FullOperationMain {
             labels.add(sb.toString());
         }
         Preconditions.checkArgument(samples.size() == labels.size());
-        FileUtils.writeLines(new File(PREFIX + "ReEnforcementEmojiSampleLabels.txt"),
+//        FileUtils.writeLines(new File(PREFIX + "ReEnforcementEmojiSampleLabels.txt"),
+//                "UTF-8",
+//                labels,
+//                "\n",
+//                false);
+        FileUtils.writeLines(new File(PREFIX + "EmojiSampleLabels.txt"),
                 "UTF-8",
                 labels,
                 "\n",
@@ -285,9 +296,9 @@ public class FullOperationMain {
                 int emojiLength = 2;
                 int currentEmojiIndex = 0;
                 List<String> containedEmojis = EmojiParser.extractEmojis(line).parallelStream().distinct().collect(Collectors.toList());
+                boolean flag = false;
                 for (String emoji : containedEmojis) {
                     currentEmojiIndex = line.indexOf(emoji);
-                    boolean flag = false;
                     if (currentEmojiIndex != -1) {
                         for (int i = currentEmojiIndex; i < line.length() - 1; i += emojiLength) {
                             if (EmojiManager.isEmoji(line.substring(currentEmojiIndex, currentEmojiIndex + emojiLength))) {
@@ -297,9 +308,12 @@ public class FullOperationMain {
                         }
                     }
                     if (flag) {
-                        temp.add(line.substring(0, currentEmojiIndex).trim());
-                        line = line.substring(currentEmojiIndex, line.length()).trim();
+                        temp.add(line.substring(0, currentEmojiIndex).trim().toLowerCase());
+                        line = line.substring(currentEmojiIndex, line.length()).trim().toLowerCase();
                     }
+                }
+                if (!flag) {
+                    temp.add(line.toLowerCase());
                 }
             } catch (Exception e) {
                 errorLines.add(line);
@@ -310,23 +324,25 @@ public class FullOperationMain {
             }
         }
 
-
-        temp = temp.parallelStream().filter(s -> EmojiParser.extractEmojis(s).size() != s.length() / 2).distinct().collect(Collectors.toList());
+//        temp = temp.parallelStream().filter(s -> EmojiParser.extractEmojis(s).size() != s.length() / 2).distinct().collect(Collectors.toList());
         List<String> temp1 = new ArrayList<>();
 
 //        添加空格
         for (String sample : temp) {
-            String emoji = EmojiParser.extractEmojis(sample).get(0);
-            int i = sample.indexOf(emoji);
-            if (i >= 1) {
-                if (i == emoji.length() - 1) {
-                    continue;
-                } else {
-                    String head = sample.substring(0, i - 1);
-                    String last = sample.substring(i, sample.length());
-                    temp1.add(head + " " + last);
+            if (EmojiParser.extractEmojis(sample).size() > 0) {
+                String emoji = EmojiParser.extractEmojis(sample).get(0);
+                int i = sample.indexOf(emoji);
+                if (i >= 1) {
+                    if (i == emoji.length() - 1) {
+                        continue;
+                    } else {
+                        String head = sample.substring(0, i - 1);
+                        String last = sample.substring(i, sample.length());
+                        temp1.add(head + " " + last);
+                    }
                 }
             }
+
         }
 
         FileUtils.writeLines(new File(PREFIX + "EmojiSample.txt"),
@@ -334,6 +350,10 @@ public class FullOperationMain {
                 temp1,
                 "\n",
                 false);
+    }
+
+    private void generateCNNData() {
+
     }
 
 }
