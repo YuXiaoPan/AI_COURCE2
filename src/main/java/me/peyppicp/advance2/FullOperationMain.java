@@ -21,7 +21,6 @@ import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.api.IterationListener;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
-import org.deeplearning4j.parallelism.ParallelWrapper;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
@@ -31,7 +30,6 @@ import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.jita.conf.CudaEnvironment;
 import org.nd4j.linalg.activations.Activation;
-import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.factory.Nd4jBackend;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.slf4j.Logger;
@@ -105,8 +103,8 @@ public class FullOperationMain {
                               File file, String prefix) throws IOException {
 
         CudaEnvironment.getInstance().getConfiguration()
-                .allowMultiGPU(true)
-                .allowCrossDeviceAccess(true)
+//                .allowMultiGPU(true)
+//                .allowCrossDeviceAccess(true)
                 .setMaximumDeviceCacheableLength(1024 * 1024 * 1024L)
                 .setMaximumDeviceCache(4L * 1024 * 1024 * 1024L)
                 .setMaximumHostCacheableLength(1024 * 1024 * 1024L)
@@ -152,12 +150,12 @@ public class FullOperationMain {
         MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
         multiLayerNetwork.init();
 
-        ParallelWrapper pw = new ParallelWrapper.Builder<>(multiLayerNetwork)
-                .prefetchBuffer(16 * Nd4j.getAffinityManager().getNumberOfDevices())
-                .reportScoreAfterAveraging(true)
-                .averagingFrequency(10)
-                .workers(Nd4j.getAffinityManager().getNumberOfDevices())
-                .build();
+//        ParallelWrapper pw = new ParallelWrapper.Builder<>(multiLayerNetwork)
+//                .prefetchBuffer(16 * Nd4j.getAffinityManager().getNumberOfDevices())
+//                .reportScoreAfterAveraging(true)
+//                .averagingFrequency(10)
+//                .workers(Nd4j.getAffinityManager().getNumberOfDevices())
+//                .build();
 
         int i = 0;
         multiLayerNetwork.setListeners(new ScoreIterationListener(1), new StatsListener(statsStorage), new IterationListener() {
@@ -184,7 +182,7 @@ public class FullOperationMain {
 
 
         for (int j = 0; j < nEpochs; j++) {
-            pw.fit(eDataSetIterator);
+            multiLayerNetwork.fit(eDataSetIterator);
             Evaluation evaluate = multiLayerNetwork.evaluate(eDataSetIteratorTest);
             eDataSetIterator.reset();
             executorService.submit(new HibernateInfoRunner(j, multiLayerNetwork, eDataSetIteratorTest, prefix, evaluate));
