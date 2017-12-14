@@ -15,7 +15,6 @@ import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.Updater;
-import org.deeplearning4j.nn.conf.WorkspaceMode;
 import org.deeplearning4j.nn.conf.layers.GravesLSTM;
 import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
@@ -30,7 +29,6 @@ import org.deeplearning4j.ui.stats.StatsListener;
 import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
-import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.factory.Nd4jBackend;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.slf4j.Logger;
@@ -124,20 +122,16 @@ public class FullOperationMain {
                 emojiSampleLabelFile.getCanonicalPath(), wordVectors,
                 batchSize, truncateReviewsToLength, true);
 
-        Nd4j.getMemoryManager().setAutoGcWindow(5000);
-
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .seed(new Random().nextInt())
                 .updater(Updater.ADAM)
                 .regularization(true)
                 .l2(1e-5)
                 .weightInit(WeightInit.XAVIER)
-                .learningRate(0.005)
+                .learningRate(0.002)
 //                .learningRateDecayPolicy(LearningRatePolicy.Inverse)
 //                .lrPolicyDecayRate(0.001)
 //                .lrPolicyPower(0.75)
-                .trainingWorkspaceMode(WorkspaceMode.SINGLE)
-                .inferenceWorkspaceMode(WorkspaceMode.SINGLE)
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
