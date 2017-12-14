@@ -98,7 +98,7 @@ public class FullOperationMain {
     private static void train(File emojiSampleFile, File emojiSampleLabelFile,
                               File emijiSampleWithoutEmojiFile, File lookUpTableFile,
                               File file, String prefix) throws IOException {
-        int batchSize = 100;
+        int batchSize = 128;
         int nEpochs = 10;
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(lookUpTableFile);
