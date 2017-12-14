@@ -296,8 +296,8 @@ public class FullOperationMain {
                 int emojiLength = 2;
                 int currentEmojiIndex = 0;
                 List<String> containedEmojis = EmojiParser.extractEmojis(line).parallelStream().distinct().collect(Collectors.toList());
-                boolean flag = false;
                 for (String emoji : containedEmojis) {
+                    boolean flag = false;
                     currentEmojiIndex = line.indexOf(emoji);
                     if (currentEmojiIndex != -1) {
                         for (int i = currentEmojiIndex; i < line.length() - 1; i += emojiLength) {
