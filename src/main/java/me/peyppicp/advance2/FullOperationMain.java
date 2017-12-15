@@ -130,7 +130,7 @@ public class FullOperationMain {
                 .list()
                 .layer(0, new GravesLSTM.Builder().nIn(eDataSetIterator.inputColumns()).nOut(48)
                         .activation(Activation.TANH).build())
-                .layer(1, new GravesLSTM.Builder().nIn(64).nOut(64)
+                .layer(1, new GravesLSTM.Builder().nIn(48).nOut(64)
                         .activation(Activation.TANH).build())
                 .layer(2, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
                         .activation(Activation.SOFTMAX).nIn(64)
