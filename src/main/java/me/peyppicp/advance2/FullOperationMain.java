@@ -107,7 +107,7 @@ public class FullOperationMain {
                               File emijiSampleWithoutEmojiFile, File lookUpTableFile,
                               File file, String prefix) throws IOException {
 
-        int batchSize = 200;
+        int batchSize = 50;
         int nEpochs = 5000;
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(lookUpTableFile);
         WordToIndex wordToIndex = new WordToIndex(emojiSampleFile.getCanonicalPath());
