@@ -189,7 +189,7 @@ public class EDataSetIterator implements DataSetIterator {
     public void reset() {
         this.cursor = 0;
         this.currentLineCursor = 0;
-        generateLabelsData();
+//        generateLabelsData();
     }
 
     public int batch() {
