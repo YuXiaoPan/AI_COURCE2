@@ -2,6 +2,7 @@ package me.peyppicp.advance2;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.AllArgsConstructor;
@@ -84,8 +85,10 @@ public class EDataSetIterator implements DataSetIterator {
 //            if (!emojis.isEmpty()) {
 //                for (String emoji : emojis) {
             String s = EmojiParser.removeAllEmojis(data.get(i)).trim().toLowerCase();
-            String index = dataLabels.get(i).split(",")[0];
-            emojiToSamples.put(index, new SampleIndexPair(s, Integer.parseInt(index)));
+            List<String> indexes = ImmutableList.copyOf(dataLabels.get(i).split(","));
+            for (String index : indexes) {
+                emojiToSamples.put(index, new SampleIndexPair(s, Integer.parseInt(index)));
+            }
 //                }
 //            }
         }
@@ -94,7 +97,7 @@ public class EDataSetIterator implements DataSetIterator {
         for (String index : emojiToSamples.keySet()) {
             List<SampleIndexPair> sampleIndexPairs = emojiToSamples.get(index);
             Collections.shuffle(sampleIndexPairs);
-            Preconditions.checkArgument(sampleIndexPairs.size() >= 1000);
+//            Preconditions.checkArgument(sampleIndexPairs.size() >= 1000);
             this.totalLines.addAll(sampleIndexPairs
                     .parallelStream()
                     .map(SampleIndexPair::getSample)

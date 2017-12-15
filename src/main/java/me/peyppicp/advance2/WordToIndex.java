@@ -39,7 +39,8 @@ public class WordToIndex {
         wordIndexMap = new HashMap<>();
         List<String> samples = FileUtils.readLines(samplesFile, Charsets.UTF_8);
         for (String sample : samples) {
-            List<String> extractEmojis = EmojiParser.extractEmojis(sample);
+            List<String> extractEmojis = EmojiParser.extractEmojis(sample)
+                    .parallelStream().distinct().collect(Collectors.toList());
             for (String extractEmoji : extractEmojis) {
                 wordIndexMap.merge(extractEmoji, 1, (o, n) -> o + n);
             }
