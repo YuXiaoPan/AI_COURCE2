@@ -62,7 +62,7 @@ public class FullOperationMain {
 //    public static final String PREFIX = "";
 //    public static final String OUTPUT = "";
     private static final Logger log = LoggerFactory.getLogger(FullOperationMain.class);
-    private static final int truncateReviewsToLength = 20;
+    private static final int truncateReviewsToLength = 32;
     private static final ExecutorService executorService = Executors.newFixedThreadPool(2);
 
     public static void main(String[] args) throws IOException, Nd4jBackend.NoAvailableBackendException {
