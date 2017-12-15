@@ -174,7 +174,7 @@ public class FullOperationMain {
         for (int j = 0; j < nEpochs; j++) {
             multiLayerNetwork.fit(eDataSetIterator);
             Evaluation evaluate = multiLayerNetwork.evaluate(eDataSetIteratorTest);
-            testResult(eDataSetIteratorTest, multiLayerNetwork);
+//            testResult(eDataSetIteratorTest, multiLayerNetwork);
             eDataSetIterator.reset();
             executorService.submit(new HibernateInfoRunner(j, multiLayerNetwork, eDataSetIteratorTest, prefix, evaluate));
 
