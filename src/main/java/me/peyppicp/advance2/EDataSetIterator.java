@@ -43,6 +43,7 @@ public class EDataSetIterator implements DataSetIterator {
     private final boolean isTest;
     private int cursor = 0;
     private int currentLineCursor = 0;
+    private List<String> data;
     private List<String> totalLines;
     private List<Integer> totalLabelLinesWithIndex;
     private final TokenizerFactory tokenizerFactory;
@@ -63,7 +64,7 @@ public class EDataSetIterator implements DataSetIterator {
         this.file = new File(path);
         this.labelFile = new File(labelPath);
         this.emojiToSamples = ArrayListMultimap.create();//emoji -> samples
-        this.totalLines = Files.readLines(file, Charsets.UTF_8);
+        this.data = Files.readLines(file, Charsets.UTF_8);
 //        this.totalLabelLinesWithIndex = Files.readLines(labelFile, Charsets.UTF_8);
         generateLabelsData();
         if (isTest) {
@@ -74,15 +75,15 @@ public class EDataSetIterator implements DataSetIterator {
 
     private void generateLabelsData() {
         Map<String, Integer> wordIndexMap = wordToIndex.getWordIndexMap();
-        for (int i = 0; i < totalLines.size(); i++) {
-            List<String> emojis = EmojiParser.extractEmojis(totalLines.get(i))
+        for (int i = 0; i < data.size(); i++) {
+            List<String> emojis = EmojiParser.extractEmojis(data.get(i))
                     .parallelStream()
                     .distinct()
                     .collect(Collectors.toList());
             if (!emojis.isEmpty()) {
                 for (String emoji : emojis) {
                     if (wordIndexMap.containsKey(emoji)) {
-                        String s = EmojiParser.removeAllEmojis(totalLines.get(i)).trim().toLowerCase();
+                        String s = EmojiParser.removeAllEmojis(data.get(i)).trim().toLowerCase();
                         emojiToSamples.put(emoji, new SampleIndexPair(s, wordToIndex.getIndex(emoji)));
                     }
                 }
