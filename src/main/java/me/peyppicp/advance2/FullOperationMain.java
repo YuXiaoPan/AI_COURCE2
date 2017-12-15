@@ -51,12 +51,12 @@ import java.util.stream.Collectors;
  */
 public class FullOperationMain {
 
-//    public static final String OUTPUT = "/home/peyppicp/output/";
-//    public static final String PREFIX = "/home/peyppicp/data/new/";
+    public static final String OUTPUT = "/home/peyppicp/output/";
+    public static final String PREFIX = "/home/peyppicp/data/new/";
     //    public static final String PREFIX = "/home/panyuxiao/data/new/";
 //    public static final String OUTPUT = "/home/panyuxiao/output/";
-    public static final String PREFIX = "";
-    public static final String OUTPUT = "";
+//    public static final String PREFIX = "";
+//    public static final String OUTPUT = "";
     private static final Logger log = LoggerFactory.getLogger(FullOperationMain.class);
     private static final int truncateReviewsToLength = 20;
 
@@ -78,17 +78,17 @@ public class FullOperationMain {
         }
 
         scanner.close();
-        File emojiSampleFile = new File(PREFIX + "ReEnforcementEmojiSample.txt");
-        File emojiSampleLabelFile = new File(PREFIX + "ReEnforcementEmojiSampleLabels.txt");
-        File emijiSampleWithoutEmojiFile = new File(PREFIX + "ReEnforcementEmojiSampleWithoutEmoji.txt");
+        File emojiSampleFile = new File(PREFIX + "EmojiSample.txt");
+        File emojiSampleLabelFile = new File(PREFIX + "EmojiSampleLabels.txt");
+        File emijiSampleWithoutEmojiFile = new File(PREFIX + "EmojiSampleWithoutEmoji.txt");
         File lookUpTableFile = new File(PREFIX + "glove.twitter.27B.25d.txt");
         if (!(emojiSampleFile.exists() && emojiSampleLabelFile.exists()
                 && emijiSampleWithoutEmojiFile.exists() && lookUpTableFile.exists())) {
             System.out.println("Begin process original samples.");
             processOriginalSamples(file);
 //            processWord2Vec();
-            System.out.println("Begin enforcement emoji samples.");
-            enforcementEmojiSamples();
+//            System.out.println("Begin enforcement emoji samples.");
+//            enforcementEmojiSamples();
             System.out.println("Begin mark labels.");
             markLabels();
             System.out.println("Begin remove emojis.");
@@ -181,7 +181,7 @@ public class FullOperationMain {
     }
 
     private static void removeEmojis() throws IOException {
-        File file = new File(PREFIX + "ReEnforcementEmojiSample.txt");
+        File file = new File(PREFIX + "EmojiSample.txt");
 //        File file = new File(PREFIX + "EmojiSample.txt");
         List<String> samples = FileUtils.readLines(file, Charsets.UTF_8);
         ArrayList<String> result = new ArrayList<>();
@@ -191,7 +191,7 @@ public class FullOperationMain {
         }
 
         Preconditions.checkArgument(samples.size() == result.size());
-        FileUtils.writeLines(new File(PREFIX + "ReEnforcementEmojiSampleWithoutEmoji.txt"),
+        FileUtils.writeLines(new File(PREFIX + "EmojiSampleWithoutEmoji.txt"),
                 "UTF-8",
                 result,
                 "\n",
@@ -199,10 +199,10 @@ public class FullOperationMain {
     }
 
     private static void markLabels() throws IOException {
-        File file = new File(PREFIX + "ReEnforcementEmojiSample.txt");
+        File file = new File(PREFIX + "EmojiSample.txt");
 //        File file = new File(PREFIX + "EmojiSample.txt");
         List<String> samples = FileUtils.readLines(file, Charsets.UTF_8);
-        WordToIndex wordToIndex = new WordToIndex(PREFIX + "ReEnforcementEmojiSample.txt");
+        WordToIndex wordToIndex = new WordToIndex(PREFIX + "EmojiSample.txt");
         ArrayList<String> labels = new ArrayList<>();
         for (String sample : samples) {
             List<String> emojis = EmojiParser.extractEmojis(sample)
@@ -221,7 +221,7 @@ public class FullOperationMain {
             labels.add(sb.toString());
         }
         Preconditions.checkArgument(samples.size() == labels.size());
-        FileUtils.writeLines(new File(PREFIX + "ReEnforcementEmojiSampleLabels.txt"),
+        FileUtils.writeLines(new File(PREFIX + "EmojiSampleWithLabels.txt"),
                 "UTF-8",
                 labels,
                 "\n",
