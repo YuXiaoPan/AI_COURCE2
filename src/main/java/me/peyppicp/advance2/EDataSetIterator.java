@@ -63,7 +63,6 @@ public class EDataSetIterator implements DataSetIterator {
         this.file = new File(path);
         this.labelFile = new File(labelPath);
         this.emojiToSamples = ArrayListMultimap.create();//emoji -> samples
-        Random randomSample = new Random();
         this.totalLines = Files.readLines(file, Charsets.UTF_8);
 //        this.totalLabelLinesWithIndex = Files.readLines(labelFile, Charsets.UTF_8);
         generateLabelsData();
@@ -76,7 +75,10 @@ public class EDataSetIterator implements DataSetIterator {
     private void generateLabelsData() {
         Map<String, Integer> wordIndexMap = wordToIndex.getWordIndexMap();
         for (int i = 0; i < totalLines.size(); i++) {
-            List<String> emojis = EmojiParser.extractEmojis(totalLines.get(i));
+            List<String> emojis = EmojiParser.extractEmojis(totalLines.get(i))
+                    .parallelStream()
+                    .distinct()
+                    .collect(Collectors.toList());
             if (!emojis.isEmpty()) {
                 for (String emoji : emojis) {
                     if (wordIndexMap.containsKey(emoji)) {

@@ -55,12 +55,12 @@ import java.util.stream.Collectors;
  */
 public class FullOperationMain {
 
-    public static final String OUTPUT = "/home/peyppicp/output/";
-    public static final String PREFIX = "/home/peyppicp/data/new/";
+//    public static final String OUTPUT = "/home/peyppicp/output/";
+//    public static final String PREFIX = "/home/peyppicp/data/new/";
     //    public static final String PREFIX = "/home/panyuxiao/data/new/";
 //    public static final String OUTPUT = "/home/panyuxiao/output/";
-//    public static final String PREFIX = "";
-//    public static final String OUTPUT = "";
+    public static final String PREFIX = "";
+    public static final String OUTPUT = "";
     private static final Logger log = LoggerFactory.getLogger(FullOperationMain.class);
     private static final int truncateReviewsToLength = 32;
     private static final ExecutorService executorService = Executors.newFixedThreadPool(2);
@@ -86,7 +86,7 @@ public class FullOperationMain {
         File emojiSampleFile = new File(PREFIX + "EmojiSample.txt");
         File emojiSampleLabelFile = new File(PREFIX + "EmojiSampleLabels.txt");
         File emijiSampleWithoutEmojiFile = new File(PREFIX + "EmojiSampleWithoutEmoji.txt");
-        File lookUpTableFile = new File(PREFIX + "glove.twitter.27B.25d.txt");
+        File lookUpTableFile = new File(PREFIX + "glove.twitter.27B.100d.txt");
         if (!(emojiSampleFile.exists() && emojiSampleLabelFile.exists()
                 && emijiSampleWithoutEmojiFile.exists() && lookUpTableFile.exists())) {
             System.out.println("Begin process original samples.");
@@ -112,10 +112,10 @@ public class FullOperationMain {
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(lookUpTableFile);
         WordToIndex wordToIndex = new WordToIndex(emojiSampleFile.getCanonicalPath());
 
-        EDataSetIterator eDataSetIterator = new EDataSetIterator(wordToIndex, emijiSampleWithoutEmojiFile.getCanonicalPath(),
+        EDataSetIterator eDataSetIterator = new EDataSetIterator(wordToIndex, emojiSampleFile.getCanonicalPath(),
                 emojiSampleLabelFile.getCanonicalPath(), wordVectors,
                 batchSize, truncateReviewsToLength, false);
-        EDataSetIterator eDataSetIteratorTest = new EDataSetIterator(wordToIndex, emijiSampleWithoutEmojiFile.getCanonicalPath(),
+        EDataSetIterator eDataSetIteratorTest = new EDataSetIterator(wordToIndex, emojiSampleFile.getCanonicalPath(),
                 emojiSampleLabelFile.getCanonicalPath(), wordVectors,
                 batchSize, truncateReviewsToLength, true);
 
@@ -132,10 +132,10 @@ public class FullOperationMain {
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
-                .layer(0, new GravesLSTM.Builder().nIn(eDataSetIterator.inputColumns()).nOut(48)
+                .layer(0, new GravesLSTM.Builder().nIn(eDataSetIterator.inputColumns()).nOut(80)
                         .activation(Activation.TANH).build())
                 .layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(48)
+                        .activation(Activation.SOFTMAX).nIn(80)
                         .nOut(eDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
@@ -359,9 +359,19 @@ public class FullOperationMain {
             }
         }
 
+        List<String> temp2 = new ArrayList<>();
+        TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
+        tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
+        for (String sample : temp1) {
+            List<String> tokens = tokenizerFactory.create(sample).getTokens();
+            StringBuilder stringBuilder = new StringBuilder();
+            tokens.forEach(s -> stringBuilder.append(s).append(" "));
+            temp2.add(stringBuilder.toString().trim());
+        }
+
         FileUtils.writeLines(new File(PREFIX + "EmojiSample.txt"),
                 "UTF-8",
-                temp1,
+                temp2,
                 "\n",
                 false);
     }
