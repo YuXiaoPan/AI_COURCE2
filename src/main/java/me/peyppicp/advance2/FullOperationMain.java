@@ -107,7 +107,7 @@ public class FullOperationMain {
                               File emijiSampleWithoutEmojiFile, File lookUpTableFile,
                               File file, String prefix) throws IOException {
 
-        int batchSize = 256;
+        int batchSize = 100;
         int nEpochs = 1000;
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(lookUpTableFile);
         WordToIndex wordToIndex = new WordToIndex(emojiSampleFile.getCanonicalPath());
@@ -121,21 +121,21 @@ public class FullOperationMain {
 
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .seed(new Random().nextInt())
-                .updater(Updater.ADAM)
+                .updater(Updater.RMSPROP)
                 .regularization(true)
                 .l2(1e-5)
                 .weightInit(WeightInit.XAVIER)
-                .learningRate(0.1)
+                .learningRate(0.0018)
 //                .learningRateDecayPolicy(LearningRatePolicy.Inverse)
 //                .lrPolicyDecayRate(0.001)
 //                .lrPolicyPower(0.75)
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
-                .layer(0, new GravesLSTM.Builder().nIn(eDataSetIterator.inputColumns()).nOut(80)
-                        .activation(Activation.TANH).build())
+                .layer(0, new GravesLSTM.Builder().nIn(eDataSetIterator.inputColumns()).nOut(200)
+                        .activation(Activation.SOFTSIGN).build())
                 .layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(80)
+                        .activation(Activation.SOFTMAX).nIn(200)
                         .nOut(eDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
@@ -175,6 +175,7 @@ public class FullOperationMain {
             multiLayerNetwork.fit(eDataSetIterator);
             Evaluation evaluate = multiLayerNetwork.evaluate(eDataSetIteratorTest);
 //            testResult(eDataSetIteratorTest, multiLayerNetwork);
+            System.out.println(evaluate.stats());
             eDataSetIterator.reset();
             executorService.submit(new HibernateInfoRunner(j, multiLayerNetwork, eDataSetIteratorTest, prefix, evaluate));
 
@@ -246,7 +247,7 @@ public class FullOperationMain {
                     .parallelStream().distinct().collect(Collectors.toList());
             StringBuilder sb = new StringBuilder();
             if (emojis.size() == 0) {
-                int index = wordToIndex.getIndex(WordToIndex.STOP);
+                int index = wordToIndex.getIndex(WordToIndex.UNKNOWN);
                 labels.add(String.valueOf(index));
                 continue;
             }

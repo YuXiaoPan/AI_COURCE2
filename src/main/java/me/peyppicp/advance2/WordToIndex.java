@@ -50,7 +50,7 @@ public class WordToIndex {
         Map<String, Integer> temp = new LinkedHashMap<>();
         wordIndexMap.entrySet()
                 .parallelStream().sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .limit(64)
+                .limit(49)
                 .forEachOrdered(entry -> temp.put(entry.getKey(), entry.getValue()));
 
         wordIndexMap = new LinkedHashMap<>();
@@ -69,7 +69,7 @@ public class WordToIndex {
     public void addUnknown() {
         int size = wordIndexMap.values().size();
         wordIndexMap.putIfAbsent(UNKNOWN, size);
-        wordIndexMap.putIfAbsent(STOP, ++size);
+//        wordIndexMap.putIfAbsent(STOP, ++size);
 //        wordIndexMap.putIfAbsent(STOP, ++size);
     }
 

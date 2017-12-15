@@ -23,7 +23,10 @@ import org.nd4j.linalg.indexing.NDArrayIndex;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 /**
@@ -34,6 +37,7 @@ import java.util.stream.Collectors;
 @Data
 public class EDataSetIterator implements DataSetIterator {
 
+    private int resetCounter;
     private final WordVectors wordVectors;
     private final int batchSize;
     private final int vectorSize;
@@ -68,6 +72,7 @@ public class EDataSetIterator implements DataSetIterator {
         this.emojiToSamples = ArrayListMultimap.create();//emoji -> samples
         this.data = Files.readLines(file, Charsets.UTF_8);
         this.dataLabels = Files.readLines(labelFile, Charsets.UTF_8);
+        this.resetCounter = 0;
         generateLabelsData();
         if (isTest) {
             this.totalLabelLinesWithIndex = this.totalLabelLinesWithIndex.subList(0, 5000);
@@ -94,24 +99,30 @@ public class EDataSetIterator implements DataSetIterator {
         }
         this.totalLines = new ArrayList<>();
         this.totalLabelLinesWithIndex = new ArrayList<>();
-        for (String index : emojiToSamples.keySet()) {
-            List<SampleIndexPair> sampleIndexPairs = emojiToSamples.get(index);
-            Collections.shuffle(sampleIndexPairs);
-//            Preconditions.checkArgument(sampleIndexPairs.size() >= 1000);
-            this.totalLines.addAll(sampleIndexPairs
-                    .parallelStream()
-                    .map(SampleIndexPair::getSample)
-                    .limit(1000)
-                    .collect(Collectors.toList()));
-            this.totalLabelLinesWithIndex.addAll(sampleIndexPairs
-                    .parallelStream()
-                    .map(SampleIndexPair::getIndex)
-                    .limit(1000)
-                    .collect(Collectors.toList()));
+        int cursor = 0;
+        List<Integer> keys = emojiToSamples.keySet()
+                .parallelStream().map(Integer::parseInt)
+                .sorted().collect(Collectors.toList());
+        while (cursor < 1000) {
+            for (int i = 0; i < keys.size(); i++) {
+                List<SampleIndexPair> sampleIndexPairs = emojiToSamples.get(keys.get(i).toString());
+                Collections.shuffle(sampleIndexPairs);
+                SampleIndexPair sampleIndexPair = sampleIndexPairs.get(cursor);
+                this.totalLines.add(sampleIndexPair.getSample());
+                this.totalLabelLinesWithIndex.add(sampleIndexPair.getIndex());
+//            this.totalLines.addAll(sampleIndexPairs
+//                    .stream()
+//                    .map(SampleIndexPair::getSample)
+//                    .limit(2000)
+//                    .collect(Collectors.toList()));
+//            this.totalLabelLinesWithIndex.addAll(sampleIndexPairs
+//                    .stream()
+//                    .map(SampleIndexPair::getIndex)
+//                    .limit(2000)
+//                    .collect(Collectors.toList()));
+            }
+            cursor++;
         }
-        Random random = new Random();
-        Collections.shuffle(this.totalLines, random);
-        Collections.shuffle(this.totalLabelLinesWithIndex, random);
     }
 
     public DataSet next(int batchSize) {
@@ -121,7 +132,7 @@ public class EDataSetIterator implements DataSetIterator {
         List<String> reviews = new ArrayList<>(batchSize);
         int[] labelInts = new int[batchSize];
         for (int i = 0; i < batchSize && cursor < totalExamples(); i++, cursor++, currentLineCursor++) {
-            String line = totalLines.get(currentLineCursor);
+            String line = totalLines.get(cursor);
             reviews.add(line);
             labelInts[i] = totalLabelLinesWithIndex.get(currentLineCursor);
         }
@@ -190,7 +201,10 @@ public class EDataSetIterator implements DataSetIterator {
     public void reset() {
         this.cursor = 0;
         this.currentLineCursor = 0;
-//        generateLabelsData();
+        this.resetCounter++;
+        if (resetCounter % 100 == 0) {
+            generateLabelsData();
+        }
     }
 
     public int batch() {
