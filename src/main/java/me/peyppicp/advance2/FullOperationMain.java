@@ -29,7 +29,11 @@ import org.deeplearning4j.ui.stats.StatsListener;
 import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.factory.Nd4jBackend;
+import org.nd4j.linalg.indexing.INDArrayIndex;
+import org.nd4j.linalg.indexing.NDArrayIndex;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +63,7 @@ public class FullOperationMain {
 //    public static final String OUTPUT = "";
     private static final Logger log = LoggerFactory.getLogger(FullOperationMain.class);
     private static final int truncateReviewsToLength = 20;
+    private static final ExecutorService executorService = Executors.newFixedThreadPool(2);
 
     public static void main(String[] args) throws IOException, Nd4jBackend.NoAvailableBackendException {
         File file = new File(PREFIX + "emoji_sample.txt");
@@ -104,7 +109,6 @@ public class FullOperationMain {
 
         int batchSize = 256;
         int nEpochs = 10;
-        ExecutorService executorService = Executors.newFixedThreadPool(1);
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(lookUpTableFile);
         WordToIndex wordToIndex = new WordToIndex(emojiSampleFile.getCanonicalPath());
 
@@ -130,10 +134,8 @@ public class FullOperationMain {
                 .list()
                 .layer(0, new GravesLSTM.Builder().nIn(eDataSetIterator.inputColumns()).nOut(48)
                         .activation(Activation.TANH).build())
-                .layer(1, new GravesLSTM.Builder().nIn(48).nOut(64)
-                        .activation(Activation.TANH).build())
                 .layer(2, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(64)
+                        .activation(Activation.SOFTMAX).nIn(48)
                         .nOut(eDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
@@ -169,10 +171,10 @@ public class FullOperationMain {
         });
         log.info("Starting training");
 
-
         for (int j = 0; j < nEpochs; j++) {
             multiLayerNetwork.fit(eDataSetIterator);
             Evaluation evaluate = multiLayerNetwork.evaluate(eDataSetIteratorTest);
+            testResult(eDataSetIteratorTest, multiLayerNetwork);
             eDataSetIterator.reset();
             executorService.submit(new HibernateInfoRunner(j, multiLayerNetwork, eDataSetIteratorTest, prefix, evaluate));
 
@@ -181,6 +183,38 @@ public class FullOperationMain {
         File outPutFile = new File(OUTPUT + "model-" + prefix + "-full" + ".txt");
         file.createNewFile();
         ModelSerializer.writeModel(multiLayerNetwork, outPutFile, true);
+    }
+
+    private static void testResult(EDataSetIterator eDataSetIterator, MultiLayerNetwork multiLayerNetwork) {
+        for (String line : eDataSetIterator.getTotalLines()) {
+            List<String> tokens = eDataSetIterator.getTokenizerFactory().create(line).getTokens();
+            List<String> tokenFiltered = new ArrayList<>();
+            for (String t : tokens) {
+                if (eDataSetIterator.getWordVectors().hasWord(t)) {
+                    tokenFiltered.add(t);
+                }
+            }
+            int outputLength = Math.max(truncateReviewsToLength, tokenFiltered.size());
+            INDArray features = Nd4j.create(1, eDataSetIterator.getVectorSize(), outputLength);
+            for (int j = 0; j < tokens.size() && j < truncateReviewsToLength; j++) {
+                String token = tokens.get(j);
+                INDArray vectorMatrix = eDataSetIterator.getWordVectors().getWordVectorMatrix(token);
+                features.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all(), NDArrayIndex.point(j)}, vectorMatrix);
+            }
+
+            INDArray output = multiLayerNetwork.output(features, false);
+            int size = output.size(2);
+            INDArray probabilitiesAtLastWord = output.get(NDArrayIndex.point(0), NDArrayIndex.all(), NDArrayIndex.point(size - 1));
+
+            Number number = probabilitiesAtLastWord.maxNumber();
+            long l = number.longValue();
+//            List<String> unqiueLabelList = eDataSetIterator.getUnqiueLabelList();
+//            System.out.println(probabilitiesAtLastWord.toString());
+//            System.out.println("\n-------------------------------");
+//            System.out.println("review: " + line);
+//            System.out.println("Prefer:" + emojiStr);
+//            System.out.println("label: " + probabilitiesAtLastWord.getDouble(1));
+        }
     }
 
     private static void removeEmojis() throws IOException {
