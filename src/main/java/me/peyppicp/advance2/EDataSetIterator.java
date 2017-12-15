@@ -115,11 +115,7 @@ public class EDataSetIterator implements DataSetIterator {
             }
             int index = labelInts[i];
             int lastIndex = Math.min(tokens.size(), maxLength);
-            if (index == wordToIndex.getIndex(WordToIndex.STOP)) {
-                labels.putScalar(new int[]{i, index, lastIndex - 1}, 0.12);
-            } else {
-                labels.putScalar(new int[]{i, index, lastIndex - 1}, 1.0);
-            }
+            labels.putScalar(new int[]{i, index, lastIndex - 1}, 1.0);
             labelMask.putScalar(new int[]{i, lastIndex - 1}, 1.0);
         }
         return new DataSet(features, labels, featureMask, labelMask);
