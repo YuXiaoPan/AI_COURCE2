@@ -49,7 +49,7 @@ public class WordToIndex {
         Map<String, Integer> temp = new LinkedHashMap<>();
         wordIndexMap.entrySet()
                 .parallelStream().sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .limit(20)
+                .limit(32)
                 .forEachOrdered(entry -> temp.put(entry.getKey(), entry.getValue()));
 
         wordIndexMap = new LinkedHashMap<>();
