@@ -102,14 +102,6 @@ public class FullOperationMain {
                               File emijiSampleWithoutEmojiFile, File lookUpTableFile,
                               File file, String prefix) throws IOException {
 
-//        CudaEnvironment.getInstance().getConfiguration()
-//                .allowMultiGPU(true)
-//                .allowCrossDeviceAccess(true)
-//                .setMaximumDeviceCacheableLength(1024 * 1024 * 1024L)
-//                .setMaximumDeviceCache(4L * 1024 * 1024 * 1024L)
-//                .setMaximumHostCacheableLength(1024 * 1024 * 1024L)
-//                .setMaximumHostCache(4L * 1024 * 1024 * 1024L);
-
         int batchSize = 128;
         int nEpochs = 10;
         ExecutorService executorService = Executors.newFixedThreadPool(1);
