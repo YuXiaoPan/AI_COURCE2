@@ -1,7 +1,12 @@
 package me.peyppicp.advance2;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.io.Files;
+import com.vdurmont.emoji.EmojiParser;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.io.Charsets;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
@@ -18,6 +23,7 @@ import org.nd4j.linalg.indexing.NDArrayIndex;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author YuXiao Pan
@@ -38,9 +44,10 @@ public class EDataSetIterator implements DataSetIterator {
     private int cursor = 0;
     private int currentLineCursor = 0;
     private List<String> totalLines;
-    private List<String> totalLabelLinesWithIndex;
+    private List<Integer> totalLabelLinesWithIndex;
     private final TokenizerFactory tokenizerFactory;
     private WordToIndex wordToIndex;
+    private final ArrayListMultimap<String, SampleIndexPair> emojiToSamples;
 
     public EDataSetIterator(WordToIndex wordToIndex, String path, String labelPath,
                             WordVectors wordVectors, int batchSize,
@@ -55,16 +62,52 @@ public class EDataSetIterator implements DataSetIterator {
         this.tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
         this.file = new File(path);
         this.labelFile = new File(labelPath);
-
+        this.emojiToSamples = ArrayListMultimap.create();//emoji -> samples
         Random randomSample = new Random();
         this.totalLines = Files.readLines(file, Charsets.UTF_8);
-        this.totalLabelLinesWithIndex = Files.readLines(labelFile, Charsets.UTF_8);
-        Collections.shuffle(totalLines, randomSample);
-        Collections.shuffle(totalLabelLinesWithIndex, randomSample);
+//        this.totalLabelLinesWithIndex = Files.readLines(labelFile, Charsets.UTF_8);
+        generateLabelsData();
         if (isTest) {
             this.totalLabelLinesWithIndex = this.totalLabelLinesWithIndex.subList(0, 5000);
             this.totalLines = this.totalLines.subList(0, 5000);
         }
+    }
+
+    private void generateLabelsData() {
+        Map<String, Integer> wordIndexMap = wordToIndex.getWordIndexMap();
+        for (int i = 0; i < totalLines.size(); i++) {
+            List<String> emojis = EmojiParser.extractEmojis(totalLines.get(i));
+            if (!emojis.isEmpty()) {
+                for (String emoji : emojis) {
+                    if (wordIndexMap.containsKey(emoji)) {
+                        String s = EmojiParser.removeAllEmojis(totalLines.get(i)).trim().toLowerCase();
+                        emojiToSamples.put(emoji, new SampleIndexPair(s, wordToIndex.getIndex(emoji)));
+                    }
+                }
+            }
+        }
+        this.totalLines = new ArrayList<>();
+        this.totalLabelLinesWithIndex = new ArrayList<>();
+        for (String emoji : emojiToSamples.keySet()) {
+            List<SampleIndexPair> sampleIndexPairs = emojiToSamples.get(emoji);
+            Collections.shuffle(sampleIndexPairs);
+            Preconditions.checkArgument(sampleIndexPairs.size() >= 1000);
+            this.totalLines.addAll(sampleIndexPairs
+                    .parallelStream()
+                    .distinct()
+                    .map(SampleIndexPair::getSample)
+                    .limit(1000)
+                    .collect(Collectors.toList()));
+            this.totalLabelLinesWithIndex.addAll(sampleIndexPairs
+                    .parallelStream()
+                    .distinct()
+                    .map(SampleIndexPair::getIndex)
+                    .limit(1000)
+                    .collect(Collectors.toList()));
+        }
+        Random random = new Random();
+        Collections.shuffle(this.totalLines, random);
+        Collections.shuffle(this.totalLabelLinesWithIndex, random);
     }
 
     public DataSet next(int batchSize) {
@@ -76,8 +119,7 @@ public class EDataSetIterator implements DataSetIterator {
         for (int i = 0; i < batchSize && cursor < totalExamples(); i++, cursor++, currentLineCursor++) {
             String line = totalLines.get(currentLineCursor);
             reviews.add(line);
-            labelInts[i] = Integer
-                    .parseInt(totalLabelLinesWithIndex.get(currentLineCursor).split(",")[0]);
+            labelInts[i] = totalLabelLinesWithIndex.get(currentLineCursor);
         }
         List<List<String>> allTokens = new ArrayList<>();
         maxLength = 0;
@@ -144,9 +186,7 @@ public class EDataSetIterator implements DataSetIterator {
     public void reset() {
         this.cursor = 0;
         this.currentLineCursor = 0;
-        Random random = new Random();
-        Collections.shuffle(this.totalLines, random);
-        Collections.shuffle(this.totalLabelLinesWithIndex, random);
+        generateLabelsData();
     }
 
     public int batch() {
@@ -179,5 +219,13 @@ public class EDataSetIterator implements DataSetIterator {
 
     public DataSet next() {
         return next(batchSize);
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public class SampleIndexPair {
+        private String sample;
+        private int index;
     }
 }
