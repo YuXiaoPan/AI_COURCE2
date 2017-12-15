@@ -16,7 +16,7 @@ import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.Updater;
 import org.deeplearning4j.nn.conf.layers.GravesLSTM;
-import org.deeplearning4j.nn.conf.layers.OutputLayer;
+import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.api.IterationListener;
@@ -51,12 +51,12 @@ import java.util.stream.Collectors;
  */
 public class FullOperationMain {
 
-    public static final String OUTPUT = "/home/peyppicp/output/";
-    public static final String PREFIX = "/home/peyppicp/data/new/";
+//    public static final String OUTPUT = "/home/peyppicp/output/";
+//    public static final String PREFIX = "/home/peyppicp/data/new/";
     //    public static final String PREFIX = "/home/panyuxiao/data/new/";
 //    public static final String OUTPUT = "/home/panyuxiao/output/";
-//    public static final String PREFIX = "";
-//    public static final String OUTPUT = "";
+    public static final String PREFIX = "";
+    public static final String OUTPUT = "";
     private static final Logger log = LoggerFactory.getLogger(FullOperationMain.class);
     private static final int truncateReviewsToLength = 20;
 
@@ -81,7 +81,7 @@ public class FullOperationMain {
         File emojiSampleFile = new File(PREFIX + "EmojiSample.txt");
         File emojiSampleLabelFile = new File(PREFIX + "EmojiSampleLabels.txt");
         File emijiSampleWithoutEmojiFile = new File(PREFIX + "EmojiSampleWithoutEmoji.txt");
-        File lookUpTableFile = new File(PREFIX + "glove.twitter.27B.25d.txt");
+        File lookUpTableFile = new File(PREFIX + "glove.twitter.27B.100d.txt");
         if (!(emojiSampleFile.exists() && emojiSampleLabelFile.exists()
                 && emijiSampleWithoutEmojiFile.exists() && lookUpTableFile.exists())) {
             System.out.println("Begin process original samples.");
@@ -130,7 +130,7 @@ public class FullOperationMain {
                 .list()
                 .layer(0, new GravesLSTM.Builder().nIn(eDataSetIterator.inputColumns()).nOut(100)
                         .activation(Activation.TANH).build())
-                .layer(1, new OutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
+                .layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
                         .activation(Activation.SOFTMAX).nIn(100)
                         .nOut(eDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
