@@ -55,12 +55,12 @@ import java.util.stream.Collectors;
  */
 public class FullOperationMain {
 
-    public static final String OUTPUT = "/home/peyppicp/output/";
-    public static final String PREFIX = "/home/peyppicp/data/new/";
+//    public static final String OUTPUT = "/home/peyppicp/output/";
+//    public static final String PREFIX = "/home/peyppicp/data/new/";
     //    public static final String PREFIX = "/home/panyuxiao/data/new/";
 //    public static final String OUTPUT = "/home/panyuxiao/output/";
-//    public static final String PREFIX = "";
-//    public static final String OUTPUT = "";
+    public static final String PREFIX = "";
+    public static final String OUTPUT = "";
     private static final Logger log = LoggerFactory.getLogger(FullOperationMain.class);
     private static final int truncateReviewsToLength = 32;
     private static final ExecutorService executorService = Executors.newFixedThreadPool(2);
@@ -125,7 +125,7 @@ public class FullOperationMain {
                 .regularization(true)
                 .l2(1e-5)
                 .weightInit(WeightInit.XAVIER)
-                .learningRate(0.01)
+                .learningRate(0.1)
 //                .learningRateDecayPolicy(LearningRatePolicy.Inverse)
 //                .lrPolicyDecayRate(0.001)
 //                .lrPolicyPower(0.75)

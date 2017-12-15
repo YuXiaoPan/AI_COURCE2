@@ -43,6 +43,7 @@ public class EDataSetIterator implements DataSetIterator {
     private final boolean isTest;
     private int cursor = 0;
     private int currentLineCursor = 0;
+    private List<String> dataLabels;
     private List<String> data;
     private List<String> totalLines;
     private List<Integer> totalLabelLinesWithIndex;
@@ -65,7 +66,7 @@ public class EDataSetIterator implements DataSetIterator {
         this.labelFile = new File(labelPath);
         this.emojiToSamples = ArrayListMultimap.create();//emoji -> samples
         this.data = Files.readLines(file, Charsets.UTF_8);
-//        this.totalLabelLinesWithIndex = Files.readLines(labelFile, Charsets.UTF_8);
+        this.dataLabels = Files.readLines(labelFile, Charsets.UTF_8);
         generateLabelsData();
         if (isTest) {
             this.totalLabelLinesWithIndex = this.totalLabelLinesWithIndex.subList(0, 5000);
@@ -74,36 +75,33 @@ public class EDataSetIterator implements DataSetIterator {
     }
 
     private void generateLabelsData() {
-        Map<String, Integer> wordIndexMap = wordToIndex.getWordIndexMap();
+        Preconditions.checkArgument(data.size() == dataLabels.size());
         for (int i = 0; i < data.size(); i++) {
-            List<String> emojis = EmojiParser.extractEmojis(data.get(i))
-                    .parallelStream()
-                    .distinct()
-                    .collect(Collectors.toList());
-            if (!emojis.isEmpty()) {
-                for (String emoji : emojis) {
-                    if (wordIndexMap.containsKey(emoji)) {
-                        String s = EmojiParser.removeAllEmojis(data.get(i)).trim().toLowerCase();
-                        emojiToSamples.put(emoji, new SampleIndexPair(s, wordToIndex.getIndex(emoji)));
-                    }
-                }
-            }
+//            List<String> emojis = EmojiParser.extractEmojis(data.get(i))
+//                    .parallelStream()
+//                    .distinct()
+//                    .collect(Collectors.toList());
+//            if (!emojis.isEmpty()) {
+//                for (String emoji : emojis) {
+            String s = EmojiParser.removeAllEmojis(data.get(i)).trim().toLowerCase();
+            String index = dataLabels.get(i).split(",")[0];
+            emojiToSamples.put(index, new SampleIndexPair(s, Integer.parseInt(index)));
+//                }
+//            }
         }
         this.totalLines = new ArrayList<>();
         this.totalLabelLinesWithIndex = new ArrayList<>();
-        for (String emoji : emojiToSamples.keySet()) {
-            List<SampleIndexPair> sampleIndexPairs = emojiToSamples.get(emoji);
+        for (String index : emojiToSamples.keySet()) {
+            List<SampleIndexPair> sampleIndexPairs = emojiToSamples.get(index);
             Collections.shuffle(sampleIndexPairs);
             Preconditions.checkArgument(sampleIndexPairs.size() >= 1000);
             this.totalLines.addAll(sampleIndexPairs
                     .parallelStream()
-                    .distinct()
                     .map(SampleIndexPair::getSample)
                     .limit(1000)
                     .collect(Collectors.toList()));
             this.totalLabelLinesWithIndex.addAll(sampleIndexPairs
                     .parallelStream()
-                    .distinct()
                     .map(SampleIndexPair::getIndex)
                     .limit(1000)
                     .collect(Collectors.toList()));
