@@ -221,7 +221,7 @@ public class FullOperationMain {
             labels.add(sb.toString());
         }
         Preconditions.checkArgument(samples.size() == labels.size());
-        FileUtils.writeLines(new File(PREFIX + "EmojiSampleWithLabels.txt"),
+        FileUtils.writeLines(new File(PREFIX + "EmojiSampleLabels.txt"),
                 "UTF-8",
                 labels,
                 "\n",
