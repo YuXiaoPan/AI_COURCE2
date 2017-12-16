@@ -322,9 +322,19 @@ public class FullOperationMain {
             }
         }
 
+        List<String> temp2 = new ArrayList<>();
+        TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
+        tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
+        for (String sample : temp1) {
+            List<String> tokens = tokenizerFactory.create(sample).getTokens();
+            StringBuilder stringBuilder = new StringBuilder();
+            tokens.forEach(s -> stringBuilder.append(s).append(" "));
+            temp2.add(stringBuilder.toString().trim());
+        }
+
         FileUtils.writeLines(new File(PREFIX + "EmojiSample.txt"),
                 "UTF-8",
-                temp1,
+                temp2,
                 "\n",
                 false);
     }

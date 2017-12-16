@@ -59,12 +59,12 @@ public class CNNMain {
 
     private static final Logger log = LoggerFactory.getLogger(CNNMain.class);
     private static ArrayListMultimap<String, SampleIndexPair> emojiToSamples = ArrayListMultimap.create();
-        public static final String OUTPUT = "/home/peyppicp/output/";
-    public static final String PREFIX = "/home/peyppicp/data/new/";
+//        public static final String OUTPUT = "/home/peyppicp/output/";
+//    public static final String PREFIX = "/home/peyppicp/data/new/";
 //    public static final String PREFIX = "/home/panyuxiao/data/new/";
 //    public static final String OUTPUT = "/home/panyuxiao/output/";
-//    public static final String PREFIX = "";
-//    public static final String OUTPUT = "";
+    public static final String PREFIX = "";
+    public static final String OUTPUT = "";
 
     public static void main(String[] args) throws IOException {
 
