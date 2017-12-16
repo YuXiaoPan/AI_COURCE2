@@ -23,10 +23,7 @@ import org.nd4j.linalg.indexing.NDArrayIndex;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -100,13 +97,16 @@ public class EDataSetIterator implements DataSetIterator {
         this.totalLines = new ArrayList<>();
         this.totalLabelLinesWithIndex = new ArrayList<>();
         int cursor = 0;
-        List<Integer> keys = emojiToSamples.keySet()
+        Map<String, Collection<SampleIndexPair>> collectionMap = emojiToSamples.asMap();
+        Map<String, List<SampleIndexPair>> tempMap = new HashMap<>();
+        collectionMap.entrySet().parallelStream().forEach(e -> tempMap.put(e.getKey(), e.getValue().parallelStream().collect(Collectors.toList())));
+        tempMap.forEach((key, value) -> Collections.shuffle(value));
+        List<Integer> keys = tempMap.keySet()
                 .parallelStream().map(Integer::parseInt)
                 .sorted().collect(Collectors.toList());
         while (cursor < 1000) {
             for (int i = 0; i < keys.size(); i++) {
-                List<SampleIndexPair> sampleIndexPairs = emojiToSamples.get(keys.get(i).toString());
-                Collections.shuffle(sampleIndexPairs);
+                List<SampleIndexPair> sampleIndexPairs = tempMap.get(keys.get(i).toString());
                 SampleIndexPair sampleIndexPair = sampleIndexPairs.get(cursor);
                 this.totalLines.add(sampleIndexPair.getSample());
                 this.totalLabelLinesWithIndex.add(sampleIndexPair.getIndex());
