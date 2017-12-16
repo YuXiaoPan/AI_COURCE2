@@ -215,8 +215,8 @@ public class CNNMain {
             }
         }
         if (!isTrain) {
-            sentences.subList(0, 10000);
-            labelForSentences.subList(0, 10000);
+            sentences.subList(0, 1000);
+            labelForSentences.subList(0, 1000);
         }
         CollectionLabeledSentenceProvider sentenceProvider = new CollectionLabeledSentenceProvider(sentences, labelForSentences, random);
         return new CnnSentenceDataSetIterator.Builder()
