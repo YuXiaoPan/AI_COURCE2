@@ -202,7 +202,7 @@ public class CNNMain {
             List<SampleIndexPair> sampleIndexPairs = emojiToSamples.get(index);
             Collections.shuffle(sampleIndexPairs);
             int totalCount = sampleIndexPairs.size();
-            int maxCount = 1000;
+            int maxCount = 3000;
             for (int i = 0; i < Math.min(maxCount, totalCount); i++) {
                 sentences.add(sampleIndexPairs.get(i).getSample());
                 labelForSentences.add(sampleIndexPairs.get(i).getIndex());
