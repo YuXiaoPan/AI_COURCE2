@@ -29,7 +29,6 @@ import org.deeplearning4j.nn.conf.layers.PoolingType;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.api.IterationListener;
-import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.deeplearning4j.ui.api.UIServer;
 import org.deeplearning4j.ui.stats.StatsListener;
 import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
@@ -43,7 +42,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -156,7 +154,7 @@ public class CNNMain {
         DataSetIterator trainIter = getDataSetIterator(true, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels, wordToIndex);
         DataSetIterator testIter = getDataSetIterator(false, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels, wordToIndex);
 
-        net.setListeners(new ScoreIterationListener(1), new StatsListener(statsStorage), new IterationListener() {
+        net.setListeners(new StatsListener(statsStorage), new IterationListener() {
             @Override
             public boolean invoked() {
                 return true;
@@ -204,10 +202,14 @@ public class CNNMain {
         ArrayList<String> labelForSentences = new ArrayList<>();
         for (String index : emojiToSamples.keySet()) {
             List<SampleIndexPair> sampleIndexPairs = emojiToSamples.get(index);
-            Collections.shuffle(sampleIndexPairs);
-            int totalCount = sampleIndexPairs.size();
-            int maxCount = 5000;
-            for (int i = 0; i < Math.min(maxCount, totalCount); i++) {
+//            Collections.shuffle(sampleIndexPairs);
+//            int totalCount = sampleIndexPairs.size();
+//            int maxCount = 5000;
+//            for (int i = 0; i < Math.min(maxCount, totalCount); i++) {
+//                sentences.add(sampleIndexPairs.get(i).getSample());
+//                labelForSentences.add(sampleIndexPairs.get(i).getIndex());
+//            }
+            for (int i = 0; i < sampleIndexPairs.size(); i++) {
                 sentences.add(sampleIndexPairs.get(i).getSample());
                 labelForSentences.add(sampleIndexPairs.get(i).getIndex());
             }
