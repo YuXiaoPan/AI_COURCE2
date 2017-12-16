@@ -111,7 +111,8 @@ public class Utils {
                     .parallelStream().distinct().collect(Collectors.toList());
             StringBuilder sb = new StringBuilder();
             if (emojis.size() == 0) {
-                int index = wordToIndex.getIndex(WordToIndex.STOP);
+//                int index = wordToIndex.getIndex(WordToIndex.UNKNOWN);
+                int index = -1;
                 labels.add(String.valueOf(index));
                 continue;
             }
@@ -130,7 +131,7 @@ public class Utils {
                 false);
     }
 
-    public static void removeEmojis(String input,String output) throws IOException {
+    public static void removeEmojis(String input, String output) throws IOException {
         File file = new File(input);
 //        File file = new File(PREFIX + "EmojiSample.txt");
         List<String> samples = FileUtils.readLines(file, Charsets.UTF_8);

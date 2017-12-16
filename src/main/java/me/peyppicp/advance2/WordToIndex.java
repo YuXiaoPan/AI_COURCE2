@@ -50,7 +50,7 @@ public class WordToIndex {
         Map<String, Integer> temp = new LinkedHashMap<>();
         wordIndexMap.entrySet()
                 .parallelStream().sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .limit(24)
+                .limit(25)
                 .forEachOrdered(entry -> temp.put(entry.getKey(), entry.getValue()));
 
         wordIndexMap = new LinkedHashMap<>();
@@ -58,12 +58,13 @@ public class WordToIndex {
         for (String emoji : temp.keySet()) {
             wordIndexMap.putIfAbsent(emoji, index++);
         }
-        addUnknown();
+//        addUnknown();
         this.outComesNum = wordIndexMap.keySet().size();
     }
 
     public int getIndex(String word) {
-        return wordIndexMap.getOrDefault(word, wordIndexMap.get(UNKNOWN));
+//        return wordIndexMap.getOrDefault(word, wordIndexMap.get(UNKNOWN));
+        return wordIndexMap.getOrDefault(word, -1);
     }
 
     public void addUnknown() {
