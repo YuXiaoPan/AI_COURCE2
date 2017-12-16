@@ -4,7 +4,6 @@ import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.nn.api.Model;
-import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 
@@ -21,7 +20,7 @@ public class HibernateInfoRunner implements Runnable {
     private String path;
     private String evaPath;
     private final String prefix;
-    private final MultiLayerNetwork model;
+    private final Model model;
     private final DataSetIterator dataSetIterator;
     private final Evaluation evaluation;
 
@@ -33,7 +32,7 @@ public class HibernateInfoRunner implements Runnable {
         this.path = FullOperationMain.OUTPUT + "model-" + prefix + "-" + anInt + ".txt";
         this.evaPath = FullOperationMain.OUTPUT + "eva-" + prefix + "-" + anInt + ".txt";
 //        this.path = "model-" + prefix + "-" + anInt + ".txt";
-        this.model = (MultiLayerNetwork) model;
+        this.model = model;
         this.evaluation = evaluation;
     }
 

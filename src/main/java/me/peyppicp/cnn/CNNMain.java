@@ -91,7 +91,7 @@ public class CNNMain {
         Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(new File(word2VecPath));
         WordToIndex wordToIndex = new WordToIndex(sampleWithEmoji);
 
-        int batchSize = 64;
+        int batchSize = 200;
         int vectorSize = word2Vec.getWordVector(word2Vec.vocab().wordAtIndex(0)).length;
         int nEpochs = 100;
         int truncateReviewsToLength = 64;
@@ -202,7 +202,7 @@ public class CNNMain {
             List<SampleIndexPair> sampleIndexPairs = emojiToSamples.get(index);
             Collections.shuffle(sampleIndexPairs);
             int totalCount = sampleIndexPairs.size();
-            int maxCount = 3000;
+            int maxCount = 5000;
             for (int i = 0; i < Math.min(maxCount, totalCount); i++) {
                 sentences.add(sampleIndexPairs.get(i).getSample());
                 labelForSentences.add(sampleIndexPairs.get(i).getIndex());
