@@ -91,9 +91,9 @@ public class CNNMain {
         Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(new File(word2VecPath));
         WordToIndex wordToIndex = new WordToIndex(sampleWithEmoji);
 
-        int batchSize = 200;
+        int batchSize = 100;
         int vectorSize = word2Vec.getWordVector(word2Vec.vocab().wordAtIndex(0)).length;
-        int nEpochs = 100;
+        int nEpochs = 5000;
         int truncateReviewsToLength = 64;
         int cnnLayerFeatureMaps = 100;      //Number of feature maps / channels / depth for each CNN layer
         PoolingType globalPoolingType = PoolingType.MAX;
@@ -180,7 +180,9 @@ public class CNNMain {
             //Run evaluation. This is on 25k reviews, so can take some time
             Evaluation evaluation = net.evaluate(testIter);
             System.out.println(evaluation.stats());
-            executorService.submit(new HibernateInfoRunner(i, net, trainIter, prefix, evaluation));
+            if (i % 10 == 0) {
+                executorService.submit(new HibernateInfoRunner(i, net, trainIter, prefix, evaluation));
+            }
         }
     }
 
