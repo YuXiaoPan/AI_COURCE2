@@ -98,7 +98,7 @@ public class FullOperationMain {
                 lookUpTableFile, file, prefix);
     }
 
-    private static void train(File emojiSampleFile, File emojiSampleLabelFile,
+    public static void train(File emojiSampleFile, File emojiSampleLabelFile,
                               File emijiSampleWithoutEmojiFile, File lookUpTableFile,
                               File file, String prefix) throws IOException {
 
@@ -180,8 +180,8 @@ public class FullOperationMain {
         ModelSerializer.writeModel(multiLayerNetwork, outPutFile, true);
     }
 
-    private static void removeEmojis() throws IOException {
-        File file = new File(PREFIX + "ReEnforcementEmojiSample.txt");
+    public static void removeEmojis() throws IOException {
+        File file = new File(PREFIX + "EmojiSample.txt");
 //        File file = new File(PREFIX + "EmojiSample.txt");
         List<String> samples = FileUtils.readLines(file, Charsets.UTF_8);
         ArrayList<String> result = new ArrayList<>();
@@ -191,18 +191,18 @@ public class FullOperationMain {
         }
 
         Preconditions.checkArgument(samples.size() == result.size());
-        FileUtils.writeLines(new File(PREFIX + "ReEnforcementEmojiSampleWithoutEmoji.txt"),
+        FileUtils.writeLines(new File(PREFIX + "EmojiSampleWithoutEmoji.txt"),
                 "UTF-8",
                 result,
                 "\n",
                 false);
     }
 
-    private static void markLabels() throws IOException {
-        File file = new File(PREFIX + "ReEnforcementEmojiSample.txt");
+    public static void markLabels() throws IOException {
+        File file = new File(PREFIX + "EmojiSample.txt");
 //        File file = new File(PREFIX + "EmojiSample.txt");
         List<String> samples = FileUtils.readLines(file, Charsets.UTF_8);
-        WordToIndex wordToIndex = new WordToIndex(PREFIX + "ReEnforcementEmojiSample.txt");
+        WordToIndex wordToIndex = new WordToIndex(PREFIX + "EmojiSample.txt");
         ArrayList<String> labels = new ArrayList<>();
         for (String sample : samples) {
             List<String> emojis = EmojiParser.extractEmojis(sample)
@@ -221,7 +221,7 @@ public class FullOperationMain {
             labels.add(sb.toString());
         }
         Preconditions.checkArgument(samples.size() == labels.size());
-        FileUtils.writeLines(new File(PREFIX + "ReEnforcementEmojiSampleLabels.txt"),
+        FileUtils.writeLines(new File(PREFIX + "EmojiSampleLabels.txt"),
                 "UTF-8",
                 labels,
                 "\n",
@@ -263,7 +263,7 @@ public class FullOperationMain {
                 false);
     }
 
-    private static void processOriginalSamples(File file) throws IOException {
+    public static void processOriginalSamples(File file) throws IOException {
         List<String> sampleLines = FileUtils.readLines(file, Charsets.UTF_8);
         List<String> emojiUnicodes = EmojiManager.getAll().parallelStream().map(Emoji::getUnicode).collect(Collectors.toList());
         List<String> temp = new ArrayList<>();
