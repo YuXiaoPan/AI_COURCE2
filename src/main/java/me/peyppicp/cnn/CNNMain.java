@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -201,32 +202,42 @@ public class CNNMain {
         }
         List<String> sentences = new ArrayList<>();
         List<String> labelForSentences = new ArrayList<>();
-        for (String index : emojiToSamples.keySet()) {
-            List<SampleIndexPair> sampleIndexPairs = emojiToSamples.get(index);
+        if (!isTrain) {
+//            int maxCount = 5000;
+            for (String index : emojiToSamples.keySet()) {
+                List<SampleIndexPair> sampleIndexPairs = emojiToSamples.get(index);
 //            Collections.shuffle(sampleIndexPairs);
 //            int totalCount = sampleIndexPairs.size();
-//            int maxCount = 5000;
 //            for (int i = 0; i < Math.min(maxCount, totalCount); i++) {
 //                sentences.add(sampleIndexPairs.get(i).getSample());
 //                labelForSentences.add(sampleIndexPairs.get(i).getIndex());
 //            }
-            for (int i = 0; i < sampleIndexPairs.size(); i++) {
-                sentences.add(sampleIndexPairs.get(i).getSample());
-                labelForSentences.add(sampleIndexPairs.get(i).getIndex());
+                for (int i = 0; i < sampleIndexPairs.size(); i++) {
+                    sentences.add(sampleIndexPairs.get(i).getSample());
+                    labelForSentences.add(sampleIndexPairs.get(i).getIndex());
+                }
             }
+        } else {
+            int maxCount = 500;
+            for (String index : emojiToSamples.keySet()) {
+                List<SampleIndexPair> sampleIndexPairs = emojiToSamples.get(index);
+                Collections.shuffle(sampleIndexPairs);
+                int totalCount = sampleIndexPairs.size();
+                for (int i = 0; i < Math.min(maxCount, totalCount); i++) {
+                    sentences.add(sampleIndexPairs.get(i).getSample());
+                    labelForSentences.add(sampleIndexPairs.get(i).getIndex());
+//            }
+                }
+            }
+            CollectionLabeledSentenceProvider sentenceProvider = new CollectionLabeledSentenceProvider(sentences, labelForSentences, random);
+            return new CnnSentenceDataSetIterator.Builder()
+                    .sentenceProvider(sentenceProvider)
+                    .wordVectors(wordVectors)
+                    .minibatchSize(miniBatchSize)
+                    .maxSentenceLength(maxSentenceLength)
+                    .useNormalizedWordVectors(false)
+                    .build();
         }
-        if (!isTrain) {
-            sentences = sentences.subList(0, 5000);
-            labelForSentences = labelForSentences.subList(0, 5000);
-        }
-        CollectionLabeledSentenceProvider sentenceProvider = new CollectionLabeledSentenceProvider(sentences, labelForSentences, random);
-        return new CnnSentenceDataSetIterator.Builder()
-                .sentenceProvider(sentenceProvider)
-                .wordVectors(wordVectors)
-                .minibatchSize(miniBatchSize)
-                .maxSentenceLength(maxSentenceLength)
-                .useNormalizedWordVectors(false)
-                .build();
     }
 
     @Data
@@ -237,3 +248,4 @@ public class CNNMain {
         private String index;
     }
 }
+
