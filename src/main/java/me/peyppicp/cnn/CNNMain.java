@@ -58,12 +58,12 @@ public class CNNMain {
 
     private static final Logger log = LoggerFactory.getLogger(CNNMain.class);
     private static ArrayListMultimap<String, SampleIndexPair> emojiToSamples = ArrayListMultimap.create();
-    public static final String OUTPUT = "/home/peyppicp/output/";
-    public static final String PREFIX = "/home/peyppicp/data/new/";
+//    public static final String OUTPUT = "/home/peyppicp/output/";
+//    public static final String PREFIX = "/home/peyppicp/data/new/";
 //    public static final String PREFIX = "/home/panyuxiao/data/new/";
 //    public static final String OUTPUT = "/home/panyuxiao/output/";
-//    public static final String PREFIX = "";
-//    public static final String OUTPUT = "";
+    public static final String PREFIX = "";
+    public static final String OUTPUT = "";
 
     public static void main(String[] args) throws IOException {
 
@@ -76,7 +76,7 @@ public class CNNMain {
         if (!(new File(sampleLabelPath).exists() && new File(samplePath).exists()
                 && new File(sampleWithEmoji).exists() && new File(word2VecPath).exists())) {
             System.out.println("Begin process original samples.");
-            Utils.processOriginalSamples(PREFIX + "emoji_sample.txt", sampleLabelPath);
+            Utils.processOriginalSamples(PREFIX + "emoji_sample.txt", sampleWithEmoji);
 //            processOriginalSamples(new File(PREFIX + "emoji_sample.txt"));
 //            processWord2Vec();
             System.out.println("Begin mark labels.");
