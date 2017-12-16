@@ -19,6 +19,7 @@ import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.nn.api.Model;
+import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.*;
 import org.deeplearning4j.nn.conf.graph.MergeVertex;
 import org.deeplearning4j.nn.conf.layers.ConvolutionLayer;
@@ -105,7 +106,8 @@ public class CNNMain {
                 .trainingWorkspaceMode(WorkspaceMode.SINGLE).inferenceWorkspaceMode(WorkspaceMode.SINGLE)
                 .weightInit(WeightInit.XAVIER)
                 .activation(Activation.LEAKYRELU)
-                .updater(Updater.ADAM)
+                .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
+                .updater(Updater.RMSPROP)
                 .convolutionMode(ConvolutionMode.Same)      //This is important so we can 'stack' the results later
                 .regularization(true).l2(0.0001)
                 .learningRate(0.01)
