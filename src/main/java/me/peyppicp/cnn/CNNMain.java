@@ -91,7 +91,7 @@ public class CNNMain {
         Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(new File(word2VecPath));
         WordToIndex wordToIndex = new WordToIndex(sampleWithEmoji);
 
-        int batchSize = 50;
+        int batchSize = 100;
         int vectorSize = word2Vec.getWordVector(word2Vec.vocab().wordAtIndex(0)).length;
         int nEpochs = 5000;
         int truncateReviewsToLength = 64;
