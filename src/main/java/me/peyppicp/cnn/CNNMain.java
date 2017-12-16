@@ -229,15 +229,15 @@ public class CNNMain {
 //            }
                 }
             }
-            CollectionLabeledSentenceProvider sentenceProvider = new CollectionLabeledSentenceProvider(sentences, labelForSentences, random);
-            return new CnnSentenceDataSetIterator.Builder()
-                    .sentenceProvider(sentenceProvider)
-                    .wordVectors(wordVectors)
-                    .minibatchSize(miniBatchSize)
-                    .maxSentenceLength(maxSentenceLength)
-                    .useNormalizedWordVectors(false)
-                    .build();
         }
+        CollectionLabeledSentenceProvider sentenceProvider = new CollectionLabeledSentenceProvider(sentences, labelForSentences, random);
+        return new CnnSentenceDataSetIterator.Builder()
+                .sentenceProvider(sentenceProvider)
+                .wordVectors(wordVectors)
+                .minibatchSize(miniBatchSize)
+                .maxSentenceLength(maxSentenceLength)
+                .useNormalizedWordVectors(false)
+                .build();
     }
 
     @Data
