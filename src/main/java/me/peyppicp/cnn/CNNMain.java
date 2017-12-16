@@ -103,7 +103,7 @@ public class CNNMain {
 
         ComputationGraphConfiguration conf = new NeuralNetConfiguration.Builder()
                 .trainingWorkspaceMode(WorkspaceMode.SINGLE).inferenceWorkspaceMode(WorkspaceMode.SINGLE)
-                .weightInit(WeightInit.RELU)
+                .weightInit(WeightInit.XAVIER)
                 .activation(Activation.LEAKYRELU)
                 .updater(Updater.ADAM)
                 .convolutionMode(ConvolutionMode.Same)      //This is important so we can 'stack' the results later
