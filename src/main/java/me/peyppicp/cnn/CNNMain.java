@@ -59,12 +59,12 @@ public class CNNMain {
 
     private static final Logger log = LoggerFactory.getLogger(CNNMain.class);
     private static ArrayListMultimap<String, SampleIndexPair> emojiToSamples = ArrayListMultimap.create();
-    public static final String OUTPUT = "/home/peyppicp/output/";
-    public static final String PREFIX = "/home/peyppicp/data/new/";
+//    public static final String OUTPUT = "/home/peyppicp/output/";
+//    public static final String PREFIX = "/home/peyppicp/data/new/";
 //    public static final String PREFIX = "/home/panyuxiao/data/new/";
 //    public static final String OUTPUT = "/home/panyuxiao/output/";
-//    public static final String PREFIX = "";
-//    public static final String OUTPUT = "";
+    public static final String PREFIX = "";
+    public static final String OUTPUT = "";
 
     public static void main(String[] args) throws IOException {
 
@@ -193,11 +193,14 @@ public class CNNMain {
                                                       List<String> samples, List<String> sampleLabels,
                                                       WordToIndex wordToIndex) {
         Preconditions.checkArgument(samples.size() == sampleLabels.size());
+        int unknownIndex = wordToIndex.getIndex(WordToIndex.UNKNOWN);
         for (int i = 0; i < samples.size(); i++) {
             String s = EmojiParser.removeAllEmojis(samples.get(i)).trim().toLowerCase();
             List<String> indexes = ImmutableList.copyOf(sampleLabels.get(i).split(","));
             for (String index : indexes) {
-                emojiToSamples.put(index, new SampleIndexPair(s, index));
+                if (!index.contains(String.valueOf(unknownIndex))) {
+                    emojiToSamples.put(index, new SampleIndexPair(s, index));
+                }
             }
         }
         List<String> sentences = new ArrayList<>();
