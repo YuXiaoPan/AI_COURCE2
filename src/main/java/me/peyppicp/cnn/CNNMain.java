@@ -7,6 +7,7 @@ import com.vdurmont.emoji.EmojiParser;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import me.peyppicp.Utils;
 import me.peyppicp.advance2.HibernateInfoRunner;
 import me.peyppicp.advance2.WordToIndex;
 import org.apache.commons.io.Charsets;
@@ -47,7 +48,6 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static me.peyppicp.advance2.FullOperationMain.*;
 
 /**
  * @author YuXiao Pan
@@ -76,12 +76,13 @@ public class CNNMain {
         if (!(new File(sampleLabelPath).exists() && new File(samplePath).exists()
                 && new File(sampleWithEmoji).exists() && new File(word2VecPath).exists())) {
             System.out.println("Begin process original samples.");
-            processOriginalSamples(new File(PREFIX + "emoji_sample.txt"));
+            Utils.processOriginalSamples(PREFIX + "emoji_sample.txt", sampleLabelPath);
+//            processOriginalSamples(new File(PREFIX + "emoji_sample.txt"));
 //            processWord2Vec();
             System.out.println("Begin mark labels.");
-            markLabels();
+            Utils.markLabels(sampleWithEmoji, sampleLabelPath);
             System.out.println("Begin remove emojis.");
-            removeEmojis();
+            Utils.removeEmojis(sampleWithEmoji, samplePath);
         }
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
