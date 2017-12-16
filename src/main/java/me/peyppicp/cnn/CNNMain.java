@@ -202,7 +202,7 @@ public class CNNMain {
         }
         List<String> sentences = new ArrayList<>();
         List<String> labelForSentences = new ArrayList<>();
-        if (!isTrain) {
+        if (isTrain) {
 //            int maxCount = 5000;
             for (String index : emojiToSamples.keySet()) {
                 List<SampleIndexPair> sampleIndexPairs = emojiToSamples.get(index);
