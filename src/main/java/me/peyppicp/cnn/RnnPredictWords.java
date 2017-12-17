@@ -23,6 +23,8 @@ import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,7 +44,7 @@ public class RnnPredictWords {
     public static final String END = "<end>";
     public static final String OUTPUT = "/home/peyppicp/output/";
     public static final String PREFIX = "/home/peyppicp/data/new/";
-
+    private static final Logger log = LoggerFactory.getLogger(RnnPredictWords.class);
 
     public static void main(String[] args) throws IOException {
         File originData = new File(PREFIX + "more_standard_emoji_sample.txt");
@@ -55,7 +57,7 @@ public class RnnPredictWords {
         int batchSize = 64;
         int nEpochs = 50;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
-        WordToIndex wordToIndex = new WordToIndex(samples, 20000);
+        WordToIndex wordToIndex = new WordToIndex(samples, 12500);
 
         RDataSetIterator rDataSetIterator = new RDataSetIterator(true, truncateLength, batchSize, samples, wordToIndex);
         RDataSetIterator tDataSetIterator = new RDataSetIterator(false, truncateLength, batchSize, samples, wordToIndex);
@@ -70,10 +72,10 @@ public class RnnPredictWords {
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
-                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(20000)
+                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(15000)
                         .activation(Activation.TANH).build())
                 .layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(20000).nOut(rDataSetIterator.totalOutcomes()).build())
+                        .activation(Activation.SOFTMAX).nIn(15000).nOut(rDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
                 .build();
@@ -82,11 +84,11 @@ public class RnnPredictWords {
         StatsStorage statsStorage = new InMemoryStatsStorage();
         uiServer.attach(statsStorage);
 
-
         MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
         multiLayerNetwork.init();
         multiLayerNetwork.setListeners(new ScoreIterationListener(1), new StatsListener(statsStorage));
 
+        System.out.println("begin train");
         for (int j = 0; j < nEpochs; j++) {
             multiLayerNetwork.fit(rDataSetIterator);
             Evaluation evaluate = multiLayerNetwork.evaluate(tDataSetIterator);
