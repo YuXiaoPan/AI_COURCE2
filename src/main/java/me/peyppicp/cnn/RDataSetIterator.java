@@ -33,6 +33,7 @@ public class RDataSetIterator implements DataSetIterator {
     private final TokenizerFactory tokenizerFactory;
     private final WordToIndex wordToIndex;
     private final WordVectors wordVectors;
+    private int vectorSize;
 
     public RDataSetIterator(boolean isTrain, int truncateLength, int batchSize,
                             List<String> samples, WordToIndex wordToIndex,
@@ -45,6 +46,7 @@ public class RDataSetIterator implements DataSetIterator {
         this.tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
         this.wordToIndex = wordToIndex;
         this.wordVectors = wordVectors;
+        this.vectorSize = wordVectors.getWordVector(wordVectors.vocab().wordAtIndex(0)).length;
         if (isTrain) {
             samples = samples.subList(0, 5000);
         }
@@ -67,7 +69,7 @@ public class RDataSetIterator implements DataSetIterator {
 
         int maxWordsSize = Math.min(truncateLength, words.size());
         INDArray input = Nd4j.create(new int[]{batchSize,
-                wordToIndex.getTotalWordsCount(), maxWordsSize}, 'f');
+                vectorSize, maxWordsSize}, 'f');
         INDArray labels = Nd4j.create(new int[]{batchSize,
                 wordToIndex.getTotalWordsCount(), maxWordsSize}, 'f');
 
@@ -96,7 +98,7 @@ public class RDataSetIterator implements DataSetIterator {
 
     @Override
     public int inputColumns() {
-        return wordVectors.getWordVector(wordVectors.vocab().wordAtIndex(0)).length;
+        return vectorSize;
     }
 
     @Override
