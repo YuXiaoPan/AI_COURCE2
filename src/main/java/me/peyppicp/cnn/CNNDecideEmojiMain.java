@@ -62,7 +62,7 @@ public class CNNDecideEmojiMain {
 
     private static final Logger log = LoggerFactory.getLogger(CNNDecideEmojiMain.class);
     private static ArrayListMultimap<String, SampleIndexPair> emojiToSamples = ArrayListMultimap.create();
-        public static final String OUTPUT = "/home/peyppicp/output/";
+    public static final String OUTPUT = "/home/peyppicp/output/";
     public static final String PREFIX = "/home/peyppicp/data/new/";
 //    public static final String PREFIX = "/home/panyuxiao/data/new/";
 //    public static final String OUTPUT = "/home/panyuxiao/output/";
@@ -191,7 +191,7 @@ public class CNNDecideEmojiMain {
         }
     }
 
-    private static DataSetIterator getDataSetIterator(boolean isTrain, WordVectors wordVectors,
+    public static DataSetIterator getDataSetIterator(boolean isTrain, WordVectors wordVectors,
                                                       int miniBatchSize, int maxSentenceLength, Random random,
                                                       List<String> samples, List<String> sampleLabels,
                                                       WordToIndex wordToIndex) {
@@ -211,12 +211,12 @@ public class CNNDecideEmojiMain {
             int maxCount = 5000;
             for (String index : emojiToSamples.keySet()) {
                 List<SampleIndexPair> sampleIndexPairs = emojiToSamples.get(index);
-            Collections.shuffle(sampleIndexPairs);
-            int totalCount = sampleIndexPairs.size();
-            for (int i = 0; i < Math.min(maxCount, totalCount); i++) {
-                sentences.add(sampleIndexPairs.get(i).getSample());
-                labelForSentences.add(sampleIndexPairs.get(i).getIndex());
-            }
+                Collections.shuffle(sampleIndexPairs);
+                int totalCount = sampleIndexPairs.size();
+                for (int i = 0; i < Math.min(maxCount, totalCount); i++) {
+                    sentences.add(sampleIndexPairs.get(i).getSample());
+                    labelForSentences.add(sampleIndexPairs.get(i).getIndex());
+                }
 //                for (int i = 0; i < sampleIndexPairs.size(); i++) {
 //                    sentences.add(sampleIndexPairs.get(i).getSample());
 //                    labelForSentences.add(sampleIndexPairs.get(i).getIndex());

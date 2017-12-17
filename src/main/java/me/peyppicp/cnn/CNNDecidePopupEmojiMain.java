@@ -167,7 +167,7 @@ public class CNNDecidePopupEmojiMain {
 
     }
 
-    private static DataSetIterator getDataSetIterator(boolean isTrain, WordVectors wordVectors,
+    public static DataSetIterator getDataSetIterator(boolean isTrain, WordVectors wordVectors,
                                                       int batchSize, int maxSentenceLength,
                                                       Random random, List<String> samples) {
         List<String> newSamples = new ArrayList<>(samples.size());
