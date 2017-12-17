@@ -42,10 +42,10 @@ public class RnnPredictWords {
     public static final String UNKNOWN = "<unknown>";
     public static final String EMOJI = "<emoji>";
     public static final String END = "<end>";
-//    public static final String OUTPUT = "/home/peyppicp/output/";
-    //    public static final String PREFIX = "/home/peyppicp/data/new/";
-public static final String PREFIX = "";
-    public static final String OUTPUT = "";
+    public static final String OUTPUT = "/home/peyppicp/output/";
+    public static final String PREFIX = "/home/peyppicp/data/new/";
+    //public static final String PREFIX = "";
+//    public static final String OUTPUT = "";
     private static final int limitNum = 2000;
     private static final Logger log = LoggerFactory.getLogger(RnnPredictWords.class);
 
