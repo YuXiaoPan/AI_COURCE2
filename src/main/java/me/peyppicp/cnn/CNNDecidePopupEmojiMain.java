@@ -65,7 +65,7 @@ public class CNNDecidePopupEmojiMain {
         String input = PREFIX + "emoji_sample.txt";
         String output = PREFIX + "standard_emoji_samples.txt";
         String word2VecPath = PREFIX + "glove.twitter.27B.100d.txt";
-//        Utils.processOriginalSamples(input, output, true);
+        Utils.processOriginalSamples(input, output, true);
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         List<String> samples = Utils.readLinesFromPath(output);
