@@ -97,11 +97,11 @@ public class RnnPredictWords {
     }
 
     private static void preMain() throws IOException {
-        String emojiSamples = "emoji_sample.txt";
-        String input = "standard_emoji_samples.txt";
+        String emojiSamples = PREFIX + "emoji_sample.txt";
+        String input = PREFIX + "standard_emoji_samples.txt";
         Utils.processOriginalSamples(emojiSamples, input, true);
         List<String> lines = Utils.readLinesFromPath(input);
-        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel("glove.twitter.27B.100d.txt");
+        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "glove.twitter.27B.100d.txt");
         DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
         tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
         List<String> tempResults = new ArrayList<>();
@@ -138,7 +138,7 @@ public class RnnPredictWords {
             indexes.forEach(s -> stringBuilder.append(s).append(" "));
             finalResults.add(stringBuilder.toString().trim());
         }
-        String output = "more_standard_emoji_sample.txt";
+        String output = PREFIX + "more_standard_emoji_sample.txt";
         Utils.writeLineToPath(finalResults, output);
     }
 }
