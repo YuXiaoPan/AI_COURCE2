@@ -48,7 +48,7 @@ public class RnnPredictWords {
     public static final String PREFIX = "/home/peyppicp/data/new/";
 //    public static final String PREFIX = "";
 //    public static final String OUTPUT = "";
-    private static final int limitNum = -1;
+    private static final int limitNum = 15000;
     private static final Logger log = LoggerFactory.getLogger(RnnPredictWords.class);
 
     public static void main(String[] args) throws IOException {
@@ -164,20 +164,20 @@ public class RnnPredictWords {
             tempResults.add(stringBuilder.toString().trim());
         }
 
-//        WordToIndex wordToIndex = new WordToIndex(tempResults, limitNum);
-//        List<String> finalResults = new ArrayList<>(tempResults.size());
-//        for (String tempResult : tempResults) {
-//            List<String> tokens = tokenizerFactory.create(tempResult).getTokens();
-//            List<String> indexes = new ArrayList<>(tokens.size());
-//            for (String token : tokens) {
-//                if (wordToIndex.getWordIndex(token) != wordToIndex.getWordIndex(UNKNOWN)) {
-//                    indexes.add(token);
-//                }
-//            }
-//            StringBuilder stringBuilder = new StringBuilder();
-//            indexes.forEach(s -> stringBuilder.append(s).append(" "));
-//            finalResults.add(stringBuilder.toString().trim());
-//        }
+        WordToIndex wordToIndex = new WordToIndex(tempResults, limitNum);
+        List<String> finalResults = new ArrayList<>(tempResults.size());
+        for (String tempResult : tempResults) {
+            List<String> tokens = tokenizerFactory.create(tempResult).getTokens();
+            List<String> indexes = new ArrayList<>(tokens.size());
+            for (String token : tokens) {
+                if (wordToIndex.getWordIndex(token) != wordToIndex.getWordIndex(UNKNOWN)) {
+                    indexes.add(UNKNOWN);
+                }
+            }
+            StringBuilder stringBuilder = new StringBuilder();
+            indexes.forEach(s -> stringBuilder.append(s).append(" "));
+            finalResults.add(stringBuilder.toString().trim());
+        }
         String output = PREFIX + "more_standard_emoji_sample.txt";
         Utils.writeLineToPath(tempResults, output);
     }
