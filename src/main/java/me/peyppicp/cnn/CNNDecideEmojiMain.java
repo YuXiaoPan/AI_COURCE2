@@ -8,8 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import me.peyppicp.Utils;
+import me.peyppicp.advance2.EmojiToIndex;
 import me.peyppicp.advance2.HibernateInfoRunner;
-import me.peyppicp.advance2.WordToIndex;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.deeplearning4j.api.storage.StatsStorage;
@@ -93,7 +93,7 @@ public class CNNDecideEmojiMain {
         List<String> samples = FileUtils.readLines(new File(samplePath), Charsets.UTF_8);
         List<String> sampleLabels = FileUtils.readLines(new File(sampleLabelPath), Charsets.UTF_8);
         Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(new File(word2VecPath));
-        WordToIndex wordToIndex = new WordToIndex(sampleWithEmoji);
+        EmojiToIndex EmojiToIndex = new EmojiToIndex(sampleWithEmoji,25);
 
         int batchSize = 100;
         int vectorSize = word2Vec.getWordVector(word2Vec.vocab().wordAtIndex(0)).length;
@@ -143,7 +143,7 @@ public class CNNDecideEmojiMain {
                         .lossFunction(LossFunctions.LossFunction.MCXENT)
                         .activation(Activation.SOFTMAX)
                         .nIn(3 * cnnLayerFeatureMaps)
-                        .nOut(wordToIndex.getOutComesNum())    //2 classes: positive or negative
+                        .nOut(EmojiToIndex.getOutComesNum())    //2 classes: positive or negative
                         .build(), "globalPool")
                 .setOutputs("out")
                 .build();
@@ -156,8 +156,8 @@ public class CNNDecideEmojiMain {
         ComputationGraph net = new ComputationGraph(conf);
         net.init();
 
-        DataSetIterator trainIter = getDataSetIterator(true, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels, wordToIndex);
-        DataSetIterator testIter = getDataSetIterator(false, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels, wordToIndex);
+        DataSetIterator trainIter = getDataSetIterator(true, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels, EmojiToIndex);
+        DataSetIterator testIter = getDataSetIterator(false, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels, EmojiToIndex);
 
         net.setListeners(new StatsListener(statsStorage), new IterationListener() {
             @Override
@@ -194,7 +194,7 @@ public class CNNDecideEmojiMain {
     public static DataSetIterator getDataSetIterator(boolean isTrain, WordVectors wordVectors,
                                                       int miniBatchSize, int maxSentenceLength, Random random,
                                                       List<String> samples, List<String> sampleLabels,
-                                                      WordToIndex wordToIndex) {
+                                                      EmojiToIndex EmojiToIndex) {
         Preconditions.checkArgument(samples.size() == sampleLabels.size());
         for (int i = 0; i < samples.size(); i++) {
             String s = EmojiParser.removeAllEmojis(samples.get(i)).trim().toLowerCase();

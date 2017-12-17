@@ -106,12 +106,12 @@ public class FullOperationMain {
         int nEpochs = 10;
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(lookUpTableFile);
-        WordToIndex wordToIndex = new WordToIndex(emojiSampleFile.getCanonicalPath());
+        EmojiToIndex EmojiToIndex = new EmojiToIndex(emojiSampleFile.getCanonicalPath(),25);
 
-        EDataSetIterator eDataSetIterator = new EDataSetIterator(wordToIndex, emijiSampleWithoutEmojiFile.getCanonicalPath(),
+        EDataSetIterator eDataSetIterator = new EDataSetIterator(EmojiToIndex, emijiSampleWithoutEmojiFile.getCanonicalPath(),
                 emojiSampleLabelFile.getCanonicalPath(), wordVectors,
                 batchSize, truncateReviewsToLength, false);
-        EDataSetIterator eDataSetIteratorTest = new EDataSetIterator(wordToIndex, emijiSampleWithoutEmojiFile.getCanonicalPath(),
+        EDataSetIterator eDataSetIteratorTest = new EDataSetIterator(EmojiToIndex, emijiSampleWithoutEmojiFile.getCanonicalPath(),
                 emojiSampleLabelFile.getCanonicalPath(), wordVectors,
                 batchSize, truncateReviewsToLength, true);
 
@@ -202,19 +202,19 @@ public class FullOperationMain {
         File file = new File(PREFIX + "EmojiSample.txt");
 //        File file = new File(PREFIX + "EmojiSample.txt");
         List<String> samples = FileUtils.readLines(file, Charsets.UTF_8);
-        WordToIndex wordToIndex = new WordToIndex(PREFIX + "EmojiSample.txt");
+        EmojiToIndex EmojiToIndex = new EmojiToIndex(PREFIX + "EmojiSample.txt",25);
         ArrayList<String> labels = new ArrayList<>();
         for (String sample : samples) {
             List<String> emojis = EmojiParser.extractEmojis(sample)
                     .parallelStream().distinct().collect(Collectors.toList());
             StringBuilder sb = new StringBuilder();
             if (emojis.size() == 0) {
-                int index = wordToIndex.getIndex(WordToIndex.STOP);
+                int index = EmojiToIndex.getIndex(EmojiToIndex.STOP);
                 labels.add(String.valueOf(index));
                 continue;
             }
             for (String emoji : emojis) {
-                int index = wordToIndex.getIndex(emoji);
+                int index = EmojiToIndex.getIndex(emoji);
                 sb.append(index).append(",");
             }
             sb.deleteCharAt(sb.length() - 1);

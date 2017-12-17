@@ -100,11 +100,11 @@ public class EmojiLSTM {
         String prefix = "full02";
 
         ExecutorService executorService = Executors.newFixedThreadPool(1);
-        WordToIndex wordToIndex = new WordToIndex(sampleFilePath);
+        EmojiToIndex EmojiToIndex = new EmojiToIndex(sampleFilePath,25);
 
         Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel("glove.twitter.27B.100d.txt");
-        EDataSetIterator eDataSetIterator = new EDataSetIterator(wordToIndex, trainDataPath, labelDataPath, word2Vec, batchSize, truncateReviewsToLength, false);
-        EDataSetIterator eDataSetIteratorTest = new EDataSetIterator(wordToIndex, trainDataPath, labelDataPath, word2Vec, batchSize, truncateReviewsToLength, true);
+        EDataSetIterator eDataSetIterator = new EDataSetIterator(EmojiToIndex, trainDataPath, labelDataPath, word2Vec, batchSize, truncateReviewsToLength, false);
+        EDataSetIterator eDataSetIteratorTest = new EDataSetIterator(EmojiToIndex, trainDataPath, labelDataPath, word2Vec, batchSize, truncateReviewsToLength, true);
 //        AsyncDataSetIterator asyncDataSetIterator = new AsyncDataSetIterator(eDataSetIterator);
 
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()

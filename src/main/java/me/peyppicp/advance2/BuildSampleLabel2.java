@@ -21,22 +21,22 @@ public class BuildSampleLabel2 {
     public static void main(String[] args) throws IOException {
         File file = new File("ReEnforcementEmojiSample.txt");
         List<String> samples = FileUtils.readLines(file, Charsets.UTF_8);
-        WordToIndex wordToIndex = new WordToIndex("ReEnforcementEmojiSample.txt");
+        EmojiToIndex EmojiToIndex = new EmojiToIndex("ReEnforcementEmojiSample.txt",25);
         ArrayList<String> labels = new ArrayList<>();
         for (String sample : samples) {
             List<String> emojis = EmojiParser.extractEmojis(sample)
                     .parallelStream().distinct().collect(Collectors.toList());
             StringBuilder sb = new StringBuilder();
             if (emojis.size() == 0) {
-                int index = wordToIndex.getIndex(WordToIndex.STOP);
+                int index = EmojiToIndex.getIndex(EmojiToIndex.STOP);
                 labels.add(String.valueOf(index));
                 continue;
             }
             for (String emoji : emojis) {
-                int index = wordToIndex.getIndex(emoji);
+                int index = EmojiToIndex.getIndex(emoji);
 //                if (index == -1) {
-//                    index = wordToIndex.getIndex(WordToIndex.UNKNOWN);
-//                    sb.append(WordToIndex.UNKNOWN).append("-").append(index).append(",");
+//                    index = EmojiToIndex.getIndex(EmojiToIndex.UNKNOWN);
+//                    sb.append(EmojiToIndex.UNKNOWN).append("-").append(index).append(",");
 //                }else{
 //                    sb.append(emoji).append("-").append(index).append(",");
 //                }

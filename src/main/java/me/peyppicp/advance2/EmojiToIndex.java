@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Data
-public class WordToIndex {
+public class EmojiToIndex {
 
     public static final String UNKNOWN = "$UNKNOWN";
     public static final String STOP = "$STOP";
@@ -28,9 +28,11 @@ public class WordToIndex {
 
     private Map<String, Integer> wordIndexMap;
     private int outComesNum;
+    private final int limitNum;
 
-    public WordToIndex(String samplesFilePath) throws IOException {
+    public EmojiToIndex(String samplesFilePath, int limitNum) throws IOException {
         this.samplesFilePath = samplesFilePath;
+        this.limitNum = limitNum;
         init();
     }
 
@@ -50,7 +52,7 @@ public class WordToIndex {
         Map<String, Integer> temp = new LinkedHashMap<>();
         wordIndexMap.entrySet()
                 .parallelStream().sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .limit(25)
+                .limit(limitNum)
                 .forEachOrdered(entry -> temp.put(entry.getKey(), entry.getValue()));
 
         wordIndexMap = new LinkedHashMap<>();

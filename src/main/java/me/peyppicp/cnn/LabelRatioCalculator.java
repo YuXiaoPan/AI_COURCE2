@@ -1,7 +1,7 @@
 package me.peyppicp.cnn;
 
 import com.vdurmont.emoji.EmojiParser;
-import me.peyppicp.advance2.WordToIndex;
+import me.peyppicp.advance2.EmojiToIndex;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 
@@ -62,7 +62,7 @@ public class LabelRatioCalculator {
         System.out.println("Sum:" + sum[0]);
 //        Preconditions.checkArgument(emojiSum[0] == sum[0]);
 
-        WordToIndex wordToIndex = new WordToIndex("EmojiSample.txt");
+        EmojiToIndex EmojiToIndex = new EmojiToIndex("EmojiSample.txt",25);
         System.out.println();
     }
 }

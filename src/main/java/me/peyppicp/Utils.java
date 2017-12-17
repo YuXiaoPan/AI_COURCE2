@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.vdurmont.emoji.Emoji;
 import com.vdurmont.emoji.EmojiManager;
 import com.vdurmont.emoji.EmojiParser;
-import me.peyppicp.advance2.WordToIndex;
+import me.peyppicp.advance2.EmojiToIndex;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
@@ -23,6 +23,14 @@ import java.util.stream.Collectors;
  * @email yuxiao.pan@kikatech.com
  */
 public class Utils {
+
+    public static void writeLineToPath(List<String> data, String path) throws IOException {
+        FileUtils.writeLines(new File(path),
+                "UTF-8",
+                data,
+                "\n",
+                false);
+    }
 
     public static List<String> readLinesFromPath(String path) throws IOException {
         return FileUtils.readLines(new File(path), Charsets.UTF_8);
@@ -128,20 +136,20 @@ public class Utils {
         File file = new File(input);
 //        File file = new File(PREFIX + "EmojiSample.txt");
         List<String> samples = FileUtils.readLines(file, Charsets.UTF_8);
-        WordToIndex wordToIndex = new WordToIndex(input);
+        EmojiToIndex EmojiToIndex = new EmojiToIndex(input, 25);
         ArrayList<String> labels = new ArrayList<>();
         for (String sample : samples) {
             List<String> emojis = EmojiParser.extractEmojis(sample)
                     .parallelStream().distinct().collect(Collectors.toList());
             StringBuilder sb = new StringBuilder();
             if (emojis.size() == 0) {
-//                int index = wordToIndex.getIndex(WordToIndex.UNKNOWN);
+//                int index = EmojiToIndex.getIndex(EmojiToIndex.UNKNOWN);
                 int index = -1;
                 labels.add(String.valueOf(index));
                 continue;
             }
             for (String emoji : emojis) {
-                int index = wordToIndex.getIndex(emoji);
+                int index = EmojiToIndex.getIndex(emoji);
                 sb.append(index).append(",");
             }
             sb.deleteCharAt(sb.length() - 1);

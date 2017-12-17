@@ -40,12 +40,12 @@ public class EDataSetIterator implements DataSetIterator {
     private List<String> totalLines;
     private List<String> totalLabelLinesWithIndex;
     private final TokenizerFactory tokenizerFactory;
-    private WordToIndex wordToIndex;
+    private EmojiToIndex EmojiToIndex;
 
-    public EDataSetIterator(WordToIndex wordToIndex, String path, String labelPath,
+    public EDataSetIterator(EmojiToIndex EmojiToIndex, String path, String labelPath,
                             WordVectors wordVectors, int batchSize,
                             int truncateLength, boolean isTest) throws IOException {
-        this.wordToIndex = wordToIndex;
+        this.EmojiToIndex = EmojiToIndex;
         this.wordVectors = wordVectors;
         this.batchSize = batchSize;
         this.truncateLength = truncateLength;
@@ -97,7 +97,7 @@ public class EDataSetIterator implements DataSetIterator {
             maxLength = truncateLength;
         }
         INDArray features = Nd4j.create(new int[]{reviews.size(), vectorSize, maxLength}, 'f');
-        INDArray labels = Nd4j.create(new int[]{reviews.size(), wordToIndex.getOutComesNum(), maxLength}, 'f');
+        INDArray labels = Nd4j.create(new int[]{reviews.size(), EmojiToIndex.getOutComesNum(), maxLength}, 'f');
         INDArray featureMask = Nd4j.zeros(reviews.size(), maxLength);
         INDArray labelMask = Nd4j.zeros(reviews.size(), maxLength);
 
@@ -115,7 +115,7 @@ public class EDataSetIterator implements DataSetIterator {
             }
             int index = labelInts[i];
             int lastIndex = Math.min(tokens.size(), maxLength);
-            if (index == wordToIndex.getIndex(WordToIndex.STOP)) {
+            if (index == EmojiToIndex.getIndex(EmojiToIndex.STOP)) {
                 labels.putScalar(new int[]{i, index, lastIndex - 1}, 0.12);
             } else {
                 labels.putScalar(new int[]{i, index, lastIndex - 1}, 1.0);
@@ -134,7 +134,7 @@ public class EDataSetIterator implements DataSetIterator {
     }
 
     public int totalOutcomes() {
-        return wordToIndex.getOutComesNum();
+        return EmojiToIndex.getOutComesNum();
     }
 
     public boolean resetSupported() {
@@ -174,7 +174,7 @@ public class EDataSetIterator implements DataSetIterator {
     }
 
     public List<String> getLabels() {
-        return wordToIndex.totalLabels();
+        return EmojiToIndex.totalLabels();
     }
 
     public boolean hasNext() {

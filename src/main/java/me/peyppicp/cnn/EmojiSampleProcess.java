@@ -2,7 +2,7 @@ package me.peyppicp.cnn;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.vdurmont.emoji.EmojiParser;
-import me.peyppicp.advance2.WordToIndex;
+import me.peyppicp.advance2.EmojiToIndex;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 
@@ -16,9 +16,9 @@ public class EmojiSampleProcess {
 
     public static void main(String[] args) throws IOException {
         File file = new File("emoji_sample.txt");
-        WordToIndex wordToIndex = new WordToIndex(file.getCanonicalPath());
+        EmojiToIndex EmojiToIndex = new EmojiToIndex(file.getCanonicalPath(),25);
         List<String> emojiSamples = FileUtils.readLines(file, Charsets.UTF_8);
-        Map<String, Integer> wordIndexMap = wordToIndex.getWordIndexMap();
+        Map<String, Integer> wordIndexMap = EmojiToIndex.getWordIndexMap();
         ArrayListMultimap<String, String> emojiToSamples = ArrayListMultimap.create(); //emoji -> samples
         System.out.println("Begin handle data.");
         int i = 0;
@@ -33,7 +33,7 @@ public class EmojiSampleProcess {
                 }
             } else {
                 String s = sample.trim().toLowerCase();
-                emojiToSamples.put(WordToIndex.STOP, s);
+                emojiToSamples.put(EmojiToIndex.STOP, s);
             }
             System.out.println(i++);
         }
