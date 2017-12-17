@@ -5,6 +5,7 @@ import me.peyppicp.Utils;
 import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
+import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -15,6 +16,7 @@ import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
+import org.deeplearning4j.text.sentenceiterator.CollectionSentenceIterator;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.ui.api.UIServer;
@@ -42,9 +44,9 @@ public class RnnPredictWords {
     public static final String UNKNOWN = "<unknown>";
     public static final String EMOJI = "<emoji>";
     public static final String END = "<end>";
-    public static final String OUTPUT = "/home/peyppicp/output/";
+        public static final String OUTPUT = "/home/peyppicp/output/";
     public static final String PREFIX = "/home/peyppicp/data/new/";
-    //public static final String PREFIX = "";
+//    public static final String PREFIX = "";
 //    public static final String OUTPUT = "";
     private static final int limitNum = -1;
     private static final Logger log = LoggerFactory.getLogger(RnnPredictWords.class);
@@ -57,16 +59,16 @@ public class RnnPredictWords {
 
         String prefix = "rnn";
         int truncateLength = 30;
-        int batchSize = 32;
+        int batchSize = 64;
         int nEpochs = 50;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
         WordToIndex wordToIndex = new WordToIndex(samples, limitNum);
-        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "glove.twitter.27B.100d.txt");
+        WordVectors wordVectors = rebuildWord2Vec(samples);
 
         RDataSetIterator rDataSetIterator = new RDataSetIterator(true, truncateLength, batchSize,
-                samples, wordToIndex, word2Vec);
+                samples, wordToIndex, wordVectors);
         RDataSetIterator tDataSetIterator = new RDataSetIterator(false, truncateLength, batchSize,
-                samples, wordToIndex, word2Vec);
+                samples, wordToIndex, wordVectors);
 
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .seed(new Random().nextInt(100))
@@ -78,10 +80,10 @@ public class RnnPredictWords {
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
-                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(2000)
+                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(200)
                         .activation(Activation.TANH).build())
                 .layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(2000).nOut(rDataSetIterator.totalOutcomes()).build())
+                        .activation(Activation.SOFTMAX).nIn(200).nOut(rDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
                 .build();
@@ -102,6 +104,34 @@ public class RnnPredictWords {
             rDataSetIterator.reset();
             ModelSerializer.writeModel(multiLayerNetwork, new File(OUTPUT + prefix + j + ".txt"), true);
         }
+    }
+
+    private static WordVectors rebuildWord2Vec(List<String> originSamples) throws IOException {
+        File subWord2VecFile = new File(PREFIX + "sub.word2vec.txt");
+        if (!subWord2VecFile.exists()) {
+            int minWordFrequency = 5;
+            int iterations = 1;
+            int layerSize = 50;
+            int seed = 3543;
+            int windowSize = 10;
+
+            CollectionSentenceIterator iterator = new CollectionSentenceIterator(originSamples);
+            DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
+            tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
+            Word2Vec vec = new Word2Vec.Builder()
+                    .minWordFrequency(minWordFrequency)
+                    .iterations(iterations)
+                    .layerSize(layerSize)
+                    .seed(seed)
+                    .windowSize(windowSize)
+                    .iterate(iterator)
+                    .tokenizerFactory(tokenizerFactory)
+                    .build();
+            vec.fit();
+            WordVectorSerializer.writeWordVectors(vec.lookupTable(), PREFIX + "sub.word2vec.txt");
+            return vec;
+        }
+        return WordVectorSerializer.readWord2VecModel(subWord2VecFile);
     }
 
     private static void preMain() throws IOException {
@@ -134,21 +164,21 @@ public class RnnPredictWords {
             tempResults.add(stringBuilder.toString().trim());
         }
 
-        WordToIndex wordToIndex = new WordToIndex(tempResults, limitNum);
-        List<String> finalResults = new ArrayList<>(tempResults.size());
-        for (String tempResult : tempResults) {
-            List<String> tokens = tokenizerFactory.create(tempResult).getTokens();
-            List<String> indexes = new ArrayList<>(tokens.size());
-            for (String token : tokens) {
-                if (wordToIndex.getWordIndex(token) != wordToIndex.getWordIndex(UNKNOWN)) {
-                    indexes.add(token);
-                }
-            }
-            StringBuilder stringBuilder = new StringBuilder();
-            indexes.forEach(s -> stringBuilder.append(s).append(" "));
-            finalResults.add(stringBuilder.toString().trim());
-        }
+//        WordToIndex wordToIndex = new WordToIndex(tempResults, limitNum);
+//        List<String> finalResults = new ArrayList<>(tempResults.size());
+//        for (String tempResult : tempResults) {
+//            List<String> tokens = tokenizerFactory.create(tempResult).getTokens();
+//            List<String> indexes = new ArrayList<>(tokens.size());
+//            for (String token : tokens) {
+//                if (wordToIndex.getWordIndex(token) != wordToIndex.getWordIndex(UNKNOWN)) {
+//                    indexes.add(token);
+//                }
+//            }
+//            StringBuilder stringBuilder = new StringBuilder();
+//            indexes.forEach(s -> stringBuilder.append(s).append(" "));
+//            finalResults.add(stringBuilder.toString().trim());
+//        }
         String output = PREFIX + "more_standard_emoji_sample.txt";
-        Utils.writeLineToPath(finalResults, output);
+        Utils.writeLineToPath(tempResults, output);
     }
 }

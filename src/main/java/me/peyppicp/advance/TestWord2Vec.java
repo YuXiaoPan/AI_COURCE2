@@ -1,10 +1,7 @@
 package me.peyppicp.advance;
 
-import com.google.common.collect.ImmutableList;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
-
-import java.util.Collection;
 
 /**
  * @author YuXiao Pan
@@ -14,9 +11,10 @@ import java.util.Collection;
 public class TestWord2Vec {
 
     public static void main(String[] args) {
-        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel("LookUpTable.txt");
-        Collection<String> strings2 = word2Vec.wordsNearest(ImmutableList.of("i'm", "happy"), ImmutableList.of(), 10);
-        System.out.println(strings2);
+        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel("glove.twitter.27B.100d.txt");
+        System.out.println(word2Vec.getMinWordFrequency());
+//        Collection<String> strings2 = word2Vec.wordsNearest(ImmutableList.of("i'm", "happy"), ImmutableList.of(), 10);
+//        System.out.println(strings2);
 //        int[] ints = new int[100];
 //        Arrays.stream(ints).parallel().forEach(System.out::println);
     }
