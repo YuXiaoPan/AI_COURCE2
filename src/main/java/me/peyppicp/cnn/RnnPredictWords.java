@@ -3,7 +3,6 @@ package me.peyppicp.cnn;
 import com.vdurmont.emoji.EmojiParser;
 import me.peyppicp.Utils;
 import org.deeplearning4j.api.storage.StatsStorage;
-import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.models.word2vec.Word2Vec;
@@ -99,8 +98,8 @@ public class RnnPredictWords {
         System.out.println("begin train");
         for (int j = 0; j < nEpochs; j++) {
             multiLayerNetwork.fit(rDataSetIterator);
-            Evaluation evaluate = multiLayerNetwork.evaluate(tDataSetIterator);
-            System.out.println(evaluate.stats());
+//            Evaluation evaluate = multiLayerNetwork.evaluate(tDataSetIterator);
+//            System.out.println(evaluate.stats());
             rDataSetIterator.reset();
             ModelSerializer.writeModel(multiLayerNetwork, new File(OUTPUT + prefix + j + ".txt"), true);
         }

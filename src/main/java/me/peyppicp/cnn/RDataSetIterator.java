@@ -71,7 +71,7 @@ public class RDataSetIterator implements DataSetIterator {
         INDArray input = Nd4j.create(new int[]{batchSize,
                 vectorSize, maxWordsSize}, 'f');
         INDArray labels = Nd4j.create(new int[]{batchSize,
-                wordToIndex.getTotalWordsCount(), maxWordsSize}, 'f');
+                vectorSize, maxWordsSize}, 'f');
 
         for (int i = 0; i < words.size(); i++) {
             String currentWord = words.get(i);
@@ -148,7 +148,7 @@ public class RDataSetIterator implements DataSetIterator {
 
     @Override
     public List<String> getLabels() {
-        return wordToIndex.getLabels();
+        throw new RuntimeException();
     }
 
     @Override
