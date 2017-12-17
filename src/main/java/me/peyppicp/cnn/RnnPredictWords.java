@@ -42,9 +42,11 @@ public class RnnPredictWords {
     public static final String UNKNOWN = "<unknown>";
     public static final String EMOJI = "<emoji>";
     public static final String END = "<end>";
-    public static final String OUTPUT = "/home/peyppicp/output/";
-    public static final String PREFIX = "/home/peyppicp/data/new/";
-    private static final int limitNum = 12500;
+//    public static final String OUTPUT = "/home/peyppicp/output/";
+    //    public static final String PREFIX = "/home/peyppicp/data/new/";
+public static final String PREFIX = "";
+    public static final String OUTPUT = "";
+    private static final int limitNum = 2000;
     private static final Logger log = LoggerFactory.getLogger(RnnPredictWords.class);
 
     public static void main(String[] args) throws IOException {
@@ -54,8 +56,8 @@ public class RnnPredictWords {
         }
 
         String prefix = "rnn";
-        int truncateLength = 50;
-        int batchSize = 64;
+        int truncateLength = 20;
+        int batchSize = 32;
         int nEpochs = 50;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
         WordToIndex wordToIndex = new WordToIndex(samples, limitNum);
@@ -73,10 +75,10 @@ public class RnnPredictWords {
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
-                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(15000)
+                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(800)
                         .activation(Activation.TANH).build())
                 .layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(15000).nOut(rDataSetIterator.totalOutcomes()).build())
+                        .activation(Activation.SOFTMAX).nIn(800).nOut(rDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
                 .build();
