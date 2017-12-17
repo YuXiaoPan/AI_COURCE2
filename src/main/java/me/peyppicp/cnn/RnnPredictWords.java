@@ -59,7 +59,7 @@ public class RnnPredictWords {
 
         String prefix = "rnn";
         int truncateLength = 30;
-        int batchSize = 64;
+        int batchSize = 128;
         int nEpochs = 50;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
         WordToIndex wordToIndex = new WordToIndex(samples, limitNum);
