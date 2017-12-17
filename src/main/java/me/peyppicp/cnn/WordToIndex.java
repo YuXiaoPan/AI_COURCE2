@@ -36,10 +36,16 @@ public class WordToIndex {
         }
         Map<String, Integer> temp = new LinkedHashMap<>();
         final int[] a = {0};
-        wordCounter.entrySet().parallelStream()
-                .sorted((o1, o2) -> -o1.getValue().compareTo(o2.getValue()))
-                .limit(LIMITNUM)
-                .forEachOrdered(e -> temp.put(e.getKey(), a[0]++));
+        if (LIMITNUM == -1) {
+            wordCounter.entrySet().parallelStream()
+                    .sorted((o1, o2) -> -o1.getValue().compareTo(o2.getValue()))
+                    .forEachOrdered(e -> temp.put(e.getKey(), a[0]++));
+        }else{
+            wordCounter.entrySet().parallelStream()
+                    .sorted((o1, o2) -> -o1.getValue().compareTo(o2.getValue()))
+                    .limit(LIMITNUM)
+                    .forEachOrdered(e -> temp.put(e.getKey(), a[0]++));
+        }
         wordCounter = temp;
     }
 
