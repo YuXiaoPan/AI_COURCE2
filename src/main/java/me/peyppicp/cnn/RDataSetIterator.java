@@ -10,8 +10,10 @@ import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.factory.Nd4j;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author YuXiao Pan
@@ -52,8 +54,8 @@ public class RDataSetIterator implements DataSetIterator {
         List<Integer> indexes = new ArrayList<>();
         for (int i = 0; i < batchSize && cursor < samples.size(); i++, cursor++) {
             String sample = samples.get(cursor);
-            List<String> tokens = tokenizerFactory.create(sample).getTokens();
-            tokens.parallelStream().filter(s -> !"".equals(s)).map(Integer::parseInt).forEachOrdered(indexes::add);
+            List<String> tokens = Arrays.stream(sample.split(" ")).collect(Collectors.toList());
+            tokens.parallelStream().map(Integer::parseInt).forEachOrdered(indexes::add);
 //            indexes.add(tokens.parallelStream().map(Integer::parseInt).collect(Collectors.toList()));
         }
 
