@@ -198,7 +198,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>me.peyppicp.cnn.CNNDecidePopupEmojiMain</mainClass>
+                            <mainClass>me.peyppicp.cnn.RnnPredictWords</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
