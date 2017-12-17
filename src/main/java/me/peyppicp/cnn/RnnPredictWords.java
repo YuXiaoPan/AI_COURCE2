@@ -80,10 +80,10 @@ public class RnnPredictWords {
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
-                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(200)
+                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(100)
                         .activation(Activation.TANH).build())
                 .layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(200).nOut(rDataSetIterator.totalOutcomes()).build())
+                        .activation(Activation.SOFTMAX).nIn(100).nOut(rDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
                 .build();

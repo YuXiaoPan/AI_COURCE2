@@ -81,9 +81,9 @@ public class RDataSetIterator implements DataSetIterator {
                 String nextWord = words.get(j);
                 INDArray nextVector = wordVectors.getWordVectorMatrix(nextWord);
                 input.put(new INDArrayIndex[]{NDArrayIndex.point(i), NDArrayIndex.all(), NDArrayIndex.point(timeStep)}, currentVector);
-//                labels.put(new INDArrayIndex[]{NDArrayIndex.point(i), NDArrayIndex.all(), NDArrayIndex.point(timeStep)}, nextVector);
+                labels.put(new INDArrayIndex[]{NDArrayIndex.point(i), NDArrayIndex.all(), NDArrayIndex.point(timeStep)}, nextVector);
 //                input.putScalar(new int[]{i, currentIndex, timeStep}, 1.0);
-                labels.putScalar(new int[]{i, wordToIndex.getWordIndex(nextWord), timeStep}, 1.0);
+//                labels.putScalar(new int[]{i, wordToIndex.getWordIndex(nextWord), timeStep}, 1.0);
                 currentWord = nextWord;
             }
 
@@ -103,7 +103,7 @@ public class RDataSetIterator implements DataSetIterator {
 
     @Override
     public int totalOutcomes() {
-        return wordToIndex.getTotalWordsCount();
+        return vectorSize;
     }
 
     @Override
