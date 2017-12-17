@@ -1,6 +1,5 @@
 package me.peyppicp.cnn;
 
-import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
@@ -11,10 +10,8 @@ import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.factory.Nd4j;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author YuXiao Pan
@@ -30,11 +27,9 @@ public class RDataSetIterator implements DataSetIterator {
     private int cursor = 0;
     private final TokenizerFactory tokenizerFactory;
     private final WordToIndex wordToIndex;
-    private final WordVectors wordVectors;
 
     public RDataSetIterator(boolean isTrain, int truncateLength, int batchSize,
-                            List<String> samples, WordToIndex wordToIndex,
-                            WordVectors wordVectors) {
+                            List<String> samples, WordToIndex wordToIndex) {
 //        this.linesToReadPerBatch = linesToReadPerBatch;
         this.truncateLength = truncateLength;
         this.samples = samples;
@@ -42,7 +37,6 @@ public class RDataSetIterator implements DataSetIterator {
         this.tokenizerFactory = new DefaultTokenizerFactory();
         this.tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
         this.wordToIndex = wordToIndex;
-        this.wordVectors = wordVectors;
         if (isTrain) {
             samples = samples.subList(0, 5000);
         }
@@ -55,28 +49,28 @@ public class RDataSetIterator implements DataSetIterator {
             throw new RuntimeException();
         }
 
-        List<String> words = new ArrayList<>();
+        List<Integer> indexes = new ArrayList<>();
         for (int i = 0; i < batchSize && cursor < samples.size(); i++, cursor++) {
             String sample = samples.get(cursor);
-            List<String> tokens = Arrays.stream(sample.split(" ")).collect(Collectors.toList());
-            tokens.parallelStream().forEachOrdered(words::add);
-//            words.add(tokens.parallelStream().collect(Collectors.toList()));
+            List<String> tokens = tokenizerFactory.create(sample).getTokens();
+            tokens.parallelStream().filter(s -> !"".equals(s)).map(Integer::parseInt).forEachOrdered(indexes::add);
+//            indexes.add(tokens.parallelStream().map(Integer::parseInt).collect(Collectors.toList()));
         }
 
-        int maxWordsSize = Math.min(truncateLength, words.size());
+        int maxWordsSize = Math.min(truncateLength, indexes.size());
         INDArray input = Nd4j.create(new int[]{batchSize,
                 wordToIndex.getTotalWordsCount(), maxWordsSize}, 'f');
         INDArray labels = Nd4j.create(new int[]{batchSize,
                 wordToIndex.getTotalWordsCount(), maxWordsSize}, 'f');
 
-        for (int i = 0; i < words.size(); i++) {
-            String currentWord = words.get(i);
+        for (int i = 0; i < indexes.size(); i++) {
+            Integer currentIndex = indexes.get(i);
             int timeStep = 0;
             for (int j = i + 1; j < maxWordsSize; j++, timeStep++) {
-                String nextWord = words.get(j);
-//                input.putScalar(new int[]{i, currentIndex, timeStep}, 1.0);
-//                labels.putScalar(new int[]{i, nextIndex, timeStep}, 1.0);
-                currentWord = nextWord;
+                Integer nextIndex = indexes.get(j);
+                input.putScalar(new int[]{i, currentIndex, timeStep}, 1.0);
+                labels.putScalar(new int[]{i, nextIndex, timeStep}, 1.0);
+                currentIndex = nextIndex;
             }
 
         }
