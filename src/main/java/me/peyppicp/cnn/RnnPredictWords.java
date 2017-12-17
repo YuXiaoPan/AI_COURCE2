@@ -44,6 +44,7 @@ public class RnnPredictWords {
     public static final String END = "<end>";
     public static final String OUTPUT = "/home/peyppicp/output/";
     public static final String PREFIX = "/home/peyppicp/data/new/";
+    private static final int limitNum = 12500;
     private static final Logger log = LoggerFactory.getLogger(RnnPredictWords.class);
 
     public static void main(String[] args) throws IOException {
@@ -57,7 +58,7 @@ public class RnnPredictWords {
         int batchSize = 64;
         int nEpochs = 50;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
-        WordToIndex wordToIndex = new WordToIndex(samples, 12500);
+        WordToIndex wordToIndex = new WordToIndex(samples, limitNum);
 
         RDataSetIterator rDataSetIterator = new RDataSetIterator(true, truncateLength, batchSize, samples, wordToIndex);
         RDataSetIterator tDataSetIterator = new RDataSetIterator(false, truncateLength, batchSize, samples, wordToIndex);
@@ -128,7 +129,7 @@ public class RnnPredictWords {
             tempResults.add(stringBuilder.toString().trim());
         }
 
-        WordToIndex wordToIndex = new WordToIndex(tempResults, 20000);
+        WordToIndex wordToIndex = new WordToIndex(tempResults, limitNum);
         List<String> finalResults = new ArrayList<>(tempResults.size());
         for (String tempResult : tempResults) {
             List<String> tokens = tokenizerFactory.create(tempResult).getTokens();
