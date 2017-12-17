@@ -9,6 +9,8 @@ import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.DataSetPreProcessor;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.indexing.INDArrayIndex;
+import org.nd4j.linalg.indexing.NDArrayIndex;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,12 +70,18 @@ public class RDataSetIterator implements DataSetIterator {
                 wordToIndex.getTotalWordsCount(), maxWordsSize}, 'f');
         INDArray labels = Nd4j.create(new int[]{batchSize,
                 wordToIndex.getTotalWordsCount(), maxWordsSize}, 'f');
+        INDArray inputMask = Nd4j.zeros(batchSize, maxWordsSize);
+        INDArray labelMask = Nd4j.zeros(batchSize, maxWordsSize);
 
         for (int i = 0; i < words.size(); i++) {
             String currentWord = words.get(i);
+            INDArray currentVector = wordVectors.getWordVectorMatrix(currentWord);
             int timeStep = 0;
             for (int j = i + 1; j < maxWordsSize; j++, timeStep++) {
                 String nextWord = words.get(j);
+                INDArray nextVector = wordVectors.getWordVectorMatrix(nextWord);
+                input.put(new INDArrayIndex[]{NDArrayIndex.point(i), NDArrayIndex.all(), NDArrayIndex.point(timeStep)}, currentVector);
+                labels.put(new INDArrayIndex[]{NDArrayIndex.point(i), NDArrayIndex.all(), NDArrayIndex.point(timeStep)}, nextVector);
 //                input.putScalar(new int[]{i, currentIndex, timeStep}, 1.0);
 //                labels.putScalar(new int[]{i, nextIndex, timeStep}, 1.0);
                 currentWord = nextWord;
