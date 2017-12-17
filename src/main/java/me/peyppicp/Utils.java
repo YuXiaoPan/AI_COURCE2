@@ -24,7 +24,20 @@ import java.util.stream.Collectors;
  */
 public class Utils {
 
-    public static void processOriginalSamples(String input, String output) throws IOException {
+    public static List<String> readLinesFromPath(String path) throws IOException {
+        return FileUtils.readLines(new File(path), Charsets.UTF_8);
+    }
+
+    /**
+     * CNNMain处理emoji_sample.txt文件
+     * 过滤只包含emoji表情的行
+     *
+     * @param input     输入数据源地址
+     * @param output    输出数据源地址
+     * @param addOrigin 是否保留原有行
+     * @throws IOException
+     */
+    public static void processOriginalSamples(String input, String output, boolean addOrigin) throws IOException {
         List<String> sampleLines = FileUtils.readLines(new File(input), Charsets.UTF_8);
         List<String> emojiUnicodes = EmojiManager.getAll().parallelStream().map(Emoji::getUnicode).collect(Collectors.toList());
         List<String> temp = new ArrayList<>();
@@ -40,20 +53,26 @@ public class Utils {
                 int emojiLength = 2;
                 int currentEmojiIndex = 0;
                 List<String> containedEmojis = EmojiParser.extractEmojis(line).parallelStream().distinct().collect(Collectors.toList());
-                for (String emoji : containedEmojis) {
-                    boolean flag = false;
-                    currentEmojiIndex = line.indexOf(emoji);
-                    if (currentEmojiIndex != -1) {
-                        for (int i = currentEmojiIndex; i < line.length() - 1; i += emojiLength) {
-                            if (EmojiManager.isEmoji(line.substring(currentEmojiIndex, currentEmojiIndex + emojiLength))) {
-                                currentEmojiIndex += emojiLength;
-                                flag = true;
+                if (!containedEmojis.isEmpty()) {
+                    for (String emoji : containedEmojis) {
+                        boolean flag = false;
+                        currentEmojiIndex = line.indexOf(emoji);
+                        if (currentEmojiIndex != -1) {
+                            for (int i = currentEmojiIndex; i < line.length() - 1; i += emojiLength) {
+                                if (EmojiManager.isEmoji(line.substring(currentEmojiIndex, currentEmojiIndex + emojiLength))) {
+                                    currentEmojiIndex += emojiLength;
+                                    flag = true;
+                                }
                             }
                         }
+                        if (flag) {
+                            temp.add(line.substring(0, currentEmojiIndex).trim().toLowerCase());
+                            line = line.substring(currentEmojiIndex, line.length()).trim().toLowerCase();
+                        }
                     }
-                    if (flag) {
-                        temp.add(line.substring(0, currentEmojiIndex).trim().toLowerCase());
-                        line = line.substring(currentEmojiIndex, line.length()).trim().toLowerCase();
+                } else {
+                    if (addOrigin) {
+                        temp.add(line);
                     }
                 }
             } catch (Exception e) {
@@ -70,16 +89,21 @@ public class Utils {
 
 //        添加空格
         for (String sample : temp) {
-            String emoji = EmojiParser.extractEmojis(sample).get(0);
-            int i = sample.indexOf(emoji);
-            if (i >= 1) {
-                if (i == emoji.length() - 1) {
-                    continue;
-                } else {
-                    String head = sample.substring(0, i);
-                    String last = sample.substring(i, sample.length());
-                    temp1.add(head + " " + last);
+            List<String> extractEmojis = EmojiParser.extractEmojis(sample);
+            if (!extractEmojis.isEmpty()) {
+                String emoji = extractEmojis.get(0);
+                int i = sample.indexOf(emoji);
+                if (i >= 1) {
+                    if (i == emoji.length() - 1) {
+                        continue;
+                    } else {
+                        String head = sample.substring(0, i);
+                        String last = sample.substring(i, sample.length());
+                        temp1.add(head + " " + last);
+                    }
                 }
+            } else {
+                temp1.add(sample);
             }
         }
 

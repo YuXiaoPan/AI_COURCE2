@@ -18,12 +18,12 @@ public class Word2VecMain {
 //    public static final String OUTPUT = "/home/peyppicp/output/";
 
     public static void main(String[] args) throws IOException {
-        String filePath = "EmojiSample.txt";
+        String filePath = "standard_emoji_samples.txt";
         int minWordFrequency = 10;
-        int iterations = 5;
-        int layerSize = 100;
+        int iterations = 1;
+        int layerSize = 50;
         int seed = 3543;
-        int windowSize = 10;
+        int windowSize = 20;
 
         BasicLineIterator lineIterator = new BasicLineIterator(filePath);
         DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();

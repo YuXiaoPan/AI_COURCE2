@@ -1,17 +1,8 @@
 package me.peyppicp.cnn;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
 import com.vdurmont.emoji.EmojiParser;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import me.peyppicp.Utils;
 import me.peyppicp.advance2.HibernateInfoRunner;
-import me.peyppicp.advance2.WordToIndex;
-import org.apache.commons.io.Charsets;
-import org.apache.commons.io.FileUtils;
 import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.iterator.CnnSentenceDataSetIterator;
@@ -21,7 +12,10 @@ import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.nn.api.Model;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
-import org.deeplearning4j.nn.conf.*;
+import org.deeplearning4j.nn.conf.ComputationGraphConfiguration;
+import org.deeplearning4j.nn.conf.ConvolutionMode;
+import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
+import org.deeplearning4j.nn.conf.Updater;
 import org.deeplearning4j.nn.conf.graph.MergeVertex;
 import org.deeplearning4j.nn.conf.layers.ConvolutionLayer;
 import org.deeplearning4j.nn.conf.layers.GlobalPoolingLayer;
@@ -35,7 +29,6 @@ import org.deeplearning4j.ui.stats.StatsListener;
 import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
-import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,17 +42,18 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
 /**
  * @author YuXiao Pan
- * @date 2017/12/16
+ * @date 2017/12/17
  * @email yuxiao.pan@kikatech.com
  */
-public class CNNMain {
+public class CNNDecidePopupEmojiMain {
 
-    private static final Logger log = LoggerFactory.getLogger(CNNMain.class);
-    private static ArrayListMultimap<String, SampleIndexPair> emojiToSamples = ArrayListMultimap.create();
-        public static final String OUTPUT = "/home/peyppicp/output/";
+    private static final Logger log = LoggerFactory.getLogger(CNNDecideEmojiMain.class);
+    private static final String POPUP = "1";
+    private static final String STOP = "2";
+
+    public static final String OUTPUT = "/home/peyppicp/output/";
     public static final String PREFIX = "/home/peyppicp/data/new/";
 //    public static final String PREFIX = "/home/panyuxiao/data/new/";
 //    public static final String OUTPUT = "/home/panyuxiao/output/";
@@ -67,31 +61,15 @@ public class CNNMain {
 //    public static final String OUTPUT = "";
 
     public static void main(String[] args) throws IOException {
-
-        String prefix = "cnn01";
-
-        String sampleWithEmoji = PREFIX + "EmojiSample.txt";
-        String samplePath = PREFIX + "EmojiSampleWithoutEmoji.txt";
-        String sampleLabelPath = PREFIX + "EmojiSampleLabels.txt";
+        String prefix = "p01";
+        String input = PREFIX + "emoji_sample.txt";
+        String output = PREFIX + "standard_emoji_samples.txt";
         String word2VecPath = PREFIX + "glove.twitter.27B.100d.txt";
-        if (!(new File(sampleLabelPath).exists() && new File(samplePath).exists()
-                && new File(sampleWithEmoji).exists() && new File(word2VecPath).exists())) {
-            System.out.println("Begin process original samples.");
-            Utils.processOriginalSamples(PREFIX + "emoji_sample.txt", sampleWithEmoji);
-//            processOriginalSamples(new File(PREFIX + "emoji_sample.txt"));
-//            processWord2Vec();
-            System.out.println("Begin mark labels.");
-            Utils.markLabels(sampleWithEmoji, sampleLabelPath);
-            System.out.println("Begin remove emojis.");
-            Utils.removeEmojis(sampleWithEmoji, samplePath);
-        }
+//        Utils.processOriginalSamples(input, output, true);
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
-        List<String> samples = FileUtils.readLines(new File(samplePath), Charsets.UTF_8);
-        List<String> sampleLabels = FileUtils.readLines(new File(sampleLabelPath), Charsets.UTF_8);
+        List<String> samples = Utils.readLinesFromPath(output);
         Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(new File(word2VecPath));
-        WordToIndex wordToIndex = new WordToIndex(sampleWithEmoji);
-
         int batchSize = 100;
         int vectorSize = word2Vec.getWordVector(word2Vec.vocab().wordAtIndex(0)).length;
         int nEpochs = 5000;
@@ -100,10 +78,10 @@ public class CNNMain {
         PoolingType globalPoolingType = PoolingType.MAX;
         Random rng = new Random(12345);
 
-        Nd4j.getMemoryManager().setAutoGcWindow(5000);
+//        Nd4j.getMemoryManager().setAutoGcWindow(5000);
 
         ComputationGraphConfiguration conf = new NeuralNetConfiguration.Builder()
-                .trainingWorkspaceMode(WorkspaceMode.SINGLE).inferenceWorkspaceMode(WorkspaceMode.SINGLE)
+//                .trainingWorkspaceMode(WorkspaceMode.SINGLE).inferenceWorkspaceMode(WorkspaceMode.SINGLE)
                 .weightInit(WeightInit.RELU)
                 .activation(Activation.LEAKYRELU)
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
@@ -140,7 +118,7 @@ public class CNNMain {
                         .lossFunction(LossFunctions.LossFunction.MCXENT)
                         .activation(Activation.SOFTMAX)
                         .nIn(3 * cnnLayerFeatureMaps)
-                        .nOut(wordToIndex.getOutComesNum())    //2 classes: positive or negative
+                        .nOut(2)
                         .build(), "globalPool")
                 .setOutputs("out")
                 .build();
@@ -153,8 +131,8 @@ public class CNNMain {
         ComputationGraph net = new ComputationGraph(conf);
         net.init();
 
-        DataSetIterator trainIter = getDataSetIterator(true, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels, wordToIndex);
-        DataSetIterator testIter = getDataSetIterator(false, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels, wordToIndex);
+        DataSetIterator trainIter = getDataSetIterator(true, word2Vec, batchSize, truncateReviewsToLength, rng, samples);
+        DataSetIterator testIter = getDataSetIterator(false, word2Vec, batchSize, truncateReviewsToLength, rng, samples);
 
         net.setListeners(new StatsListener(statsStorage), new IterationListener() {
             @Override
@@ -186,68 +164,37 @@ public class CNNMain {
                 executorService.submit(new HibernateInfoRunner(i, net, trainIter, prefix, evaluation));
             }
         }
+
     }
 
     private static DataSetIterator getDataSetIterator(boolean isTrain, WordVectors wordVectors,
-                                                      int miniBatchSize, int maxSentenceLength, Random random,
-                                                      List<String> samples, List<String> sampleLabels,
-                                                      WordToIndex wordToIndex) {
-        Preconditions.checkArgument(samples.size() == sampleLabels.size());
-        for (int i = 0; i < samples.size(); i++) {
-            String s = EmojiParser.removeAllEmojis(samples.get(i)).trim().toLowerCase();
-            List<String> indexes = ImmutableList.copyOf(sampleLabels.get(i).split(","));
-            for (String index : indexes) {
-                if (!index.contains(String.valueOf(-1))) {
-                    emojiToSamples.put(index, new SampleIndexPair(s, index));
-                }
+                                                      int batchSize, int maxSentenceLength,
+                                                      Random random, List<String> samples) {
+        List<String> newSamples = new ArrayList<>(samples.size());
+        List<String> labels = new ArrayList<>(samples.size());
+        for (String sample : samples) {
+            List<String> extractEmojis = EmojiParser.extractEmojis(sample);
+            if (extractEmojis.isEmpty()) {
+                newSamples.add(sample);
+                labels.add(STOP);
+            } else {
+                newSamples.add(EmojiParser.removeAllEmojis(sample));
+                labels.add(POPUP);
             }
         }
-        List<String> sentences = new ArrayList<>();
-        List<String> labelForSentences = new ArrayList<>();
-        if (isTrain) {
-//            int maxCount = 5000;
-            for (String index : emojiToSamples.keySet()) {
-                List<SampleIndexPair> sampleIndexPairs = emojiToSamples.get(index);
-//            Collections.shuffle(sampleIndexPairs);
-//            int totalCount = sampleIndexPairs.size();
-//            for (int i = 0; i < Math.min(maxCount, totalCount); i++) {
-//                sentences.add(sampleIndexPairs.get(i).getSample());
-//                labelForSentences.add(sampleIndexPairs.get(i).getIndex());
-//            }
-                for (int i = 0; i < sampleIndexPairs.size(); i++) {
-                    sentences.add(sampleIndexPairs.get(i).getSample());
-                    labelForSentences.add(sampleIndexPairs.get(i).getIndex());
-                }
-            }
-        } else {
-            int maxCount = 500;
-            for (String index : emojiToSamples.keySet()) {
-                List<SampleIndexPair> sampleIndexPairs = emojiToSamples.get(index);
-                Collections.shuffle(sampleIndexPairs);
-                int totalCount = sampleIndexPairs.size();
-                for (int i = 0; i < Math.min(maxCount, totalCount); i++) {
-                    sentences.add(sampleIndexPairs.get(i).getSample());
-                    labelForSentences.add(sampleIndexPairs.get(i).getIndex());
-//            }
-                }
-            }
+        if (!isTrain) {
+            Collections.shuffle(newSamples, random);
+            Collections.shuffle(labels, random);
+            newSamples = newSamples.subList(0, 5000);
+            labels = labels.subList(0, 5000);
         }
-        CollectionLabeledSentenceProvider sentenceProvider = new CollectionLabeledSentenceProvider(sentences, labelForSentences, random);
+        CollectionLabeledSentenceProvider provider = new CollectionLabeledSentenceProvider(newSamples, labels, random);
         return new CnnSentenceDataSetIterator.Builder()
-                .sentenceProvider(sentenceProvider)
+                .sentenceProvider(provider)
                 .wordVectors(wordVectors)
-                .minibatchSize(miniBatchSize)
+                .minibatchSize(batchSize)
                 .maxSentenceLength(maxSentenceLength)
                 .useNormalizedWordVectors(false)
                 .build();
     }
-
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class SampleIndexPair {
-        private String sample;
-        private String index;
-    }
 }
-

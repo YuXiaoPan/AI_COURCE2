@@ -1,6 +1,6 @@
 package me.peyppicp.advance2;
 
-import me.peyppicp.cnn.CNNMain;
+import me.peyppicp.cnn.CNNDecideEmojiMain;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.deeplearning4j.eval.Evaluation;
@@ -30,8 +30,8 @@ public class HibernateInfoRunner implements Runnable {
         this.dataSetIterator = iterator;
         this.anInt = anInt;
         this.prefix = prefix;
-        this.path = CNNMain.OUTPUT + "model-" + prefix + "-" + anInt + ".txt";
-        this.evaPath = CNNMain.OUTPUT + "eva-" + prefix + "-" + anInt + ".txt";
+        this.path = CNNDecideEmojiMain.OUTPUT + "model-" + prefix + "-" + anInt + ".txt";
+        this.evaPath = CNNDecideEmojiMain.OUTPUT + "eva-" + prefix + "-" + anInt + ".txt";
 //        this.path = "model-" + prefix + "-" + anInt + ".txt";
         this.model = model;
         this.evaluation = evaluation;
