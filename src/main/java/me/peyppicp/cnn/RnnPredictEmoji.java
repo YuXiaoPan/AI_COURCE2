@@ -60,10 +60,8 @@ public class RnnPredictEmoji {
         List<String> samples = Utils.readLinesFromPath(samplesPath);
         List<String> sampleLabels = Utils.readLinesFromPath(sampleLabelPath);
         List<List<String>> samplesLineAndLabel = CNNDecideEmojiMain.getSamplesLineAndLabel(true, samples, sampleLabels);
-
         List<String> filteredSamples = samplesLineAndLabel.get(0);
         List<String> filteredSampleLabels = samplesLineAndLabel.get(1);
-
         Random random = new Random();
         Collections.shuffle(filteredSamples, random);
         Collections.shuffle(filteredSampleLabels, random);
@@ -112,6 +110,16 @@ public class RnnPredictEmoji {
             multiLayerNetwork.fit(train);
             Evaluation evaluate = multiLayerNetwork.evaluate(test);
             System.out.println(evaluate);
+
+            samplesLineAndLabel = CNNDecideEmojiMain.getSamplesLineAndLabel(true, samples, sampleLabels);
+            filteredSamples = samplesLineAndLabel.get(0);
+            filteredSampleLabels = samplesLineAndLabel.get(1);
+            Collections.shuffle(filteredSamples, random);
+            Collections.shuffle(filteredSampleLabels, random);
+            train = new EmojiDataSetIterator(true,filteredSamples, filteredSampleLabels, emojiToIndex, batchSize
+                    , tokenizerFactory, word2Vec, truncateLength);
+            test = new EmojiDataSetIterator(false,filteredSamples, filteredSampleLabels, emojiToIndex, batchSize
+                    , tokenizerFactory, word2Vec, truncateLength);
             train.reset();
             ModelSerializer.writeModel(multiLayerNetwork, OUTPUT + "predict" + i + ".txt", true);
         }
