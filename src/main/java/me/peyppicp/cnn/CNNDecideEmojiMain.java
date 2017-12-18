@@ -93,7 +93,7 @@ public class CNNDecideEmojiMain {
         List<String> samples = FileUtils.readLines(new File(samplePath), Charsets.UTF_8);
         List<String> sampleLabels = FileUtils.readLines(new File(sampleLabelPath), Charsets.UTF_8);
         Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(new File(word2VecPath));
-        EmojiToIndex EmojiToIndex = new EmojiToIndex(sampleWithEmoji,25);
+        EmojiToIndex EmojiToIndex = new EmojiToIndex(sampleWithEmoji, 25);
 
         int batchSize = 100;
         int vectorSize = word2Vec.getWordVector(word2Vec.vocab().wordAtIndex(0)).length;
@@ -191,10 +191,10 @@ public class CNNDecideEmojiMain {
         }
     }
 
-    public static DataSetIterator getDataSetIterator(boolean isTrain, WordVectors wordVectors,
-                                                      int miniBatchSize, int maxSentenceLength, Random random,
-                                                      List<String> samples, List<String> sampleLabels,
-                                                      EmojiToIndex EmojiToIndex) {
+    public static List<List<String>> getSamplesLineAndLabel(boolean isTrain, List<String> samples, List<String> sampleLabels) {
+        List<String> sentences = new ArrayList<>();
+        List<String> labelForSentences = new ArrayList<>();
+        ImmutableList<List<String>> immutableList = ImmutableList.of(sentences, labelForSentences);
         Preconditions.checkArgument(samples.size() == sampleLabels.size());
         for (int i = 0; i < samples.size(); i++) {
             String s = EmojiParser.removeAllEmojis(samples.get(i)).trim().toLowerCase();
@@ -205,8 +205,6 @@ public class CNNDecideEmojiMain {
                 }
             }
         }
-        List<String> sentences = new ArrayList<>();
-        List<String> labelForSentences = new ArrayList<>();
         if (isTrain) {
             int maxCount = 5000;
             for (String index : emojiToSamples.keySet()) {
@@ -235,7 +233,16 @@ public class CNNDecideEmojiMain {
                 }
             }
         }
-        CollectionLabeledSentenceProvider sentenceProvider = new CollectionLabeledSentenceProvider(sentences, labelForSentences, random);
+        return immutableList;
+    }
+
+    public static DataSetIterator getDataSetIterator(boolean isTrain, WordVectors wordVectors,
+                                                     int miniBatchSize, int maxSentenceLength, Random random,
+                                                     List<String> samples, List<String> sampleLabels,
+                                                     EmojiToIndex EmojiToIndex) {
+        List<List<String>> samplesLineAndLabel = getSamplesLineAndLabel(isTrain, samples, sampleLabels);
+        CollectionLabeledSentenceProvider sentenceProvider = new CollectionLabeledSentenceProvider(samplesLineAndLabel.get(0),
+                samplesLineAndLabel.get(1), random);
         return new CnnSentenceDataSetIterator.Builder()
                 .sentenceProvider(sentenceProvider)
                 .wordVectors(wordVectors)

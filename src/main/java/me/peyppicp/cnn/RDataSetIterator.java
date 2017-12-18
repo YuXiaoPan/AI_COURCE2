@@ -71,7 +71,7 @@ public class RDataSetIterator implements DataSetIterator {
         INDArray input = Nd4j.create(new int[]{batchSize,
                 vectorSize, maxWordsSize}, 'f');
         INDArray labels = Nd4j.create(new int[]{batchSize,
-                vectorSize, maxWordsSize}, 'f');
+                wordToIndex.getTotalWordsCount(), maxWordsSize}, 'f');
 
         for (int i = 0; i < words.size(); i++) {
             String currentWord = words.get(i);
@@ -79,14 +79,12 @@ public class RDataSetIterator implements DataSetIterator {
             int timeStep = 0;
             for (int j = i + 1; j < maxWordsSize; j++, timeStep++) {
                 String nextWord = words.get(j);
-                INDArray nextVector = wordVectors.getWordVectorMatrix(nextWord);
                 input.put(new INDArrayIndex[]{NDArrayIndex.point(i), NDArrayIndex.all(), NDArrayIndex.point(timeStep)}, currentVector);
-                labels.put(new INDArrayIndex[]{NDArrayIndex.point(i), NDArrayIndex.all(), NDArrayIndex.point(timeStep)}, nextVector);
+//                labels.put(new INDArrayIndex[]{NDArrayIndex.point(i), NDArrayIndex.all(), NDArrayIndex.point(timeStep)}, nextVector);
 //                input.putScalar(new int[]{i, currentIndex, timeStep}, 1.0);
-//                labels.putScalar(new int[]{i, wordToIndex.getWordIndex(nextWord), timeStep}, 1.0);
+                labels.putScalar(new int[]{i, wordToIndex.getWordIndex(nextWord), timeStep}, 1.0);
                 currentWord = nextWord;
             }
-
         }
         return new DataSet(input, labels);
     }
@@ -103,7 +101,7 @@ public class RDataSetIterator implements DataSetIterator {
 
     @Override
     public int totalOutcomes() {
-        return vectorSize;
+        return wordToIndex.getTotalWordsCount();
     }
 
     @Override
@@ -148,7 +146,7 @@ public class RDataSetIterator implements DataSetIterator {
 
     @Override
     public List<String> getLabels() {
-        throw new RuntimeException();
+        return wordToIndex.getLabels();
     }
 
     @Override

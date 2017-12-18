@@ -3,6 +3,7 @@ package me.peyppicp.cnn;
 import com.vdurmont.emoji.EmojiParser;
 import me.peyppicp.Utils;
 import org.deeplearning4j.api.storage.StatsStorage;
+import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.models.word2vec.Word2Vec;
@@ -43,9 +44,11 @@ public class RnnPredictWords {
     public static final String UNKNOWN = "<unknown>";
     public static final String EMOJI = "<emoji>";
     public static final String END = "<end>";
-        public static final String OUTPUT = "/home/peyppicp/output/";
-    public static final String PREFIX = "/home/peyppicp/data/new/";
-//    public static final String PREFIX = "";
+    //        public static final String OUTPUT = "/home/peyppicp/output/";
+//    public static final String PREFIX = "/home/peyppicp/data/new/";
+    public static final String PREFIX = "/home/panyuxiao/data/new/";
+    public static final String OUTPUT = "/home/panyuxiao/output/";
+    //    public static final String PREFIX = "";
 //    public static final String OUTPUT = "";
     private static final int limitNum = 15000;
     private static final Logger log = LoggerFactory.getLogger(RnnPredictWords.class);
@@ -101,6 +104,8 @@ public class RnnPredictWords {
 //            Evaluation evaluate = multiLayerNetwork.evaluate(tDataSetIterator);
 //            System.out.println(evaluate.stats());
             rDataSetIterator.reset();
+            Evaluation evaluate = multiLayerNetwork.evaluate(tDataSetIterator);
+            System.out.println(evaluate);
             ModelSerializer.writeModel(multiLayerNetwork, new File(OUTPUT + prefix + j + ".txt"), true);
         }
     }
@@ -178,6 +183,6 @@ public class RnnPredictWords {
             finalResults.add(stringBuilder.toString().trim());
         }
         String output = PREFIX + "more_standard_emoji_sample.txt";
-        Utils.writeLineToPath(tempResults, output);
+        Utils.writeLineToPath(finalResults, output);
     }
 }
