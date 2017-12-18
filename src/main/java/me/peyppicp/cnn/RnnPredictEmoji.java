@@ -68,7 +68,7 @@ public class RnnPredictEmoji {
         Collections.shuffle(filteredSamples, random);
         Collections.shuffle(filteredSampleLabels, random);
 
-        int batchSize = 128;
+        int batchSize = 200;
         int nEpochs = 100;
         int truncateLength = 30;
 
@@ -91,10 +91,10 @@ public class RnnPredictEmoji {
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
-                .layer(0, new GravesLSTM.Builder().nIn(train.inputColumns()).nOut(75)
+                .layer(0, new GravesLSTM.Builder().nIn(train.inputColumns()).nOut(50)
                         .activation(Activation.TANH).build())
                 .layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(75).nOut(train.totalOutcomes()).build())
+                        .activation(Activation.SOFTMAX).nIn(50).nOut(train.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
                 .build();
