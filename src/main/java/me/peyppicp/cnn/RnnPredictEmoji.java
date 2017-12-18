@@ -67,7 +67,7 @@ public class RnnPredictEmoji {
         Collections.shuffle(filteredSampleLabels, random);
 
         int batchSize = 200;
-        int nEpochs = 100;
+        int nEpochs = 1000;
         int truncateLength = 30;
 
         EmojiToIndex emojiToIndex = new EmojiToIndex(PREFIX + "EmojiSample.txt", 25);
@@ -120,7 +120,7 @@ public class RnnPredictEmoji {
                     , tokenizerFactory, word2Vec, truncateLength);
             test = new EmojiDataSetIterator(false,filteredSamples, filteredSampleLabels, emojiToIndex, batchSize
                     , tokenizerFactory, word2Vec, truncateLength);
-            train.reset();
+//            train.reset();
             ModelSerializer.writeModel(multiLayerNetwork, OUTPUT + "predict" + i + ".txt", true);
         }
     }
