@@ -75,7 +75,7 @@ public class RnnPredictEmoji {
         EmojiToIndex emojiToIndex = new EmojiToIndex(PREFIX + "EmojiSample.txt", 25);
         TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
         tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
-        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "glove.twitter.27B.100d.txt");
+        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "glove.twitter.27B.50d.txt");
         EmojiDataSetIterator train = new EmojiDataSetIterator(filteredSamples, filteredSampleLabels, emojiToIndex, batchSize
                 , tokenizerFactory, word2Vec, truncateLength);
         EmojiDataSetIterator test = new EmojiDataSetIterator(filteredSamples, filteredSampleLabels, emojiToIndex, batchSize
@@ -91,10 +91,10 @@ public class RnnPredictEmoji {
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
-                .layer(0, new GravesLSTM.Builder().nIn(train.inputColumns()).nOut(100)
+                .layer(0, new GravesLSTM.Builder().nIn(train.inputColumns()).nOut(75)
                         .activation(Activation.TANH).build())
                 .layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(100).nOut(train.totalOutcomes()).build())
+                        .activation(Activation.SOFTMAX).nIn(75).nOut(train.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
                 .build();
