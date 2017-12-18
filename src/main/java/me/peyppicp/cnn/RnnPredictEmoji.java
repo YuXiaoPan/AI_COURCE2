@@ -24,6 +24,7 @@ import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -34,9 +35,16 @@ import java.util.Random;
  */
 public class RnnPredictEmoji {
 
+    //    public static final String OUTPUT = "/home/peyppicp/output/";
+    //    public static final String PREFIX = "/home/peyppicp/data/new/";
+    public static final String PREFIX = "/home/panyuxiao/data/new/";
+    public static final String OUTPUT = "/home/panyuxiao/output/";
+//    public static final String PREFIX = "";
+//    public static final String OUTPUT = "";
+
     public static void main(String[] args) throws IOException {
-        String samplesPath = "EmojiSampleWithoutEmoji.txt";
-        String sampleLabelPath = "EmojiSampleLabels.txt";
+        String samplesPath = PREFIX + "EmojiSampleWithoutEmoji.txt";
+        String sampleLabelPath = PREFIX + "EmojiSampleLabels.txt";
         List<String> samples = Utils.readLinesFromPath(samplesPath);
         List<String> sampleLabels = Utils.readLinesFromPath(sampleLabelPath);
         List<List<String>> samplesLineAndLabel = CNNDecideEmojiMain.getSamplesLineAndLabel(true, samples, sampleLabels);
@@ -44,14 +52,18 @@ public class RnnPredictEmoji {
         List<String> filteredSamples = samplesLineAndLabel.get(0);
         List<String> filteredSampleLabels = samplesLineAndLabel.get(1);
 
+        Random random = new Random();
+        Collections.shuffle(filteredSamples, random);
+        Collections.shuffle(filteredSampleLabels, random);
+
         int batchSize = 128;
         int nEpochs = 10;
         int truncateLength = 30;
 
-        EmojiToIndex emojiToIndex = new EmojiToIndex("EmojiSample.txt", 25);
+        EmojiToIndex emojiToIndex = new EmojiToIndex(PREFIX + "EmojiSample.txt", 25);
         TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
         tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
-        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel("glove.twitter.27B.100d.txt");
+        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "glove.twitter.27B.100d.txt");
         EmojiDataSetIterator train = new EmojiDataSetIterator(filteredSamples, filteredSampleLabels, emojiToIndex, batchSize
                 , tokenizerFactory, word2Vec, truncateLength);
         EmojiDataSetIterator test = new EmojiDataSetIterator(filteredSamples, filteredSampleLabels, emojiToIndex, batchSize
@@ -88,7 +100,7 @@ public class RnnPredictEmoji {
             Evaluation evaluate = multiLayerNetwork.evaluate(test);
             System.out.println(evaluate);
             train.reset();
-            ModelSerializer.writeModel(multiLayerNetwork, "predict" + i + ".txt", true);
+            ModelSerializer.writeModel(multiLayerNetwork, OUTPUT + "predict" + i + ".txt", true);
         }
     }
 }
