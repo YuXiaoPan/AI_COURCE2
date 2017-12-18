@@ -69,7 +69,7 @@ public class RnnPredictEmoji {
         Collections.shuffle(filteredSampleLabels, random);
 
         int batchSize = 128;
-        int nEpochs = 10;
+        int nEpochs = 100;
         int truncateLength = 30;
 
         EmojiToIndex emojiToIndex = new EmojiToIndex(PREFIX + "EmojiSample.txt", 25);
