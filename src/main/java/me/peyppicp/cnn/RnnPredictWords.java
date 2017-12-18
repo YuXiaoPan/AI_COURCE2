@@ -143,7 +143,7 @@ public class RnnPredictWords {
         String input = PREFIX + "standard_emoji_samples.txt";
         Utils.processOriginalSamples(emojiSamples, input, true);
         List<String> lines = Utils.readLinesFromPath(input);
-        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "glove.twitter.27B.100d.txt");
+        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "glove.twitter.27B.50d.txt");
         DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
         tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
         List<String> tempResults = new ArrayList<>();
