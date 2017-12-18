@@ -43,8 +43,18 @@ public class RnnPredictEmoji {
 //    public static final String OUTPUT = "";
 
     public static void main(String[] args) throws IOException {
+        String originSamples = PREFIX + "emoji_sample.txt";
+        String emojiSampleWithEmoji = PREFIX + "EmojiSample.txt";
         String samplesPath = PREFIX + "EmojiSampleWithoutEmoji.txt";
         String sampleLabelPath = PREFIX + "EmojiSampleLabels.txt";
+
+        System.out.println("Begin process original samples.");
+        Utils.processOriginalSamples(originSamples, emojiSampleWithEmoji, false);
+        System.out.println("Begin mark labels.");
+        Utils.markLabels(emojiSampleWithEmoji, sampleLabelPath);
+        System.out.println("Begin remove emojis.");
+        Utils.removeEmojis(emojiSampleWithEmoji, samplesPath);
+
         List<String> samples = Utils.readLinesFromPath(samplesPath);
         List<String> sampleLabels = Utils.readLinesFromPath(sampleLabelPath);
         List<List<String>> samplesLineAndLabel = CNNDecideEmojiMain.getSamplesLineAndLabel(true, samples, sampleLabels);
