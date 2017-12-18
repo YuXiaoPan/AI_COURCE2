@@ -76,9 +76,9 @@ public class RnnPredictEmoji {
         TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
         tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
         Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "glove.twitter.27B.50d.txt");
-        EmojiDataSetIterator train = new EmojiDataSetIterator(filteredSamples, filteredSampleLabels, emojiToIndex, batchSize
+        EmojiDataSetIterator train = new EmojiDataSetIterator(true,filteredSamples, filteredSampleLabels, emojiToIndex, batchSize
                 , tokenizerFactory, word2Vec, truncateLength);
-        EmojiDataSetIterator test = new EmojiDataSetIterator(filteredSamples, filteredSampleLabels, emojiToIndex, batchSize
+        EmojiDataSetIterator test = new EmojiDataSetIterator(false,filteredSamples, filteredSampleLabels, emojiToIndex, batchSize
                 , tokenizerFactory, word2Vec, truncateLength);
 
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()

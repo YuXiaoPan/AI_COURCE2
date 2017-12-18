@@ -24,8 +24,8 @@ import java.util.stream.Collectors;
 public class EmojiDataSetIterator implements DataSetIterator {
 
     private int cursor;
-    private final List<String> samples;
-    private final List<Integer> sampleLabels;
+    private List<String> samples;
+    private List<Integer> sampleLabels;
     private final EmojiToIndex emojiToIndex;
     private final int batchSize;
     private final TokenizerFactory tokenizerFactory;
@@ -33,7 +33,7 @@ public class EmojiDataSetIterator implements DataSetIterator {
     private final int vectorSize;
     private final int truncateLength;
 
-    public EmojiDataSetIterator(List<String> samples, List<String> sampleLabels, EmojiToIndex emojiToIndex,
+    public EmojiDataSetIterator(boolean isTrain, List<String> samples, List<String> sampleLabels, EmojiToIndex emojiToIndex,
                                 int batchSize, TokenizerFactory tokenizerFactory, WordVectors wordVectors,
                                 int truncateLength) {
         this.samples = samples;
@@ -44,6 +44,10 @@ public class EmojiDataSetIterator implements DataSetIterator {
         this.wordVectors = wordVectors;
         this.vectorSize = wordVectors.getWordVector(wordVectors.vocab().wordAtIndex(0)).length;
         this.truncateLength = truncateLength;
+        if (!isTrain) {
+            this.samples = this.samples.subList(0, 5000);
+            this.sampleLabels = this.sampleLabels.subList(0, 5000);
+        }
     }
 
     public DataSet next(int batchSize) {
