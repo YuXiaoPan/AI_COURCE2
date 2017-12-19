@@ -1,13 +1,14 @@
 package me.peyppicp.advance;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestMain {
 
     public static void main(String[] args) throws IOException {
 
-        String string = "1";
-        String[] split = string.split(",");
-        System.out.println();
+        List<String> a2 = new ArrayList<String>();
+        System.out.println(a2.getClass().getCanonicalName());
     }
 }

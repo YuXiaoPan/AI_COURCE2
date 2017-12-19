@@ -19,7 +19,6 @@ import org.deeplearning4j.iterator.provider.CollectionLabeledSentenceProvider;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.models.word2vec.Word2Vec;
-import org.deeplearning4j.nn.api.Model;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.ComputationGraphConfiguration;
 import org.deeplearning4j.nn.conf.ConvolutionMode;
@@ -32,7 +31,6 @@ import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.conf.layers.PoolingType;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.weights.WeightInit;
-import org.deeplearning4j.optimize.api.IterationListener;
 import org.deeplearning4j.ui.api.UIServer;
 import org.deeplearning4j.ui.stats.StatsListener;
 import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
@@ -62,10 +60,10 @@ public class CNNDecideEmojiMain {
 
     private static final Logger log = LoggerFactory.getLogger(CNNDecideEmojiMain.class);
     private static ArrayListMultimap<String, SampleIndexPair> emojiToSamples = ArrayListMultimap.create();
-    public static final String OUTPUT = "/home/peyppicp/output/";
-    public static final String PREFIX = "/home/peyppicp/data/new/";
-//    public static final String PREFIX = "/home/panyuxiao/data/new/";
-//    public static final String OUTPUT = "/home/panyuxiao/output/";
+//    public static final String OUTPUT = "/home/peyppicp/output/";
+//    public static final String PREFIX = "/home/peyppicp/data/new/";
+    public static final String PREFIX = "/home/panyuxiao/data/new/";
+    public static final String OUTPUT = "/home/panyuxiao/output/";
 //    public static final String PREFIX = "";
 //    public static final String OUTPUT = "";
 
@@ -159,24 +157,7 @@ public class CNNDecideEmojiMain {
         DataSetIterator trainIter = getDataSetIterator(true, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels, EmojiToIndex);
         DataSetIterator testIter = getDataSetIterator(false, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels, EmojiToIndex);
 
-        net.setListeners(new StatsListener(statsStorage), new IterationListener() {
-            @Override
-            public boolean invoked() {
-                return true;
-            }
-
-            @Override
-            public void invoke() {
-            }
-
-            @Override
-            public void iterationDone(Model model, int counter) {
-                counter++;
-                if (counter % 500 == 0) {
-                    log.info("Now is at prefix: " + prefix + ", cursor:" + trainIter.cursor() + ", total :" + trainIter.totalExamples());
-                }
-            }
-        });
+        net.setListeners(new StatsListener(statsStorage));
         log.info("Starting training");
 
         for (int i = 0; i < nEpochs; i++) {
@@ -185,6 +166,8 @@ public class CNNDecideEmojiMain {
             //Run evaluation. This is on 25k reviews, so can take some time
             Evaluation evaluation = net.evaluate(testIter);
             System.out.println(evaluation.stats());
+            trainIter = getDataSetIterator(true, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels, EmojiToIndex);
+            testIter = getDataSetIterator(false, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels, EmojiToIndex);
             if (i % 10 == 0) {
                 executorService.submit(new HibernateInfoRunner(i, net, trainIter, prefix, evaluation));
             }

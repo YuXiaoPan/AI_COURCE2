@@ -46,10 +46,10 @@ public class RnnPredictWords {
     public static final String END = "<end>";
     //        public static final String OUTPUT = "/home/peyppicp/output/";
 //    public static final String PREFIX = "/home/peyppicp/data/new/";
-    public static final String PREFIX = "/home/panyuxiao/data/new/";
-    public static final String OUTPUT = "/home/panyuxiao/output/";
-    //    public static final String PREFIX = "";
-//    public static final String OUTPUT = "";
+//    public static final String PREFIX = "/home/panyuxiao/data/new/";
+//    public static final String OUTPUT = "/home/panyuxiao/output/";
+        public static final String PREFIX = "";
+    public static final String OUTPUT = "";
     private static final int limitNum = 15000;
     private static final Logger log = LoggerFactory.getLogger(RnnPredictWords.class);
 
