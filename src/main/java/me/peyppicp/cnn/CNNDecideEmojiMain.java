@@ -20,10 +20,7 @@ import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
-import org.deeplearning4j.nn.conf.ComputationGraphConfiguration;
-import org.deeplearning4j.nn.conf.ConvolutionMode;
-import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.Updater;
+import org.deeplearning4j.nn.conf.*;
 import org.deeplearning4j.nn.conf.graph.MergeVertex;
 import org.deeplearning4j.nn.conf.layers.ConvolutionLayer;
 import org.deeplearning4j.nn.conf.layers.GlobalPoolingLayer;
@@ -34,8 +31,10 @@ import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.ui.api.UIServer;
 import org.deeplearning4j.ui.stats.StatsListener;
 import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
+import org.nd4j.jita.conf.CudaEnvironment;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +67,10 @@ public class CNNDecideEmojiMain {
 //    public static final String OUTPUT = "";
 
     public static void main(String[] args) throws IOException {
+        CudaEnvironment.getInstance().getConfiguration()
+                .allowMultiGPU(false)
+                .setMaximumDeviceCache(10L * 1024L * 1024L * 1024L)
+                .allowCrossDeviceAccess(true);
 
         String prefix = "cnn01";
 
@@ -101,10 +104,10 @@ public class CNNDecideEmojiMain {
         PoolingType globalPoolingType = PoolingType.MAX;
         Random rng = new Random(12345);
 
-//        Nd4j.getMemoryManager().setAutoGcWindow(5000);
+        Nd4j.getMemoryManager().setAutoGcWindow(5000);
 
         ComputationGraphConfiguration conf = new NeuralNetConfiguration.Builder()
-//                .trainingWorkspaceMode(WorkspaceMode.SINGLE).inferenceWorkspaceMode(WorkspaceMode.SINGLE)
+                .trainingWorkspaceMode(WorkspaceMode.SINGLE).inferenceWorkspaceMode(WorkspaceMode.SINGLE)
                 .weightInit(WeightInit.RELU)
                 .activation(Activation.LEAKYRELU)
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
