@@ -12,7 +12,6 @@ import me.peyppicp.advance2.EmojiToIndex;
 import me.peyppicp.advance2.HibernateInfoRunner;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
-import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.iterator.CnnSentenceDataSetIterator;
 import org.deeplearning4j.iterator.provider.CollectionLabeledSentenceProvider;
@@ -28,9 +27,6 @@ import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.conf.layers.PoolingType;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.weights.WeightInit;
-import org.deeplearning4j.ui.api.UIServer;
-import org.deeplearning4j.ui.stats.StatsListener;
-import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.nd4j.jita.conf.CudaEnvironment;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
@@ -72,7 +68,7 @@ public class CNNDecideEmojiMain {
                 .setMaximumDeviceCache(10L * 1024L * 1024L * 1024L)
                 .allowCrossDeviceAccess(true);
 
-        String prefix = "cnn01";
+        String prefix = "complex01";
 
         String sampleWithEmoji = PREFIX + "EmojiSample.txt";
         String samplePath = PREFIX + "EmojiSampleWithoutEmoji.txt";
@@ -100,7 +96,7 @@ public class CNNDecideEmojiMain {
         int vectorSize = word2Vec.getWordVector(word2Vec.vocab().wordAtIndex(0)).length;
         int nEpochs = 5000;
         int truncateReviewsToLength = 64;
-        int cnnLayerFeatureMaps = 100;      //Number of feature maps / channels / depth for each CNN layer
+        int cnnLayerFeatureMaps = 300;      //Number of feature maps / channels / depth for each CNN layer
         PoolingType globalPoolingType = PoolingType.MAX;
         Random rng = new Random(12345);
 
@@ -150,9 +146,9 @@ public class CNNDecideEmojiMain {
                 .build();
 
 
-        UIServer uiServer = UIServer.getInstance();
-        StatsStorage statsStorage = new InMemoryStatsStorage();
-        uiServer.attach(statsStorage);
+//        UIServer uiServer = UIServer.getInstance();
+//        StatsStorage statsStorage = new InMemoryStatsStorage();
+//        uiServer.attach(statsStorage);
 
         ComputationGraph net = new ComputationGraph(conf);
         net.init();
@@ -160,7 +156,7 @@ public class CNNDecideEmojiMain {
         DataSetIterator trainIter = getDataSetIterator(true, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels, EmojiToIndex);
         DataSetIterator testIter = getDataSetIterator(false, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels, EmojiToIndex);
 
-        net.setListeners(new StatsListener(statsStorage));
+//        net.setListeners(new StatsListener(statsStorage));
         log.info("Starting training");
 
         for (int i = 0; i < nEpochs; i++) {
