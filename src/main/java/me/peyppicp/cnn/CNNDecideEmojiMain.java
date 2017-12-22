@@ -55,7 +55,7 @@ public class CNNDecideEmojiMain {
 
     private static final Logger log = LoggerFactory.getLogger(CNNDecideEmojiMain.class);
     private static ArrayListMultimap<String, SampleIndexPair> emojiToSamples = ArrayListMultimap.create();
-//    public static final String OUTPUT = "/home/peyppicp/output/";
+    //    public static final String OUTPUT = "/home/peyppicp/output/";
 //    public static final String PREFIX = "/home/peyppicp/data/new/";
     public static final String PREFIX = "/home/panyuxiao/data/new/";
     public static final String OUTPUT = "/home/panyuxiao/output/";
@@ -68,7 +68,7 @@ public class CNNDecideEmojiMain {
                 .setMaximumDeviceCache(10L * 1024L * 1024L * 1024L)
                 .allowCrossDeviceAccess(true);
 
-        String prefix = "complex01";
+        String prefix = "complex02";
 
         String sampleWithEmoji = PREFIX + "EmojiSample.txt";
         String samplePath = PREFIX + "EmojiSampleWithoutEmoji.txt";
@@ -92,10 +92,10 @@ public class CNNDecideEmojiMain {
         Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(new File(word2VecPath));
         EmojiToIndex EmojiToIndex = new EmojiToIndex(sampleWithEmoji, 25);
 
-        int batchSize = 100;
+        int batchSize = 128;
         int vectorSize = word2Vec.getWordVector(word2Vec.vocab().wordAtIndex(0)).length;
         int nEpochs = 5000;
-        int truncateReviewsToLength = 64;
+        int truncateReviewsToLength = 32;
         int cnnLayerFeatureMaps = 300;      //Number of feature maps / channels / depth for each CNN layer
         PoolingType globalPoolingType = PoolingType.MAX;
         Random rng = new Random(12345);
@@ -145,7 +145,6 @@ public class CNNDecideEmojiMain {
                 .setOutputs("out")
                 .build();
 
-
 //        UIServer uiServer = UIServer.getInstance();
 //        StatsStorage statsStorage = new InMemoryStatsStorage();
 //        uiServer.attach(statsStorage);
@@ -188,19 +187,19 @@ public class CNNDecideEmojiMain {
             }
         }
         if (isTrain) {
-            int maxCount = 5000;
+//            int maxCount = 5000;
             for (String index : emojiToSamples.keySet()) {
                 List<SampleIndexPair> sampleIndexPairs = emojiToSamples.get(index);
-                Collections.shuffle(sampleIndexPairs);
-                int totalCount = sampleIndexPairs.size();
-                for (int i = 0; i < Math.min(maxCount, totalCount); i++) {
-                    sentences.add(sampleIndexPairs.get(i).getSample());
-                    labelForSentences.add(sampleIndexPairs.get(i).getIndex());
-                }
-//                for (int i = 0; i < sampleIndexPairs.size(); i++) {
+//                Collections.shuffle(sampleIndexPairs);
+//                int totalCount = sampleIndexPairs.size();
+//                for (int i = 0; i < Math.min(maxCount, totalCount); i++) {
 //                    sentences.add(sampleIndexPairs.get(i).getSample());
 //                    labelForSentences.add(sampleIndexPairs.get(i).getIndex());
 //                }
+                for (int i = 0; i < sampleIndexPairs.size(); i++) {
+                    sentences.add(sampleIndexPairs.get(i).getSample());
+                    labelForSentences.add(sampleIndexPairs.get(i).getIndex());
+                }
             }
         } else {
             int maxCount = 500;
