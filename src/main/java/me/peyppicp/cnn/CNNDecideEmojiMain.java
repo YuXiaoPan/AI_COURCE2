@@ -164,7 +164,7 @@ public class CNNDecideEmojiMain {
             //Run evaluation. This is on 25k reviews, so can take some time
             Evaluation evaluation = net.evaluate(testIter);
             System.out.println(evaluation.stats());
-            trainIter = getDataSetIterator(true, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels, EmojiToIndex);
+//            trainIter = getDataSetIterator(true, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels, EmojiToIndex);
             testIter = getDataSetIterator(false, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels, EmojiToIndex);
             if (i % 10 == 0) {
                 executorService.submit(new HibernateInfoRunner(i, net, trainIter, prefix, evaluation));
