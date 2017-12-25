@@ -2,6 +2,7 @@ package me.peyppicp.cnn;
 
 import com.google.common.collect.Lists;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
+import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.DataSetPreProcessor;
@@ -11,9 +12,7 @@ import org.nd4j.linalg.indexing.INDArrayIndex;
 import org.nd4j.linalg.indexing.NDArrayIndex;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author YuXiao Pan
@@ -39,12 +38,10 @@ public class PTBDataSetIterator implements DataSetIterator {
 //        this.linesToReadPerBatch = linesToReadPerBatch;
         this.tokens = Lists.newArrayList();
         this.truncateLength = truncateLength;
-        if (isTrain) {
-            samples.parallelStream().filter(s -> !"".equals(s))
-                    .forEach(s -> tokens.addAll(Arrays.stream(s.split(" ")).collect(Collectors.toList())));
-        } else {
-            samples.parallelStream().filter(s -> !"".equals(s)).limit(5000)
-                    .forEach(s -> tokens.addAll(Arrays.stream(s.split(" ")).collect(Collectors.toList())));
+        DefaultTokenizerFactory defaultTokenizerFactory = new DefaultTokenizerFactory();
+        tokens = defaultTokenizerFactory.create(samples.get(0)).getTokens();
+        if (!isTrain) {
+            tokens = tokens.subList(0, 5000);
         }
         this.batchSize = batchSize;
         this.wordToIndex = wordToIndex;
@@ -61,19 +58,25 @@ public class PTBDataSetIterator implements DataSetIterator {
             throw new RuntimeException();
         }
 
+        int maxWordListSize = 0;
         int maxWordsSize = 0;
         List<List<String>> words = new ArrayList<>();
         for (int i = 0; i < batchSize; i++) {
             List<String> temp = new ArrayList<>();
-            for (int j = 0; cursor < tokens.size() && j < numberSteps; cursor++) {
+            for (int j = 0; cursor < tokens.size() && j < numberSteps; cursor++, j++) {
                 temp.add(tokens.get(cursor));
             }
-            words.add(temp);
+            if (!temp.isEmpty()) {
+                words.add(temp);
+                maxWordsSize = Math.max(maxWordsSize, temp.size());
+            }
         }
 
-        INDArray input = Nd4j.create(new int[]{batchSize,
+        maxWordListSize = Math.min(batchSize, words.size());
+
+        INDArray input = Nd4j.create(new int[]{maxWordListSize,
                 vectorSize, maxWordsSize}, 'f');
-        INDArray labels = Nd4j.create(new int[]{batchSize,
+        INDArray labels = Nd4j.create(new int[]{maxWordListSize,
                 wordToIndex.getTotalWordsCount(), maxWordsSize}, 'f');
 
         for (int i = 0; i < words.size(); i++) {
@@ -84,7 +87,7 @@ public class PTBDataSetIterator implements DataSetIterator {
                 String nextToken = firstBatch.get(j);
                 input.put(new INDArrayIndex[]{NDArrayIndex.point(i),
                         NDArrayIndex.all(), NDArrayIndex.point(timeStep)}, currentVector);
-                labels.putScalar(new int[]{i, wordToIndex.getWordIndex(nextToken), j}, 1.0);
+                labels.putScalar(new int[]{i, wordToIndex.getWordIndex(nextToken), timeStep}, 1.0);
                 currentVector = wordVectors.getWordVectorMatrix(nextToken);
                 currentToken = nextToken;
             }

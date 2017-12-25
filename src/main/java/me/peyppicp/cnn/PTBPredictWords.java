@@ -55,19 +55,19 @@ public class PTBPredictWords {
     private static final Logger log = LoggerFactory.getLogger(PTBPredictWords.class);
 
     public static void main(String[] args) throws IOException {
-        File originData = new File(PREFIX + "more_standard_emoji_sample.txt");
+        File originData = new File(PREFIX + "test1.txt");
         if (!originData.exists()) {
             preMain();
         }
 
         String prefix = "rnn";
         int truncateLength = 30;
-        int batchSize = 128;
+        int batchSize = 8;
         int nEpochs = 10000;
-        int numberSteps = 20;
+        int numberSteps = 5;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
         WordToIndex wordToIndex = new WordToIndex(samples, limitNum);
-//        WordVectors wordVectors = rebuildWord2Vec(samples);
+//        WordVectors word2Vec = rebuildWord2Vec(samples);
         Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "sub.word2vec.txt");
         PTBDataSetIterator rDataSetIterator = new PTBDataSetIterator(true, truncateLength, batchSize,
                 numberSteps, samples, wordToIndex, word2Vec);
@@ -87,10 +87,10 @@ public class PTBPredictWords {
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
-                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(5)
+                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(50)
                         .activation(Activation.TANH).build())
                 .layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(5).nOut(rDataSetIterator.totalOutcomes()).build())
+                        .activation(Activation.SOFTMAX).nIn(50).nOut(rDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
                 .build();
@@ -109,40 +109,40 @@ public class PTBPredictWords {
 //            Evaluation evaluate = multiLayerNetwork.evaluate(tDataSetIterator);
 //            System.out.println(evaluate.stats());
             rDataSetIterator.reset();
-            if (j % 10 == 0) {
+//            if (j % 10 == 0) {
                 Evaluation evaluate = multiLayerNetwork.evaluate(tDataSetIterator);
                 System.out.println(evaluate);
-            }
+//            }
 //            ModelSerializer.writeModel(multiLayerNetwork, new File(OUTPUT + prefix + j + ".txt"), true);
         }
     }
 
     private static WordVectors rebuildWord2Vec(List<String> originSamples) throws IOException {
-        File subWord2VecFile = new File(PREFIX + "sub.word2vec.txt");
-        if (!subWord2VecFile.exists()) {
-            int minWordFrequency = 1;
-            int iterations = 1;
-            int layerSize = 50;
-            int seed = 3543;
-            int windowSize = 10;
+//        File subWord2VecFile = new File(PREFIX + "sub.word2vec.txt");
+//        if (!subWord2VecFile.exists()) {
+        int minWordFrequency = 5;
+        int iterations = 1;
+        int layerSize = 50;
+        int seed = 3543;
+        int windowSize = 10;
 
-            CollectionSentenceIterator iterator = new CollectionSentenceIterator(originSamples);
-            DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
-            tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
-            Word2Vec vec = new Word2Vec.Builder()
-                    .minWordFrequency(minWordFrequency)
-                    .iterations(iterations)
-                    .layerSize(layerSize)
-                    .seed(seed)
-                    .windowSize(windowSize)
-                    .iterate(iterator)
-                    .tokenizerFactory(tokenizerFactory)
-                    .build();
-            vec.fit();
-            WordVectorSerializer.writeWordVectors(vec.lookupTable(), PREFIX + "sub.word2vec.txt");
-            return vec;
-        }
-        return WordVectorSerializer.readWord2VecModel(subWord2VecFile);
+        CollectionSentenceIterator iterator = new CollectionSentenceIterator(originSamples);
+        DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
+        tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
+        Word2Vec vec = new Word2Vec.Builder()
+                .minWordFrequency(minWordFrequency)
+                .iterations(iterations)
+                .layerSize(layerSize)
+                .seed(seed)
+                .windowSize(windowSize)
+                .iterate(iterator)
+                .tokenizerFactory(tokenizerFactory)
+                .build();
+        vec.fit();
+        WordVectorSerializer.writeWordVectors(vec.lookupTable(), PREFIX + "sub.word2vec.txt");
+        return vec;
+//        }
+//        return WordVectorSerializer.readWord2VecModel(subWord2VecFile);
     }
 
     private static void preMain() throws IOException {
@@ -192,7 +192,7 @@ public class PTBPredictWords {
 //            finalResults.add(stringBuilder.toString().trim());
         }
         List<String> data = Lists.newArrayList();
-        data.add(stringBuilder.toString());
+        data.add(stringBuilder.toString().trim());
         String output = PREFIX + "more_standard_emoji_sample.txt";
         Utils.writeLineToPath(data, output);
     }
