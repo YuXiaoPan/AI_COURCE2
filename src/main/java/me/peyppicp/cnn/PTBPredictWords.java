@@ -1,5 +1,6 @@
 package me.peyppicp.cnn;
 
+import com.google.common.collect.Lists;
 import com.vdurmont.emoji.EmojiParser;
 import me.peyppicp.Utils;
 import org.deeplearning4j.api.storage.StatsStorage;
@@ -39,7 +40,7 @@ import java.util.Random;
  * @date 2017/12/17
  * @email yuxiao.pan@kikatech.com
  */
-public class RnnPredictWords {
+public class PTBPredictWords {
 
     public static final String UNKNOWN = "<unknown>";
     public static final String EMOJI = "<emoji>";
@@ -51,10 +52,10 @@ public class RnnPredictWords {
     public static final String PREFIX = "";
     public static final String OUTPUT = "";
     private static final int limitNum = 15000;
-    private static final Logger log = LoggerFactory.getLogger(RnnPredictWords.class);
+    private static final Logger log = LoggerFactory.getLogger(PTBPredictWords.class);
 
     public static void main(String[] args) throws IOException {
-        File originData = new File(PREFIX + "test1.txt");
+        File originData = new File(PREFIX + "more_standard_emoji_sample.txt");
         if (!originData.exists()) {
             preMain();
         }
@@ -63,14 +64,15 @@ public class RnnPredictWords {
         int truncateLength = 30;
         int batchSize = 128;
         int nEpochs = 10000;
+        int numberSteps = 20;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
         WordToIndex wordToIndex = new WordToIndex(samples, limitNum);
 //        WordVectors wordVectors = rebuildWord2Vec(samples);
         Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "sub.word2vec.txt");
-        RDataSetIterator rDataSetIterator = new RDataSetIterator(true, truncateLength, batchSize,
-                samples, wordToIndex, word2Vec);
-        RDataSetIterator tDataSetIterator = new RDataSetIterator(false, truncateLength, batchSize,
-                samples, wordToIndex, word2Vec);
+        PTBDataSetIterator rDataSetIterator = new PTBDataSetIterator(true, truncateLength, batchSize,
+                numberSteps, samples, wordToIndex, word2Vec);
+        PTBDataSetIterator tDataSetIterator = new PTBDataSetIterator(false, truncateLength, batchSize,
+                numberSteps, samples, wordToIndex, word2Vec);
 
         Nd4j.getMemoryManager().setAutoGcWindow(5000);
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
@@ -85,10 +87,10 @@ public class RnnPredictWords {
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
-                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(50)
+                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(5)
                         .activation(Activation.TANH).build())
                 .layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(50).nOut(rDataSetIterator.totalOutcomes()).build())
+                        .activation(Activation.SOFTMAX).nIn(5).nOut(rDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
                 .build();
@@ -174,7 +176,8 @@ public class RnnPredictWords {
         }
 
         WordToIndex wordToIndex = new WordToIndex(tempResults, limitNum);
-        List<String> finalResults = new ArrayList<>(tempResults.size());
+//        List<String> finalResults = new ArrayList<>(tempResults.size());
+        StringBuilder stringBuilder = new StringBuilder();
         for (String tempResult : tempResults) {
             List<String> tokens = tokenizerFactory.create(tempResult).getTokens();
             List<String> indexes = new ArrayList<>(tokens.size());
@@ -185,11 +188,12 @@ public class RnnPredictWords {
                     indexes.add(UNKNOWN);
                 }
             }
-            StringBuilder stringBuilder = new StringBuilder();
             indexes.forEach(s -> stringBuilder.append(s).append(" "));
-            finalResults.add(stringBuilder.toString().trim());
+//            finalResults.add(stringBuilder.toString().trim());
         }
+        List<String> data = Lists.newArrayList();
+        data.add(stringBuilder.toString());
         String output = PREFIX + "more_standard_emoji_sample.txt";
-        Utils.writeLineToPath(finalResults, output);
+        Utils.writeLineToPath(data, output);
     }
 }

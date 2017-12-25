@@ -27,7 +27,6 @@ import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.conf.layers.PoolingType;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.weights.WeightInit;
-import org.nd4j.jita.conf.CudaEnvironment;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.factory.Nd4j;
@@ -63,10 +62,10 @@ public class CNNDecideEmojiMain {
 //    public static final String OUTPUT = "";
 
     public static void main(String[] args) throws IOException {
-        CudaEnvironment.getInstance().getConfiguration()
-                .allowMultiGPU(false)
-                .setMaximumDeviceCache(10L * 1024L * 1024L * 1024L)
-                .allowCrossDeviceAccess(true);
+//        CudaEnvironment.getInstance().getConfiguration()
+//                .allowMultiGPU(false)
+//                .setMaximumDeviceCache(10L * 1024L * 1024L * 1024L)
+//                .allowCrossDeviceAccess(true);
 
         String prefix = "complex02";
 
