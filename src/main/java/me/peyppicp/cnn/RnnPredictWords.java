@@ -11,6 +11,7 @@ import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.Updater;
+import org.deeplearning4j.nn.conf.WorkspaceMode;
 import org.deeplearning4j.nn.conf.layers.GravesLSTM;
 import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
@@ -24,6 +25,7 @@ import org.deeplearning4j.ui.stats.StatsListener;
 import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,33 +50,39 @@ public class RnnPredictWords {
 //    public static final String PREFIX = "/home/peyppicp/data/new/";
 //    public static final String PREFIX = "/home/panyuxiao/data/new/";
 //    public static final String OUTPUT = "/home/panyuxiao/output/";
-        public static final String PREFIX = "";
+    public static final String PREFIX = "";
     public static final String OUTPUT = "";
     private static final int limitNum = 15000;
     private static final Logger log = LoggerFactory.getLogger(RnnPredictWords.class);
 
     public static void main(String[] args) throws IOException {
+
+//        CudaEnvironment.getInstance().getConfiguration().setMaximumDeviceCache(7L * 1024L * 1024L * 1024L);
         File originData = new File(PREFIX + "more_standard_emoji_sample.txt");
         if (!originData.exists()) {
             preMain();
         }
 
-        String prefix = "rnn";
+        String prefix = "predictWords";
         int truncateLength = 30;
-        int batchSize = 128;
+        int batchSize = 64;
         int nEpochs = 100;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
         WordToIndex wordToIndex = new WordToIndex(samples, limitNum);
-        WordVectors wordVectors = rebuildWord2Vec(samples);
+//        WordVectors wordVectors = rebuildWord2Vec(samples);
+        WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(PREFIX + "sub.word2vec.txt");
 
         RDataSetIterator rDataSetIterator = new RDataSetIterator(true, truncateLength, batchSize,
                 samples, wordToIndex, wordVectors);
         RDataSetIterator tDataSetIterator = new RDataSetIterator(false, truncateLength, batchSize,
                 samples, wordToIndex, wordVectors);
 
+        Nd4j.getMemoryManager().setAutoGcWindow(1000);
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
+                .trainingWorkspaceMode(WorkspaceMode.SINGLE)
+                .inferenceWorkspaceMode(WorkspaceMode.SINGLE)
                 .seed(new Random().nextInt(100))
-                .updater(Updater.SGD)
+                .updater(Updater.ADAM)
                 .regularization(true)
                 .l2(1e-5)
                 .weightInit(WeightInit.XAVIER)
@@ -82,10 +90,10 @@ public class RnnPredictWords {
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
-                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(100)
+                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(50)
                         .activation(Activation.TANH).build())
                 .layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(100).nOut(rDataSetIterator.totalOutcomes()).build())
+                        .activation(Activation.SOFTMAX).nIn(50).nOut(rDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
                 .build();
@@ -143,7 +151,7 @@ public class RnnPredictWords {
         String input = PREFIX + "standard_emoji_samples.txt";
         Utils.processOriginalSamples(emojiSamples, input, true);
         List<String> lines = Utils.readLinesFromPath(input);
-        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "glove.twitter.27B.50d.txt");
+        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "glove.twitter.27B.100d.txt");
         DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
         tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
         List<String> tempResults = new ArrayList<>();
@@ -175,6 +183,8 @@ public class RnnPredictWords {
             List<String> indexes = new ArrayList<>(tokens.size());
             for (String token : tokens) {
                 if (wordToIndex.getWordIndex(token) != wordToIndex.getWordIndex(UNKNOWN)) {
+                    indexes.add(token);
+                }else{
                     indexes.add(UNKNOWN);
                 }
             }
