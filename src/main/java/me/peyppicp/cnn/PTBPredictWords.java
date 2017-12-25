@@ -47,24 +47,24 @@ public class PTBPredictWords {
     public static final String END = "<end>";
     //        public static final String OUTPUT = "/home/peyppicp/output/";
 //    public static final String PREFIX = "/home/peyppicp/data/new/";
-//    public static final String PREFIX = "/home/panyuxiao/data/new/";
-//    public static final String OUTPUT = "/home/panyuxiao/output/";
-    public static final String PREFIX = "";
-    public static final String OUTPUT = "";
+    public static final String PREFIX = "/home/panyuxiao/data/new/";
+    public static final String OUTPUT = "/home/panyuxiao/output/";
+//    public static final String PREFIX = "";
+//    public static final String OUTPUT = "";
     private static final int limitNum = 15000;
     private static final Logger log = LoggerFactory.getLogger(PTBPredictWords.class);
 
     public static void main(String[] args) throws IOException {
-        File originData = new File(PREFIX + "test1.txt");
+        File originData = new File(PREFIX + "more_standard_emoji_sample.txt");
         if (!originData.exists()) {
             preMain();
         }
 
-        String prefix = "rnn";
+        String prefix = "peyppicp";
         int truncateLength = 30;
         int batchSize = 8;
-        int nEpochs = 10000;
-        int numberSteps = 5;
+        int nEpochs = 100;
+        int numberSteps = 10;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
         WordToIndex wordToIndex = new WordToIndex(samples, limitNum);
 //        WordVectors word2Vec = rebuildWord2Vec(samples);
