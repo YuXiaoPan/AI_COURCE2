@@ -1,9 +1,7 @@
 package me.peyppicp.cnn;
 
+import com.google.common.collect.Lists;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
-import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
-import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
-import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.DataSetPreProcessor;
@@ -14,7 +12,6 @@ import org.nd4j.linalg.indexing.NDArrayIndex;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,86 +20,81 @@ import java.util.stream.Collectors;
  * @date 2017/12/17
  * @email yuxiao.pan@kikatech.com
  */
-public class RDataSetIterator implements DataSetIterator {
+public class PTBDataSetIterator implements DataSetIterator {
 
     //    private final int linesToReadPerBatch;
     private final int batchSize;
     private final int truncateLength;
-    private List<String> samples;
+    private List<String> tokens;
     private int cursor = 0;
-    private final TokenizerFactory tokenizerFactory;
     private final WordToIndex wordToIndex;
     private final WordVectors wordVectors;
     private int vectorSize;
+    private int fetchTokenSize;
+    private final int numberSteps;
 
-    public RDataSetIterator(boolean isTrain, int truncateLength, int batchSize,
-                            List<String> samples, WordToIndex wordToIndex,
-                            WordVectors wordVectors) {
+    public PTBDataSetIterator(boolean isTrain, int truncateLength, int batchSize, int numberSteps,
+                              List<String> samples, WordToIndex wordToIndex,
+                              WordVectors wordVectors) {
 //        this.linesToReadPerBatch = linesToReadPerBatch;
+        this.tokens = Lists.newArrayList();
         this.truncateLength = truncateLength;
-        this.samples = samples;
+        if (isTrain) {
+            samples.parallelStream().filter(s -> !"".equals(s))
+                    .forEach(s -> tokens.addAll(Arrays.stream(s.split(" ")).collect(Collectors.toList())));
+        } else {
+            samples.parallelStream().filter(s -> !"".equals(s)).limit(5000)
+                    .forEach(s -> tokens.addAll(Arrays.stream(s.split(" ")).collect(Collectors.toList())));
+        }
         this.batchSize = batchSize;
-        this.tokenizerFactory = new DefaultTokenizerFactory();
-        this.tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
         this.wordToIndex = wordToIndex;
         this.wordVectors = wordVectors;
         this.vectorSize = wordVectors.getWordVector(wordVectors.vocab().wordAtIndex(0)).length;
-        if (isTrain) {
-            samples = samples.subList(0, 25);
-        }
-        Collections.shuffle(samples);
+        this.numberSteps = numberSteps;
+        this.fetchTokenSize = batchSize * numberSteps;
+
     }
 
     @Override
     public DataSet next(int batchSize) {
-        if (cursor >= samples.size()) {
+        if (cursor >= tokens.size()) {
             throw new RuntimeException();
         }
 
         int maxWordsSize = 0;
         List<List<String>> words = new ArrayList<>();
-        for (int i = 0; i < batchSize && cursor < samples.size(); i++, cursor++) {
-            String sample = samples.get(cursor);
-            List<String> tokens = Arrays.stream(sample.split(" ")).collect(Collectors.toList());
-            maxWordsSize = Math.max(maxWordsSize, tokens.size());
-            words.add(tokens);
-//            tokens.parallelStream().forEachOrdered(words::add);
-//            words.add(tokens.parallelStream().collect(Collectors.toList()));
+        for (int i = 0; i < batchSize; i++) {
+            List<String> temp = new ArrayList<>();
+            for (int j = 0; cursor < tokens.size() && j < numberSteps; cursor++) {
+                temp.add(tokens.get(cursor));
+            }
+            words.add(temp);
         }
 
         INDArray input = Nd4j.create(new int[]{batchSize,
                 vectorSize, maxWordsSize}, 'f');
         INDArray labels = Nd4j.create(new int[]{batchSize,
                 wordToIndex.getTotalWordsCount(), maxWordsSize}, 'f');
-        INDArray inputMask = Nd4j.zeros(batchSize, maxWordsSize);
-        INDArray labelMask = Nd4j.zeros(batchSize, maxWordsSize);
 
         for (int i = 0; i < words.size(); i++) {
-            List<String> lineTokens = words.get(i);
-            for (int j = 0; j < lineTokens.size(); j++) {
-                String currentToken = lineTokens.get(j);
-                INDArray currentVector = wordVectors.getWordVectorMatrix(currentToken);
-                int timeStep = 0;
-                for (int k = j + 1; k < maxWordsSize && k < lineTokens.size(); k++, timeStep++) {
-                    String nextWord = lineTokens.get(k);
-                    input.put(new INDArrayIndex[]{NDArrayIndex.point(i), NDArrayIndex.all(), NDArrayIndex.point(timeStep)}, currentVector);
-                    labels.putScalar(new int[]{i, wordToIndex.getWordIndex(nextWord), timeStep}, 1.0);
-
-                    currentVector = wordVectors.getWordVectorMatrix(nextWord);
-                    currentToken = nextWord;
-                    labelMask.putScalar(new int[]{i, timeStep}, 1.0);
-                }
-                break;
+            List<String> firstBatch = words.get(i);
+            String currentToken = firstBatch.get(0);
+            INDArray currentVector = wordVectors.getWordVectorMatrix(currentToken);
+            for (int j = 1, timeStep = 0; j < firstBatch.size(); j++, timeStep++) {
+                String nextToken = firstBatch.get(j);
+                input.put(new INDArrayIndex[]{NDArrayIndex.point(i),
+                        NDArrayIndex.all(), NDArrayIndex.point(timeStep)}, currentVector);
+                labels.putScalar(new int[]{i, wordToIndex.getWordIndex(nextToken), j}, 1.0);
+                currentVector = wordVectors.getWordVectorMatrix(nextToken);
+                currentToken = nextToken;
             }
-            inputMask.putScalar(new int[]{i, 0}, 1.0);
         }
-//        return new DataSet(input, labels, inputMask, labelMask);
-        return new DataSet(input, labels, inputMask, labelMask);
+        return new DataSet(input, labels);
     }
 
     @Override
     public int totalExamples() {
-        return samples.size();
+        return tokens.size();
     }
 
     @Override
@@ -162,7 +154,7 @@ public class RDataSetIterator implements DataSetIterator {
 
     @Override
     public boolean hasNext() {
-        return cursor < samples.size();
+        return cursor < tokens.size();
     }
 
     @Override
