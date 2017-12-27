@@ -3,8 +3,6 @@ package me.peyppicp.cnn;
 import com.google.common.collect.Lists;
 import com.vdurmont.emoji.EmojiParser;
 import me.peyppicp.Utils;
-import org.deeplearning4j.api.storage.StatsStorage;
-import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.models.word2vec.Word2Vec;
@@ -17,12 +15,11 @@ import org.deeplearning4j.nn.conf.layers.GravesLSTM;
 import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
+import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.deeplearning4j.text.sentenceiterator.CollectionSentenceIterator;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
-import org.deeplearning4j.ui.api.UIServer;
-import org.deeplearning4j.ui.stats.StatsListener;
-import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
+import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
@@ -62,7 +59,7 @@ public class PTBPredictWords {
 
         String prefix = "peyppicp";
         int truncateLength = 30;
-        int batchSize = 8;
+        int batchSize = 64;
         int nEpochs = 100;
         int numberSteps = 10;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
@@ -71,8 +68,8 @@ public class PTBPredictWords {
         Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "sub.word2vec.txt");
         PTBDataSetIterator rDataSetIterator = new PTBDataSetIterator(true, truncateLength, batchSize,
                 numberSteps, samples, wordToIndex, word2Vec);
-        PTBDataSetIterator tDataSetIterator = new PTBDataSetIterator(false, truncateLength, batchSize,
-                numberSteps, samples, wordToIndex, word2Vec);
+//        PTBDataSetIterator tDataSetIterator = new PTBDataSetIterator(false, truncateLength, batchSize,
+//                numberSteps, Utils.readLinesFromPath("testForTest.txt"), wordToIndex, word2Vec);
 
         Nd4j.getMemoryManager().setAutoGcWindow(5000);
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
@@ -83,7 +80,7 @@ public class PTBPredictWords {
                 .regularization(true)
                 .l2(1e-5)
                 .weightInit(WeightInit.XAVIER)
-                .learningRate(0.01)
+                .learningRate(0.001)
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
@@ -95,13 +92,13 @@ public class PTBPredictWords {
                 .backprop(true)
                 .build();
 
-        UIServer uiServer = UIServer.getInstance();
-        StatsStorage statsStorage = new InMemoryStatsStorage();
-        uiServer.attach(statsStorage);
+//        UIServer uiServer = UIServer.getInstance();
+//        StatsStorage statsStorage = new InMemoryStatsStorage();
+//        uiServer.attach(statsStorage);
 
         MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
         multiLayerNetwork.init();
-        multiLayerNetwork.setListeners(new StatsListener(statsStorage));
+        multiLayerNetwork.setListeners(new ScoreIterationListener(5));
 
         System.out.println("begin train");
         for (int j = 0; j < nEpochs; j++) {
@@ -110,10 +107,37 @@ public class PTBPredictWords {
 //            System.out.println(evaluate.stats());
             rDataSetIterator.reset();
 //            if (j % 10 == 0) {
-                Evaluation evaluate = multiLayerNetwork.evaluate(tDataSetIterator);
-                System.out.println(evaluate);
+//                Evaluation evaluate = multiLayerNetwork.evaluate(tDataSetIterator);
+//                System.out.println(evaluate);
 //            }
-//            ModelSerializer.writeModel(multiLayerNetwork, new File(OUTPUT + prefix + j + ".txt"), true);
+            ModelSerializer.writeModel(multiLayerNetwork, new File(OUTPUT + prefix + j + ".txt"), true);
+
+//            multiLayerNetwork.rnnClearPreviousState();
+//
+//            INDArray currentVector = word2Vec.getWordVectorMatrix("happy");
+//            INDArray indArray = Nd4j.zeros(1, 50, 1);
+//            indArray.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all(), NDArrayIndex.point(0)}, currentVector);
+//            INDArray output = multiLayerNetwork.rnnTimeStep(currentVector);
+//
+//            INDArray indArray1 = Nd4j.zeros(1, 50);
+//            INDArray birthday = word2Vec.getWordVectorMatrix("birthday");
+//            indArray1.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, birthday);
+//            INDArray nextOutput = multiLayerNetwork.rnnTimeStep(birthday);
+//
+//            INDArray to = word2Vec.getWordVectorMatrix("to");
+//            INDArray zeros = Nd4j.zeros(1, 50);
+//            zeros.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, to);
+//            INDArray indArray2 = multiLayerNetwork.rnnTimeStep(zeros);
+//
+//            INDArray you = word2Vec.getWordVectorMatrix("you");
+//            INDArray zeros1 = Nd4j.zeros(1, 50);
+//            zeros1.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, you);
+//            INDArray indArray3 = multiLayerNetwork.rnnTimeStep(zeros1);
+//            System.out.println(output);
+//            System.out.println(nextOutput);
+//            System.out.println(indArray2);
+//            System.out.println(indArray3);
+//            System.out.println(wordToIndex.toString());
         }
     }
 

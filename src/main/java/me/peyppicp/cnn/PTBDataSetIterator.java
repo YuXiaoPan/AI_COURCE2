@@ -41,7 +41,7 @@ public class PTBDataSetIterator implements DataSetIterator {
         DefaultTokenizerFactory defaultTokenizerFactory = new DefaultTokenizerFactory();
         tokens = defaultTokenizerFactory.create(samples.get(0)).getTokens();
         if (!isTrain) {
-            tokens = tokens.subList(0, 5000);
+            tokens = tokens.subList(0, 100);
         }
         this.batchSize = batchSize;
         this.wordToIndex = wordToIndex;
@@ -73,7 +73,6 @@ public class PTBDataSetIterator implements DataSetIterator {
         }
 
         maxWordListSize = Math.min(batchSize, words.size());
-
         INDArray input = Nd4j.create(new int[]{maxWordListSize,
                 vectorSize, maxWordsSize}, 'f');
         INDArray labels = Nd4j.create(new int[]{maxWordListSize,

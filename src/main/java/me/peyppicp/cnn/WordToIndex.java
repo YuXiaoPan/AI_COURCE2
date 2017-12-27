@@ -60,4 +60,13 @@ public class WordToIndex {
     public int getTotalWordsCount() {
         return totalWordsCount;
     }
+
+    public String getWord(int index) {
+        return wordCounter.entrySet().stream().filter(entry -> entry.getValue() == index)
+                .map(Map.Entry::getKey).findFirst().get();
+    }
+
+    public String toString() {
+        return wordCounter.toString();
+    }
 }
