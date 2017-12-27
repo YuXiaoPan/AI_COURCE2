@@ -55,6 +55,7 @@ public class PTBPredictWords {
         File originData = new File(PREFIX + "more_standard_emoji_sample.txt");
         if (!originData.exists()) {
             preMain();
+            preForWord2Vec();
         }
 
         String prefix = "peyppicp";
@@ -64,7 +65,7 @@ public class PTBPredictWords {
         int numberSteps = 10;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
         WordToIndex wordToIndex = new WordToIndex(samples, limitNum);
-        WordVectors word2Vec = rebuildWord2Vec(samples);
+        WordVectors word2Vec = rebuildWord2Vec(Utils.readLinesFromPath(PREFIX + "more_standard_emoji_sample_for_word2vec.txt"));
 //        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "sub.word2vec.txt");
         PTBDataSetIterator rDataSetIterator = new PTBDataSetIterator(true, truncateLength, batchSize,
                 numberSteps, samples, wordToIndex, word2Vec);
@@ -139,6 +140,56 @@ public class PTBPredictWords {
 //            System.out.println(indArray3);
 //            System.out.println(wordToIndex.toString());
         }
+    }
+
+    private static void preForWord2Vec() throws IOException {
+        String emojiSamples = PREFIX + "emoji_sample.txt";
+        String input = PREFIX + "standard_emoji_samples.txt";
+        Utils.processOriginalSamples(emojiSamples, input, true);
+        List<String> lines = Utils.readLinesFromPath(input);
+        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "glove.twitter.27B.100d.txt");
+        DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
+        tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
+        List<String> tempResults = new ArrayList<>();
+        for (String line : lines) {
+            List<String> tokens = tokenizerFactory.create(line).getTokens();
+            List<String> filteredTokens = new ArrayList<>(tokens.size());
+            List<String> extractEmojis = EmojiParser.extractEmojis(line);
+            for (String token : tokens) {
+                if (word2Vec.hasWord(token)) {
+                    filteredTokens.add(token);
+                } else {
+                    filteredTokens.add(UNKNOWN);
+                }
+            }
+            if (!extractEmojis.isEmpty()) {
+                filteredTokens.add(EMOJI);
+            } else {
+                filteredTokens.add(END);
+            }
+            StringBuilder stringBuilder = new StringBuilder();
+            filteredTokens.forEach(s -> stringBuilder.append(s).append(" "));
+            tempResults.add(stringBuilder.toString().trim());
+        }
+
+        WordToIndex wordToIndex = new WordToIndex(tempResults, limitNum);
+        List<String> finalResults = new ArrayList<>(tempResults.size());
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String tempResult : tempResults) {
+            List<String> tokens = tokenizerFactory.create(tempResult).getTokens();
+            List<String> indexes = new ArrayList<>(tokens.size());
+            for (String token : tokens) {
+                if (wordToIndex.getWordIndex(token) != wordToIndex.getWordIndex(UNKNOWN)) {
+                    indexes.add(token);
+                } else {
+                    indexes.add(UNKNOWN);
+                }
+            }
+            indexes.forEach(s -> stringBuilder.append(s).append(" "));
+            finalResults.add(stringBuilder.toString().trim());
+        }
+        String output = PREFIX + "more_standard_emoji_sample_for_word2vec.txt";
+        Utils.writeLineToPath(finalResults, output);
     }
 
     private static WordVectors rebuildWord2Vec(List<String> originSamples) throws IOException {
