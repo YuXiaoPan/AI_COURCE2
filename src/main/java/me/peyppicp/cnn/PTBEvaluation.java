@@ -35,5 +35,15 @@ public class PTBEvaluation {
         return tpNumber / ((tpNumber + fpNumber) * 1.0d);
     }
 
-//    public double
+    public double accuracy() {
+        return (tpNumber + tnNumber) / ((tpNumber + fpNumber + fnNumber + tnNumber) * 1.0d);
+    }
+
+    public double recall() {
+        return tpNumber / ((tpNumber + fnNumber) * 1.0d);
+    }
+
+    public double F1() {
+        return (2 * recall() * accuracy()) / ((recall() + accuracy()) * 1.0d);
+    }
 }

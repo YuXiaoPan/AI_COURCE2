@@ -46,7 +46,7 @@ public class PTBPredictWords {
 //    public static final String PREFIX = "/home/peyppicp/data/new/";
     public static final String PREFIX = "/home/panyuxiao/data/new/";
     public static final String OUTPUT = "/home/panyuxiao/output/";
-    //    public static final String PREFIX = "";
+//        public static final String PREFIX = "";
 //    public static final String OUTPUT = "";
     private static final int limitNum = 15000;
     private static final Logger log = LoggerFactory.getLogger(PTBPredictWords.class);
@@ -55,8 +55,8 @@ public class PTBPredictWords {
         File originData = new File(PREFIX + "more_standard_emoji_sample.txt");
         if (!originData.exists()) {
             preMain();
-            preForWord2Vec();
         }
+        preForWord2Vec();
 
         String prefix = "peyppicp";
         int truncateLength = 30;
@@ -116,8 +116,8 @@ public class PTBPredictWords {
 //            multiLayerNetwork.rnnClearPreviousState();
 //
 //            INDArray currentVector = word2Vec.getWordVectorMatrix("happy");
-//            INDArray indArray = Nd4j.zeros(1, 50, 1);
-//            indArray.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all(), NDArrayIndex.point(0)}, currentVector);
+//            INDArray indArray = Nd4j.zeros(1, 50);
+//            indArray.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, currentVector);
 //            INDArray output = multiLayerNetwork.rnnTimeStep(currentVector);
 //
 //            INDArray indArray1 = Nd4j.zeros(1, 50);
