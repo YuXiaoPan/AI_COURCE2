@@ -52,6 +52,7 @@ public class PTBPredictWords {
     private static final Logger log = LoggerFactory.getLogger(PTBPredictWords.class);
 
     public static void main(String[] args) throws IOException {
+        Nd4j.getMemoryManager().setAutoGcWindow(5000);
         File originData = new File(PREFIX + "more_standard_emoji_sample.txt");
         if (!originData.exists()) {
             preMain();
@@ -72,7 +73,6 @@ public class PTBPredictWords {
 //        PTBDataSetIterator tDataSetIterator = new PTBDataSetIterator(false, truncateLength, batchSize,
 //                numberSteps, Utils.readLinesFromPath("testForTest.txt"), wordToIndex, word2Vec);
 
-        Nd4j.getMemoryManager().setAutoGcWindow(5000);
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .trainingWorkspaceMode(WorkspaceMode.SINGLE)
                 .inferenceWorkspaceMode(WorkspaceMode.SINGLE)

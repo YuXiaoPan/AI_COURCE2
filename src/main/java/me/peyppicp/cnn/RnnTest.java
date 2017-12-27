@@ -10,7 +10,10 @@ import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.indexing.INDArrayIndex;
 import org.nd4j.linalg.indexing.NDArrayIndex;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author YuXiao Pan
@@ -48,12 +51,33 @@ public class RnnTest {
         INDArray firstVector = wordVectors.getWordVectorMatrix(firstWord);
         inputArray.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, firstVector);
         INDArray firstOutput = ptbModel.rnnTimeStep(inputArray);
-
+        List<String> topNWords = findTopNWords(firstOutput, 10);
+        System.out.println(topNWords);
+        for (String token : tokens) {
+            if (token.equalsIgnoreCase(topNWords.get(0))) {
+                top1.tpPlusOne();
+            }else{
+//                top1.
+            }
+        }
         return null;
     }
 
-    public List<String> findTop10Words(INDArray output) {
-        return null;
+    public List<String> findTopNWords(INDArray output,int topN) {
+        INDArray indArray = output.linearView();
+        List<String> labels = wordToIndex.getLabels();
+        Map<String, Float> top10WordsMap = new HashMap<>(labels.size());
+        List<String> top10Words = new ArrayList<>(topN);
+        Preconditions.checkArgument(topN < labels.size());
+        Preconditions.checkArgument(labels.size() == indArray.length());
+        for (int i = 0; i < indArray.length(); i++) {
+            top10WordsMap.put(labels.get(i), indArray.getFloat(i));
+        }
+        top10WordsMap.entrySet().parallelStream()
+                .sorted((e1, e2) -> -e1.getValue().compareTo(e2.getValue()))
+                .limit(topN)
+                .forEachOrdered(entry -> top10Words.add(entry.getKey()));
+        return top10Words;
     }
 
 }
