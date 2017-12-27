@@ -174,8 +174,8 @@ public class PTBPredictWords {
 
         WordToIndex wordToIndex = new WordToIndex(tempResults, limitNum);
         List<String> finalResults = new ArrayList<>(tempResults.size());
-        StringBuilder stringBuilder = new StringBuilder();
         for (String tempResult : tempResults) {
+            StringBuilder stringBuilder = new StringBuilder();
             List<String> tokens = tokenizerFactory.create(tempResult).getTokens();
             List<String> indexes = new ArrayList<>(tokens.size());
             for (String token : tokens) {
