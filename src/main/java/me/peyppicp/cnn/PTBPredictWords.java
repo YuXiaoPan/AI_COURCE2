@@ -46,7 +46,7 @@ public class PTBPredictWords {
 //    public static final String PREFIX = "/home/peyppicp/data/new/";
     public static final String PREFIX = "/home/panyuxiao/data/new/";
     public static final String OUTPUT = "/home/panyuxiao/output/";
-//    public static final String PREFIX = "";
+    //    public static final String PREFIX = "";
 //    public static final String OUTPUT = "";
     private static final int limitNum = 15000;
     private static final Logger log = LoggerFactory.getLogger(PTBPredictWords.class);
@@ -64,8 +64,8 @@ public class PTBPredictWords {
         int numberSteps = 10;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
         WordToIndex wordToIndex = new WordToIndex(samples, limitNum);
-//        WordVectors word2Vec = rebuildWord2Vec(samples);
-        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "sub.word2vec.txt");
+        WordVectors word2Vec = rebuildWord2Vec(samples);
+//        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "sub.word2vec.txt");
         PTBDataSetIterator rDataSetIterator = new PTBDataSetIterator(true, truncateLength, batchSize,
                 numberSteps, samples, wordToIndex, word2Vec);
 //        PTBDataSetIterator tDataSetIterator = new PTBDataSetIterator(false, truncateLength, batchSize,
@@ -142,31 +142,31 @@ public class PTBPredictWords {
     }
 
     private static WordVectors rebuildWord2Vec(List<String> originSamples) throws IOException {
-//        File subWord2VecFile = new File(PREFIX + "sub.word2vec.txt");
-//        if (!subWord2VecFile.exists()) {
-        int minWordFrequency = 5;
-        int iterations = 1;
-        int layerSize = 50;
-        int seed = 3543;
-        int windowSize = 10;
+        File subWord2VecFile = new File(PREFIX + "sub.word2vec.txt");
+        if (!subWord2VecFile.exists()) {
+            int minWordFrequency = 5;
+            int iterations = 1;
+            int layerSize = 50;
+            int seed = 3543;
+            int windowSize = 10;
 
-        CollectionSentenceIterator iterator = new CollectionSentenceIterator(originSamples);
-        DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
-        tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
-        Word2Vec vec = new Word2Vec.Builder()
-                .minWordFrequency(minWordFrequency)
-                .iterations(iterations)
-                .layerSize(layerSize)
-                .seed(seed)
-                .windowSize(windowSize)
-                .iterate(iterator)
-                .tokenizerFactory(tokenizerFactory)
-                .build();
-        vec.fit();
-        WordVectorSerializer.writeWordVectors(vec.lookupTable(), PREFIX + "sub.word2vec.txt");
-        return vec;
-//        }
-//        return WordVectorSerializer.readWord2VecModel(subWord2VecFile);
+            CollectionSentenceIterator iterator = new CollectionSentenceIterator(originSamples);
+            DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
+            tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
+            Word2Vec vec = new Word2Vec.Builder()
+                    .minWordFrequency(minWordFrequency)
+                    .iterations(iterations)
+                    .layerSize(layerSize)
+                    .seed(seed)
+                    .windowSize(windowSize)
+                    .iterate(iterator)
+                    .tokenizerFactory(tokenizerFactory)
+                    .build();
+            vec.fit();
+            WordVectorSerializer.writeWordVectors(vec.lookupTable(), PREFIX + "sub.word2vec.txt");
+            return vec;
+        }
+        return WordVectorSerializer.readWord2VecModel(subWord2VecFile);
     }
 
     private static void preMain() throws IOException {
