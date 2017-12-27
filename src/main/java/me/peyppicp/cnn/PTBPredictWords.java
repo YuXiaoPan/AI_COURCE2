@@ -56,8 +56,8 @@ public class PTBPredictWords {
         File originData = new File(PREFIX + "more_standard_emoji_sample.txt");
         if (!originData.exists()) {
             preMain();
+            preForWord2Vec();
         }
-        preForWord2Vec();
 
         String prefix = "peyppicp";
         int truncateLength = 30;
