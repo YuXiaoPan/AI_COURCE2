@@ -15,11 +15,9 @@ import org.deeplearning4j.nn.conf.layers.GravesLSTM;
 import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
-import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.deeplearning4j.text.sentenceiterator.CollectionSentenceIterator;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
-import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
@@ -37,23 +35,23 @@ import java.util.Random;
  * @date 2017/12/17
  * @email yuxiao.pan@kikatech.com
  */
-public class PTBPredictWords {
+public class PTBPredictWordsForLocalTest {
 
     public static final String UNKNOWN = "<unknown>";
     public static final String EMOJI = "<emoji>";
     public static final String END = "<end>";
     //        public static final String OUTPUT = "/home/peyppicp/output/";
 //    public static final String PREFIX = "/home/peyppicp/data/new/";
-    public static final String PREFIX = "/home/panyuxiao/data/new/";
-    public static final String OUTPUT = "/home/panyuxiao/output/";
-//        public static final String PREFIX = "";
-//    public static final String OUTPUT = "";
+//    public static final String PREFIX = "/home/panyuxiao/data/new/";
+//    public static final String OUTPUT = "/home/panyuxiao/output/";
+        public static final String PREFIX = "";
+    public static final String OUTPUT = "";
     private static final int limitNum = 15000;
-    private static final Logger log = LoggerFactory.getLogger(PTBPredictWords.class);
+    private static final Logger log = LoggerFactory.getLogger(PTBPredictWordsForLocalTest.class);
 
     public static void main(String[] args) throws IOException {
         Nd4j.getMemoryManager().setAutoGcWindow(5000);
-        File originData = new File(PREFIX + "more_standard_emoji_sample.txt");
+        File originData = new File(PREFIX + "test.txt");
         if (!originData.exists()) {
             preMain();
             preForWord2Vec();
@@ -61,9 +59,9 @@ public class PTBPredictWords {
 
         String prefix = "peyppicp";
         int truncateLength = 30;
-        int batchSize = 64;
-        int nEpochs = 100;
-        int numberSteps = 10;
+        int batchSize = 4;
+        int nEpochs = 500;
+        int numberSteps = 5;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
         WordToIndex wordToIndex = new WordToIndex(samples, limitNum);
 //        WordVectors word2Vec = rebuildWord2Vec(Utils.readLinesFromPath(PREFIX + "more_standard_emoji_sample_for_word2vec.txt"));
@@ -85,10 +83,10 @@ public class PTBPredictWords {
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
-                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(50)
+                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(75)
                         .activation(Activation.TANH).build())
                 .layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(50).nOut(rDataSetIterator.totalOutcomes()).build())
+                        .activation(Activation.SOFTMAX).nIn(75).nOut(rDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
                 .build();
@@ -99,7 +97,10 @@ public class PTBPredictWords {
 
         MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
         multiLayerNetwork.init();
-        multiLayerNetwork.setListeners(new ScoreIterationListener(5));
+
+        DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
+        tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
+        RnnTest rnnTest = new RnnTest(word2Vec, wordToIndex, tokenizerFactory, multiLayerNetwork, null);
 
         System.out.println("begin train");
         for (int j = 0; j < nEpochs; j++) {
@@ -111,34 +112,8 @@ public class PTBPredictWords {
 //                Evaluation evaluate = multiLayerNetwork.evaluate(tDataSetIterator);
 //                System.out.println(evaluate);
 //            }
-            ModelSerializer.writeModel(multiLayerNetwork, new File(OUTPUT + prefix + j + ".txt"), true);
-
-//            multiLayerNetwork.rnnClearPreviousState();
-//
-//            INDArray currentVector = word2Vec.getWordVectorMatrix("happy");
-//            INDArray indArray = Nd4j.zeros(1, 50);
-//            indArray.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, currentVector);
-//            INDArray output = multiLayerNetwork.rnnTimeStep(currentVector);
-//
-//            INDArray indArray1 = Nd4j.zeros(1, 50);
-//            INDArray birthday = word2Vec.getWordVectorMatrix("birthday");
-//            indArray1.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, birthday);
-//            INDArray nextOutput = multiLayerNetwork.rnnTimeStep(birthday);
-//
-//            INDArray to = word2Vec.getWordVectorMatrix("to");
-//            INDArray zeros = Nd4j.zeros(1, 50);
-//            zeros.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, to);
-//            INDArray indArray2 = multiLayerNetwork.rnnTimeStep(zeros);
-//
-//            INDArray you = word2Vec.getWordVectorMatrix("you");
-//            INDArray zeros1 = Nd4j.zeros(1, 50);
-//            zeros1.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, you);
-//            INDArray indArray3 = multiLayerNetwork.rnnTimeStep(zeros1);
-//            System.out.println(output);
-//            System.out.println(nextOutput);
-//            System.out.println(indArray2);
-//            System.out.println(indArray3);
-//            System.out.println(wordToIndex.toString());
+//            ModelSerializer.writeModel(multiLayerNetwork, new File(OUTPUT + prefix + j + ".txt"), true);
+        rnnTest.generateTokensFromStr("welcome to new york");
         }
     }
 

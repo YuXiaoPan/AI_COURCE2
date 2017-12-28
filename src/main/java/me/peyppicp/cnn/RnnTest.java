@@ -42,25 +42,19 @@ public class RnnTest {
         this.top3 = new PTBEvaluation();
     }
 
-    public String generateTokensFromStr(String sentence) {
+    public void generateTokensFromStr(String sentence) {
         ptbModel.rnnClearPreviousState();
         List<String> tokens = tokenizerFactory.create(sentence).getTokens();
         Preconditions.checkArgument(tokens.size() > 1);
-        String firstWord = tokens.get(0);
-        INDArray inputArray = Nd4j.zeros(1, word2vecSize);
-        INDArray firstVector = wordVectors.getWordVectorMatrix(firstWord);
-        inputArray.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, firstVector);
-        INDArray firstOutput = ptbModel.rnnTimeStep(inputArray);
-        List<String> topNWords = findTopNWords(firstOutput, 10);
-        System.out.println(topNWords);
         for (String token : tokens) {
-            if (token.equalsIgnoreCase(topNWords.get(0))) {
-                top1.tpPlusOne();
-            }else{
-//                top1.
-            }
+            INDArray input = Nd4j.zeros(1, word2vecSize);
+            INDArray vectorMatrix = wordVectors.getWordVectorMatrix(token);
+            input.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, vectorMatrix);
+            INDArray output = ptbModel.rnnTimeStep(input);
+            System.out.println("current input:" + token);
+            System.out.println(findTopNWords(output, 10));
         }
-        return null;
+        System.out.println();
     }
 
     public List<String> findTopNWords(INDArray output,int topN) {
