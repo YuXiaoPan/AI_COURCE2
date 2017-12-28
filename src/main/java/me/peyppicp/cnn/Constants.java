@@ -11,5 +11,5 @@ public class Constants {
     public static final String MORE_STANDARD = "more_standard_emoji_sample.txt";
     public static final String TEMP_DATA = "standard_emoji_samples.txt";
     public static final String _50D = "glove.twitter.27B.50d.txt";
-    public static final String ORIGINAL_DATA = "new_sample.txt";
+    public static final String ORIGINAL_DATA = "emoji_sample.txt";
 }
