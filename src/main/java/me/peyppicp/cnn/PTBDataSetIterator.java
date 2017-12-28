@@ -75,7 +75,7 @@ public class PTBDataSetIterator implements DataSetIterator {
                 String nextToken = firstBatch.get(j);
                 input.put(new INDArrayIndex[]{NDArrayIndex.point(i),
                         NDArrayIndex.all(), NDArrayIndex.point(timeStep)}, currentVector);
-                labels.putScalar(new int[]{i, wordToIndex.getWordIndex(nextToken), timeStep}, 1.0);
+                labels.putScalar(new int[]{i, wordToIndex.getIndex(nextToken), timeStep}, 1.0);
                 currentVector = wordVectors.getWordVectorMatrix(nextToken);
                 currentToken = nextToken;
             }

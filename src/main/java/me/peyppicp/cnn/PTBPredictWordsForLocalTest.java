@@ -50,15 +50,17 @@ public class PTBPredictWordsForLocalTest {
     public static void main(String[] args) throws IOException {
         Nd4j.getMemoryManager().setAutoGcWindow(5000);
         File originData = new File(PREFIX + "test.txt");
-        if (!originData.exists()) {
-            preMain();
-        }
+//        if (!originData.exists()) {
+//            preMain();
+//        }
 
         String prefix = "peyppicp";
         int batchSize = 4;
         int nEpochs = 500;
-        int numberSteps = 10;
+        int numberSteps = 5;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
+        WordLimiter wordLimiter = new WordLimiter(samples, limitNum);
+        wordLimiter.toFile(PREFIX + Constants.PAIR);
         WordToIndex wordToIndex = new WordToIndex(PREFIX + Constants.PAIR);
         Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + Constants._50D);
         PTBDataSetIterator rDataSetIterator = new PTBDataSetIterator(batchSize,
@@ -80,8 +82,10 @@ public class PTBPredictWordsForLocalTest {
                 .list()
                 .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(50)
                         .activation(Activation.TANH).build())
-                .layer(1, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(50).nOut(rDataSetIterator.totalOutcomes()).build())
+                .layer(1, new GravesLSTM.Builder().nIn(50).nOut(100)
+                        .activation(Activation.TANH).build())
+                .layer(2, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
+                        .activation(Activation.SOFTMAX).nIn(100).nOut(rDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
                 .build();
