@@ -61,7 +61,7 @@ public class PTBPredictWords {
 
         String prefix = "peyppicp";
         int truncateLength = 30;
-        int batchSize = 64;
+        int batchSize = 128;
         int nEpochs = 100;
         int numberSteps = 10;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
