@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.vdurmont.emoji.EmojiParser;
 import me.peyppicp.Utils;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
-import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -16,7 +15,6 @@ import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
-import org.deeplearning4j.text.sentenceiterator.CollectionSentenceIterator;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.util.ModelSerializer;
@@ -42,6 +40,7 @@ public class PTBPredictWords {
     public static final String UNKNOWN = "<unknown>";
     public static final String EMOJI = "<emoji>";
     public static final String END = "<end>";
+
     //        public static final String OUTPUT = "/home/peyppicp/output/";
 //    public static final String PREFIX = "/home/peyppicp/data/new/";
     public static final String PREFIX = "/home/panyuxiao/data/new/";
@@ -53,25 +52,21 @@ public class PTBPredictWords {
 
     public static void main(String[] args) throws IOException {
         Nd4j.getMemoryManager().setAutoGcWindow(5000);
+
         File originData = new File(PREFIX + "more_standard_emoji_sample.txt");
         if (!originData.exists()) {
-            preMain();
-            preForWord2Vec();
+            prepareDataForTrain();
         }
 
-        String prefix = "peyppicp";
-        int truncateLength = 30;
+        String prefix = "ptb";
         int batchSize = 128;
         int nEpochs = 100;
         int numberSteps = 10;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
         WordToIndex wordToIndex = new WordToIndex(samples, limitNum);
-//        WordVectors word2Vec = rebuildWord2Vec(Utils.readLinesFromPath(PREFIX + "more_standard_emoji_sample_for_word2vec.txt"));
-        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "sub.word2vec.txt");
-        PTBDataSetIterator rDataSetIterator = new PTBDataSetIterator(true, truncateLength, batchSize,
+        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "glove.twitter.27B.50d.txt");
+        PTBDataSetIterator rDataSetIterator = new PTBDataSetIterator(batchSize,
                 numberSteps, samples, wordToIndex, word2Vec);
-//        PTBDataSetIterator tDataSetIterator = new PTBDataSetIterator(false, truncateLength, batchSize,
-//                numberSteps, Utils.readLinesFromPath("testForTest.txt"), wordToIndex, word2Vec);
 
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .trainingWorkspaceMode(WorkspaceMode.SINGLE)
@@ -93,56 +88,20 @@ public class PTBPredictWords {
                 .backprop(true)
                 .build();
 
-//        UIServer uiServer = UIServer.getInstance();
-//        StatsStorage statsStorage = new InMemoryStatsStorage();
-//        uiServer.attach(statsStorage);
 
         MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
         multiLayerNetwork.init();
         multiLayerNetwork.setListeners(new ScoreIterationListener(5));
 
-        System.out.println("begin train");
+        log.info("Begin Train");
         for (int j = 0; j < nEpochs; j++) {
             multiLayerNetwork.fit(rDataSetIterator);
-//            Evaluation evaluate = multiLayerNetwork.evaluate(tDataSetIterator);
-//            System.out.println(evaluate.stats());
             rDataSetIterator.reset();
-//            if (j % 10 == 0) {
-//                Evaluation evaluate = multiLayerNetwork.evaluate(tDataSetIterator);
-//                System.out.println(evaluate);
-//            }
             ModelSerializer.writeModel(multiLayerNetwork, new File(OUTPUT + prefix + j + ".txt"), true);
-
-//            multiLayerNetwork.rnnClearPreviousState();
-//
-//            INDArray currentVector = word2Vec.getWordVectorMatrix("happy");
-//            INDArray indArray = Nd4j.zeros(1, 50);
-//            indArray.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, currentVector);
-//            INDArray output = multiLayerNetwork.rnnTimeStep(currentVector);
-//
-//            INDArray indArray1 = Nd4j.zeros(1, 50);
-//            INDArray birthday = word2Vec.getWordVectorMatrix("birthday");
-//            indArray1.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, birthday);
-//            INDArray nextOutput = multiLayerNetwork.rnnTimeStep(birthday);
-//
-//            INDArray to = word2Vec.getWordVectorMatrix("to");
-//            INDArray zeros = Nd4j.zeros(1, 50);
-//            zeros.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, to);
-//            INDArray indArray2 = multiLayerNetwork.rnnTimeStep(zeros);
-//
-//            INDArray you = word2Vec.getWordVectorMatrix("you");
-//            INDArray zeros1 = Nd4j.zeros(1, 50);
-//            zeros1.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, you);
-//            INDArray indArray3 = multiLayerNetwork.rnnTimeStep(zeros1);
-//            System.out.println(output);
-//            System.out.println(nextOutput);
-//            System.out.println(indArray2);
-//            System.out.println(indArray3);
-//            System.out.println(wordToIndex.toString());
         }
     }
 
-    private static void preForWord2Vec() throws IOException {
+    private static void prepareDataForTrain() throws IOException {
         String emojiSamples = PREFIX + "emoji_sample.txt";
         String input = PREFIX + "standard_emoji_samples.txt";
         Utils.processOriginalSamples(emojiSamples, input, true);
@@ -173,85 +132,6 @@ public class PTBPredictWords {
         }
 
         WordToIndex wordToIndex = new WordToIndex(tempResults, limitNum);
-        List<String> finalResults = new ArrayList<>(tempResults.size());
-        for (String tempResult : tempResults) {
-            StringBuilder stringBuilder = new StringBuilder();
-            List<String> tokens = tokenizerFactory.create(tempResult).getTokens();
-            List<String> indexes = new ArrayList<>(tokens.size());
-            for (String token : tokens) {
-                if (wordToIndex.getWordIndex(token) != wordToIndex.getWordIndex(UNKNOWN)) {
-                    indexes.add(token);
-                } else {
-                    indexes.add(UNKNOWN);
-                }
-            }
-            indexes.forEach(s -> stringBuilder.append(s).append(" "));
-            finalResults.add(stringBuilder.toString().trim());
-        }
-        String output = PREFIX + "more_standard_emoji_sample_for_word2vec.txt";
-        Utils.writeLineToPath(finalResults, output);
-    }
-
-    private static WordVectors rebuildWord2Vec(List<String> originSamples) throws IOException {
-        File subWord2VecFile = new File(PREFIX + "sub.word2vec.txt");
-        if (!subWord2VecFile.exists()) {
-            int minWordFrequency = 5;
-            int iterations = 1;
-            int layerSize = 50;
-            int seed = 3543;
-            int windowSize = 10;
-
-            CollectionSentenceIterator iterator = new CollectionSentenceIterator(originSamples);
-            DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
-            tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
-            Word2Vec vec = new Word2Vec.Builder()
-                    .minWordFrequency(minWordFrequency)
-                    .iterations(iterations)
-                    .layerSize(layerSize)
-                    .seed(seed)
-                    .windowSize(windowSize)
-                    .iterate(iterator)
-                    .tokenizerFactory(tokenizerFactory)
-                    .build();
-            vec.fit();
-            WordVectorSerializer.writeWordVectors(vec.lookupTable(), PREFIX + "sub.word2vec.txt");
-            return vec;
-        }
-        return WordVectorSerializer.readWord2VecModel(subWord2VecFile);
-    }
-
-    private static void preMain() throws IOException {
-        String emojiSamples = PREFIX + "emoji_sample.txt";
-        String input = PREFIX + "standard_emoji_samples.txt";
-        Utils.processOriginalSamples(emojiSamples, input, true);
-        List<String> lines = Utils.readLinesFromPath(input);
-        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "glove.twitter.27B.100d.txt");
-        DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
-        tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
-        List<String> tempResults = new ArrayList<>();
-        for (String line : lines) {
-            List<String> tokens = tokenizerFactory.create(line).getTokens();
-            List<String> filteredTokens = new ArrayList<>(tokens.size());
-            List<String> extractEmojis = EmojiParser.extractEmojis(line);
-            for (String token : tokens) {
-                if (word2Vec.hasWord(token)) {
-                    filteredTokens.add(token);
-                } else {
-                    filteredTokens.add(UNKNOWN);
-                }
-            }
-            if (!extractEmojis.isEmpty()) {
-                filteredTokens.add(EMOJI);
-            } else {
-                filteredTokens.add(END);
-            }
-            StringBuilder stringBuilder = new StringBuilder();
-            filteredTokens.forEach(s -> stringBuilder.append(s).append(" "));
-            tempResults.add(stringBuilder.toString().trim());
-        }
-
-        WordToIndex wordToIndex = new WordToIndex(tempResults, limitNum);
-//        List<String> finalResults = new ArrayList<>(tempResults.size());
         StringBuilder stringBuilder = new StringBuilder();
         for (String tempResult : tempResults) {
             List<String> tokens = tokenizerFactory.create(tempResult).getTokens();
@@ -264,7 +144,6 @@ public class PTBPredictWords {
                 }
             }
             indexes.forEach(s -> stringBuilder.append(s).append(" "));
-//            finalResults.add(stringBuilder.toString().trim());
         }
         List<String> data = Lists.newArrayList();
         data.add(stringBuilder.toString().trim());

@@ -62,13 +62,7 @@ public class CNNDecideEmojiMain {
 //    public static final String OUTPUT = "";
 
     public static void main(String[] args) throws IOException {
-//        CudaEnvironment.getInstance().getConfiguration()
-//                .allowMultiGPU(false)
-//                .setMaximumDeviceCache(10L * 1024L * 1024L * 1024L)
-//                .allowCrossDeviceAccess(true);
-
         String prefix = "complex02";
-
         String sampleWithEmoji = PREFIX + "EmojiSample.txt";
         String samplePath = PREFIX + "EmojiSampleWithoutEmoji.txt";
         String sampleLabelPath = PREFIX + "EmojiSampleLabels.txt";
