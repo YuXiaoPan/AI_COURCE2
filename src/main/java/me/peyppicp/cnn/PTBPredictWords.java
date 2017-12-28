@@ -41,9 +41,9 @@ public class PTBPredictWords {
     public static final String EMOJI = "<emoji>";
     public static final String END = "<end>";
 
-            public static final String OUTPUT = "/home/peyppicp/output/";
+    public static final String OUTPUT = "/home/peyppicp/output/";
     public static final String PREFIX = "/home/peyppicp/data/new/";
-//    public static final String PREFIX = "/home/panyuxiao/data/new/";
+    //    public static final String PREFIX = "/home/panyuxiao/data/new/";
 //    public static final String OUTPUT = "/home/panyuxiao/output/";
 //    public static final String PREFIX = "";
 //    public static final String OUTPUT = "";
@@ -140,7 +140,7 @@ public class PTBPredictWords {
             List<String> tokens = tokenizerFactory.create(tempResult).getTokens();
             List<String> indexes = new ArrayList<>(tokens.size());
             for (String token : tokens) {
-                if (wordLimiter.getWordIndex(token) != wordLimiter.getWordIndex(UNKNOWN)) {
+                if (wordLimiter.getWordIndex(token) != -1) {
                     indexes.add(token);
                 } else {
 //                    indexes.add(UNKNOWN);

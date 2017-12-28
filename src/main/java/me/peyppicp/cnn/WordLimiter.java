@@ -56,7 +56,7 @@ public class WordLimiter {
     }
 
     public int getWordIndex(String word) {
-        return wordCounter.getOrDefault(word, wordCounter.get(RnnPredictWords.UNKNOWN));
+        return wordCounter.getOrDefault(word, -1);
     }
 
     public int getTotalWordsCount() {

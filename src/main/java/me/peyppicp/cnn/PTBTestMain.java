@@ -17,7 +17,7 @@ import java.io.IOException;
 public class PTBTestMain {
 
     public static void main(String[] args) throws IOException {
-        MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork("./src/main/resources/model/peyppicp0.txt");
+        MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork("./src/main/resources/model/ptb0.txt");
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel("glove.twitter.27B.50d.txt");
         WordToIndex wordToIndex = new WordToIndex("pair.txt");
         DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();

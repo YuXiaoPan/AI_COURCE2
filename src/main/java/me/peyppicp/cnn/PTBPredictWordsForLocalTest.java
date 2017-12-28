@@ -147,7 +147,7 @@ public class PTBPredictWordsForLocalTest {
             List<String> tokens = tokenizerFactory.create(tempResult).getTokens();
             List<String> indexes = new ArrayList<>(tokens.size());
             for (String token : tokens) {
-                if (wordLimiter.getWordIndex(token) != wordLimiter.getWordIndex(UNKNOWN)) {
+                if (wordLimiter.getWordIndex(token) != -1) {
                     indexes.add(token);
                 } else {
 //                    indexes.add(UNKNOWN);
