@@ -5,6 +5,7 @@ import com.vdurmont.emoji.EmojiParser;
 import me.peyppicp.Utils;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
+import org.deeplearning4j.nn.api.Model;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
@@ -14,7 +15,7 @@ import org.deeplearning4j.nn.conf.layers.GravesLSTM;
 import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
-import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
+import org.deeplearning4j.optimize.api.IterationListener;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.util.ModelSerializer;
@@ -41,11 +42,11 @@ public class PTBPredictWords {
     public static final String EMOJI = "<emoji>";
     public static final String END = "<end>";
 
-    public static final String OUTPUT = "/home/peyppicp/output/";
-    public static final String PREFIX = "/home/peyppicp/data/new/";
-    //    public static final String PREFIX = "/home/panyuxiao/data/new/";
-//    public static final String OUTPUT = "/home/panyuxiao/output/";
-//    public static final String PREFIX = "";
+    //    public static final String OUTPUT = "/home/peyppicp/output/";
+//    public static final String PREFIX = "/home/peyppicp/data/new/";
+    public static final String PREFIX = "/home/panyuxiao/data/new/";
+    public static final String OUTPUT = "/home/panyuxiao/output/";
+    //    public static final String PREFIX = "";
 //    public static final String OUTPUT = "";
     private static final int limitNum = 15000;
     private static final Logger log = LoggerFactory.getLogger(PTBPredictWords.class);
@@ -61,7 +62,7 @@ public class PTBPredictWords {
 
         String prefix = "ptb";
         int batchSize = 128;
-        int nEpochs = 100;
+        int nEpochs = 10;
         int numberSteps = 5;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
         WordToIndex wordToIndex = new WordToIndex(PREFIX + Constants.PAIR);
@@ -77,23 +78,39 @@ public class PTBPredictWords {
                 .regularization(true)
                 .l2(1e-5)
                 .weightInit(WeightInit.XAVIER)
-                .learningRate(0.001)
+//                .learningRate(0.1)
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
-                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(50)
+                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(75)
                         .activation(Activation.TANH).build())
-                .layer(1, new GravesLSTM.Builder().nIn(50).nOut(75).activation(Activation.TANH).build())
+                .layer(1, new GravesLSTM.Builder().nIn(75).nOut(50).activation(Activation.TANH).build())
                 .layer(2, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(75).nOut(rDataSetIterator.totalOutcomes()).build())
+                        .activation(Activation.SOFTMAX).nIn(50).nOut(rDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
                 .build();
 
-
         MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
         multiLayerNetwork.init();
-        multiLayerNetwork.setListeners(new ScoreIterationListener(5));
+        multiLayerNetwork.setListeners(new IterationListener() {
+            @Override
+            public boolean invoked() {
+                return false;
+            }
+
+            @Override
+            public void invoke() {
+
+            }
+
+            @Override
+            public void iterationDone(Model model, int i) {
+                double loss = model.score();
+                double exp = Math.exp(loss / i);
+                System.out.println("PPL:" + exp + ",iterator:" + i);
+            }
+        });
 
         log.info("Begin Train");
         for (int j = 0; j < nEpochs; j++) {
@@ -120,7 +137,7 @@ public class PTBPredictWords {
                 if (word2Vec.hasWord(token)) {
                     filteredTokens.add(token);
                 } else {
-//                    filteredTokens.add(UNKNOWN);
+                    filteredTokens.add(UNKNOWN);
                 }
             }
             if (!extractEmojis.isEmpty()) {
@@ -143,7 +160,7 @@ public class PTBPredictWords {
                 if (wordLimiter.getWordIndex(token) != -1) {
                     indexes.add(token);
                 } else {
-//                    indexes.add(UNKNOWN);
+                    indexes.add(UNKNOWN);
                 }
             }
             indexes.forEach(s -> stringBuilder.append(s).append(" "));

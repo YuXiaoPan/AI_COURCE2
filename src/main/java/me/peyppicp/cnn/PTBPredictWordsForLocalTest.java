@@ -5,6 +5,7 @@ import com.vdurmont.emoji.EmojiParser;
 import me.peyppicp.Utils;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
+import org.deeplearning4j.nn.api.Model;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
@@ -14,6 +15,7 @@ import org.deeplearning4j.nn.conf.layers.GravesLSTM;
 import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
+import org.deeplearning4j.optimize.api.IterationListener;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.nd4j.linalg.activations.Activation;
@@ -56,12 +58,12 @@ public class PTBPredictWordsForLocalTest {
 
         String prefix = "peyppicp";
         int batchSize = 4;
-        int nEpochs = 500;
+        int nEpochs = 10;
         int numberSteps = 5;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
         WordLimiter wordLimiter = new WordLimiter(samples, limitNum);
         wordLimiter.toFile(PREFIX + Constants.PAIR);
-        WordToIndex wordToIndex = new WordToIndex(PREFIX + Constants.PAIR);
+        WordToIndex wordToIndex = new WordToIndex(PREFIX + "pairTest.txt");
         Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + Constants._50D);
         PTBDataSetIterator rDataSetIterator = new PTBDataSetIterator(batchSize,
                 numberSteps, samples, wordToIndex, word2Vec);
@@ -76,14 +78,14 @@ public class PTBPredictWordsForLocalTest {
                 .regularization(true)
                 .l2(1e-5)
                 .weightInit(WeightInit.XAVIER)
-                .learningRate(0.001)
+//                .learningRateScoreBasedDecayRate(0.01)
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
                 .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(50)
                         .activation(Activation.TANH).build())
                 .layer(1, new GravesLSTM.Builder().nIn(50).nOut(100)
-                        .activation(Activation.TANH).build())
+                        .activation(Activation.TANH).dropOut(0.5d).build())
                 .layer(2, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
                         .activation(Activation.SOFTMAX).nIn(100).nOut(rDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
@@ -96,6 +98,26 @@ public class PTBPredictWordsForLocalTest {
 
         MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
         multiLayerNetwork.init();
+        multiLayerNetwork.setListeners(new IterationListener() {
+            @Override
+            public boolean invoked() {
+                return false;
+            }
+
+            @Override
+            public void invoke() {
+
+            }
+
+            @Override
+            public void iterationDone(Model model, int i) {
+//                if (i % 10 == 0) {
+                    double loss = model.score();
+                    double exp = Math.exp(loss / i);
+                    System.out.println("PPL:" + exp + ",iterator:" + i);
+//                }
+            }
+        });
 
         DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
         tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
