@@ -44,14 +44,22 @@ public class PTBPredictWords {
 
     //    public static final String OUTPUT = "/home/peyppicp/output/";
 //    public static final String PREFIX = "/home/peyppicp/data/new/";
-    public static final String PREFIX = "/home/panyuxiao/data/new/";
-    public static final String OUTPUT = "/home/panyuxiao/output/";
-    //    public static final String PREFIX = "";
-//    public static final String OUTPUT = "";
+//    public static String PREFIX = "/home/panyuxiao/data/new/";
+//    public static String OUTPUT = "/home/panyuxiao/output/";
+        public static String PREFIX = "";
+    public static String OUTPUT = "";
     private static final int limitNum = 15000;
     private static final Logger log = LoggerFactory.getLogger(PTBPredictWords.class);
 
+    /**
+     *
+     * @param args
+     * @throws IOException
+     */
     public static void main(String[] args) throws IOException {
+        PREFIX = args[0];
+        OUTPUT = args[1];
+
         Nd4j.getMemoryManager().setAutoGcWindow(5000);
 
         File originData = new File(PREFIX + Constants.MORE_STANDARD);
