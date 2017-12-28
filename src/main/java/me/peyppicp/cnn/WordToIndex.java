@@ -1,12 +1,12 @@
 package me.peyppicp.cnn;
 
 import me.peyppicp.Utils;
-import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
-import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
-import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author YuXiao Pan
@@ -15,61 +15,30 @@ import java.util.*;
  */
 public class WordToIndex {
 
-    private List<String> lines;
-    private Map<String, Integer> wordCounter;
-    private TokenizerFactory tokenizerFactory;
+    private Map<String, Integer> wordToIndexMap;
+    private Map<Integer, String> indexToWordMap;
     private int totalWordsCount;
-    private final int LIMITNUM;
     private final String path;
-
-    public WordToIndex(List<String> lines, int limitNum) {
-        this.lines = lines;
-        this.LIMITNUM = limitNum;
-        this.tokenizerFactory = new DefaultTokenizerFactory();
-        this.tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
-        this.wordCounter = new HashMap<>();
-        init();
-        this.totalWordsCount = wordCounter.keySet().size();
-        this.path = null;
-    }
 
     public WordToIndex(String path) throws IOException {
         this.path = path;
         List<String> strings = Utils.readLinesFromPath(path);
-        this.wordCounter = new LinkedHashMap<>();
+        this.wordToIndexMap = new LinkedHashMap<>();
+        this.indexToWordMap = new LinkedHashMap<>();
         for (String str : strings) {
             String[] split = str.split(",");
-            wordCounter.put(split[0], Integer.parseInt(split[1]));
+            wordToIndexMap.put(split[0], Integer.parseInt(split[1]));
+            indexToWordMap.put(Integer.parseInt(split[1]), split[0]);
         }
-        this.LIMITNUM = wordCounter.keySet().size();
-    }
-
-    private void init() {
-        for (String line : lines) {
-            List<String> tokens = tokenizerFactory.create(line).getTokens();
-            tokens.forEach(s -> wordCounter.merge(s, 1, (o, n) -> o + n));
-        }
-        Map<String, Integer> temp = new LinkedHashMap<>();
-        final int[] a = {0};
-        if (LIMITNUM == -1) {
-            wordCounter.entrySet().parallelStream()
-                    .sorted((o1, o2) -> -o1.getValue().compareTo(o2.getValue()))
-                    .forEachOrdered(e -> temp.put(e.getKey(), a[0]++));
-        }else{
-            wordCounter.entrySet().parallelStream()
-                    .sorted((o1, o2) -> -o1.getValue().compareTo(o2.getValue()))
-                    .limit(LIMITNUM)
-                    .forEachOrdered(e -> temp.put(e.getKey(), a[0]++));
-        }
-        wordCounter = temp;
+        this.totalWordsCount = wordToIndexMap.keySet().size();
     }
 
     public List<String> getLabels() {
-        return new ArrayList<>(wordCounter.keySet());
+        return new ArrayList<>(wordToIndexMap.keySet());
     }
 
-    public int getWordIndex(String word) {
-        return wordCounter.getOrDefault(word, wordCounter.get(RnnPredictWords.UNKNOWN));
+    public int getIndex(String word) {
+        return wordToIndexMap.getOrDefault(word, -1);
     }
 
     public int getTotalWordsCount() {
@@ -77,17 +46,10 @@ public class WordToIndex {
     }
 
     public String getWord(int index) {
-        return wordCounter.entrySet().stream().filter(entry -> entry.getValue() == index)
-                .map(Map.Entry::getKey).findFirst().get();
+        return indexToWordMap.getOrDefault(index, "<unknown>");
     }
 
     public String toString() {
-        return wordCounter.toString();
-    }
-
-    public void toFile(String path) throws IOException {
-        List<String> list = new ArrayList<>();
-        wordCounter.entrySet().forEach(entry -> list.add(entry.getKey() + "," + entry.getValue()));
-        Utils.writeLineToPath(list, path);
+        return wordToIndexMap.toString();
     }
 }
