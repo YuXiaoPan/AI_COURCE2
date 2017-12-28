@@ -1,9 +1,11 @@
 package me.peyppicp.cnn;
 
+import me.peyppicp.Utils;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -18,6 +20,7 @@ public class WordToIndex {
     private TokenizerFactory tokenizerFactory;
     private int totalWordsCount;
     private final int LIMITNUM;
+    private final String path;
 
     public WordToIndex(List<String> lines, int limitNum) {
         this.lines = lines;
@@ -27,6 +30,18 @@ public class WordToIndex {
         this.wordCounter = new HashMap<>();
         init();
         this.totalWordsCount = wordCounter.keySet().size();
+        this.path = null;
+    }
+
+    public WordToIndex(String path) throws IOException {
+        this.path = path;
+        List<String> strings = Utils.readLinesFromPath(path);
+        this.wordCounter = new LinkedHashMap<>();
+        for (String str : strings) {
+            String[] split = str.split(",");
+            wordCounter.put(split[0], Integer.parseInt(split[1]));
+        }
+        this.LIMITNUM = wordCounter.keySet().size();
     }
 
     private void init() {
@@ -68,5 +83,11 @@ public class WordToIndex {
 
     public String toString() {
         return wordCounter.toString();
+    }
+
+    public void toFile(String path) throws IOException {
+        List<String> list = new ArrayList<>();
+        wordCounter.entrySet().forEach(entry -> list.add(entry.getKey() + "," + entry.getValue()));
+        Utils.writeLineToPath(list, path);
     }
 }

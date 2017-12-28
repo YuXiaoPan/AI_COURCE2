@@ -52,6 +52,7 @@ public class RnnTest {
             input.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, vectorMatrix);
             INDArray output = ptbModel.rnnTimeStep(input);
             System.out.println("current input:" + token);
+            System.out.println(output);
             System.out.println(findTopNWords(output, 10));
         }
         System.out.println();
@@ -73,5 +74,4 @@ public class RnnTest {
                 .forEachOrdered(entry -> top10Words.add(entry.getKey()));
         return top10Words;
     }
-
 }

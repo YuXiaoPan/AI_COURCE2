@@ -60,7 +60,7 @@ public class PTBPredictWordsForLocalTest {
         int numberSteps = 10;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
         WordToIndex wordToIndex = new WordToIndex(samples, limitNum);
-        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "glove.twitter.27B.100d.txt");
+        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "glove.twitter.27B.50d.txt");
         PTBDataSetIterator rDataSetIterator = new PTBDataSetIterator(batchSize,
                 numberSteps, samples, wordToIndex, word2Vec);
 //        PTBDataSetIterator tDataSetIterator = new PTBDataSetIterator(false, truncateLength, batchSize,
@@ -101,7 +101,7 @@ public class PTBPredictWordsForLocalTest {
         for (int j = 0; j < nEpochs; j++) {
             multiLayerNetwork.fit(rDataSetIterator);
             rDataSetIterator.reset();
-            rnnTest.generateTokensFromStr("happy birthday");
+            rnnTest.generateTokensFromStr("happy birthday to you");
         }
     }
 

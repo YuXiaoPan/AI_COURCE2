@@ -61,7 +61,7 @@ public class PTBPredictWords {
         String prefix = "ptb";
         int batchSize = 128;
         int nEpochs = 100;
-        int numberSteps = 10;
+        int numberSteps = 5;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
         WordToIndex wordToIndex = new WordToIndex(samples, limitNum);
         Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "glove.twitter.27B.50d.txt");
