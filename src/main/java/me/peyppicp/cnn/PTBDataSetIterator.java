@@ -21,35 +21,25 @@ import java.util.List;
  */
 public class PTBDataSetIterator implements DataSetIterator {
 
-    //    private final int linesToReadPerBatch;
     private final int batchSize;
-    private final int truncateLength;
     private List<String> tokens;
     private int cursor = 0;
     private final WordToIndex wordToIndex;
     private final WordVectors wordVectors;
     private int vectorSize;
-    private int fetchTokenSize;
     private final int numberSteps;
 
-    public PTBDataSetIterator(boolean isTrain, int truncateLength, int batchSize, int numberSteps,
+    public PTBDataSetIterator(int batchSize, int numberSteps,
                               List<String> samples, WordToIndex wordToIndex,
                               WordVectors wordVectors) {
-//        this.linesToReadPerBatch = linesToReadPerBatch;
         this.tokens = Lists.newArrayList();
-        this.truncateLength = truncateLength;
         DefaultTokenizerFactory defaultTokenizerFactory = new DefaultTokenizerFactory();
         tokens = defaultTokenizerFactory.create(samples.get(0)).getTokens();
-        if (!isTrain) {
-            tokens = tokens.subList(0, 5000);
-        }
         this.batchSize = batchSize;
         this.wordToIndex = wordToIndex;
         this.wordVectors = wordVectors;
         this.vectorSize = wordVectors.getWordVector(wordVectors.vocab().wordAtIndex(0)).length;
         this.numberSteps = numberSteps;
-        this.fetchTokenSize = batchSize * numberSteps;
-
     }
 
     @Override
@@ -58,7 +48,6 @@ public class PTBDataSetIterator implements DataSetIterator {
             throw new RuntimeException();
         }
 
-        int maxWordListSize = 0;
         int maxWordsSize = 0;
         List<List<String>> words = new ArrayList<>();
         for (int i = 0; i < batchSize; i++) {
@@ -72,8 +61,7 @@ public class PTBDataSetIterator implements DataSetIterator {
             }
         }
 
-        maxWordListSize = Math.min(batchSize, words.size());
-
+        int maxWordListSize = Math.min(batchSize, words.size());
         INDArray input = Nd4j.create(new int[]{maxWordListSize,
                 vectorSize, maxWordsSize}, 'f');
         INDArray labels = Nd4j.create(new int[]{maxWordListSize,
@@ -87,7 +75,7 @@ public class PTBDataSetIterator implements DataSetIterator {
                 String nextToken = firstBatch.get(j);
                 input.put(new INDArrayIndex[]{NDArrayIndex.point(i),
                         NDArrayIndex.all(), NDArrayIndex.point(timeStep)}, currentVector);
-                labels.putScalar(new int[]{i, wordToIndex.getWordIndex(nextToken), timeStep}, 1.0);
+                labels.putScalar(new int[]{i, wordToIndex.getIndex(nextToken), timeStep}, 1.0);
                 currentVector = wordVectors.getWordVectorMatrix(nextToken);
                 currentToken = nextToken;
             }
@@ -152,7 +140,7 @@ public class PTBDataSetIterator implements DataSetIterator {
 
     @Override
     public List<String> getLabels() {
-        return wordToIndex.getLabels();
+        throw new UnsupportedOperationException();
     }
 
     @Override

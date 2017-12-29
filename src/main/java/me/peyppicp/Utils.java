@@ -4,7 +4,8 @@ import com.google.common.base.Preconditions;
 import com.vdurmont.emoji.Emoji;
 import com.vdurmont.emoji.EmojiManager;
 import com.vdurmont.emoji.EmojiParser;
-import me.peyppicp.advance2.EmojiToIndex;
+import me.peyppicp.cnn.EmojiLimiter;
+import me.peyppicp.cnn.EmojiToIndex;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
@@ -136,7 +137,9 @@ public class Utils {
         File file = new File(input);
 //        File file = new File(PREFIX + "EmojiSample.txt");
         List<String> samples = FileUtils.readLines(file, Charsets.UTF_8);
-        EmojiToIndex EmojiToIndex = new EmojiToIndex(input, 25);
+        EmojiLimiter emojiLimiter = new EmojiLimiter(input, 25);
+        emojiLimiter.writeToFile();
+        EmojiToIndex emojiToIndex = new EmojiToIndex();
         ArrayList<String> labels = new ArrayList<>();
         for (String sample : samples) {
             List<String> emojis = EmojiParser.extractEmojis(sample)
@@ -149,7 +152,7 @@ public class Utils {
                 continue;
             }
             for (String emoji : emojis) {
-                int index = EmojiToIndex.getIndex(emoji);
+                int index = emojiToIndex.getIndex(emoji);
                 sb.append(index).append(",");
             }
             sb.deleteCharAt(sb.length() - 1);

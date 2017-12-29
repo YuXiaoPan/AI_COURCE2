@@ -64,7 +64,7 @@ public class RnnPredictWords {
         int batchSize = 128;
         int nEpochs = 10000;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
-        WordToIndex wordToIndex = new WordToIndex(samples, limitNum);
+        WordToIndex wordToIndex = null;
 //        WordVectors wordVectors = rebuildWord2Vec(samples);
         Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "sub.word2vec.txt");
         RDataSetIterator rDataSetIterator = new RDataSetIterator(true, truncateLength, batchSize,
@@ -173,17 +173,17 @@ public class RnnPredictWords {
             tempResults.add(stringBuilder.toString().trim());
         }
 
-        WordToIndex wordToIndex = new WordToIndex(tempResults, limitNum);
+        WordToIndex wordToIndex = null;
         List<String> finalResults = new ArrayList<>(tempResults.size());
         for (String tempResult : tempResults) {
             List<String> tokens = tokenizerFactory.create(tempResult).getTokens();
             List<String> indexes = new ArrayList<>(tokens.size());
             for (String token : tokens) {
-                if (wordToIndex.getWordIndex(token) != wordToIndex.getWordIndex(UNKNOWN)) {
-                    indexes.add(token);
-                } else {
-                    indexes.add(UNKNOWN);
-                }
+//                if (wordToIndex.getWordIndex(token) != wordToIndex.getWordIndex(UNKNOWN)) {
+//                    indexes.add(token);
+//                } else {
+//                    indexes.add(UNKNOWN);
+//                }
             }
             StringBuilder stringBuilder = new StringBuilder();
             indexes.forEach(s -> stringBuilder.append(s).append(" "));

@@ -86,7 +86,7 @@ public class RDataSetIterator implements DataSetIterator {
                 for (int k = j + 1; k < maxWordsSize && k < lineTokens.size(); k++, timeStep++) {
                     String nextWord = lineTokens.get(k);
                     input.put(new INDArrayIndex[]{NDArrayIndex.point(i), NDArrayIndex.all(), NDArrayIndex.point(timeStep)}, currentVector);
-                    labels.putScalar(new int[]{i, wordToIndex.getWordIndex(nextWord), timeStep}, 1.0);
+                    labels.putScalar(new int[]{i, wordToIndex.getIndex(nextWord), timeStep}, 1.0);
 
                     currentVector = wordVectors.getWordVectorMatrix(nextWord);
                     currentToken = nextWord;

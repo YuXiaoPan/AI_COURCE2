@@ -1,7 +1,6 @@
 package me.peyppicp.advance2;
 
 import com.google.common.base.Preconditions;
-import me.peyppicp.advance.Word2VecMain;
 import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
@@ -65,7 +64,6 @@ public class EmojiLSTM {
         System.out.println("Please set flag to determine weather continue or not: 1->true,0->false");
         int flagInt = scanner.nextInt();
         Preconditions.checkArgument(flagInt == 0 || flagInt == 1);
-        Word2VecMain.main(word2VecArgs);
         if (flagInt == 1) {
             System.exit(0);
         }
