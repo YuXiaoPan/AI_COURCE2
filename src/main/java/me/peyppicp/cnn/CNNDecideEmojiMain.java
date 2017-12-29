@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import me.peyppicp.Utils;
-import me.peyppicp.advance2.EmojiToIndex;
 import me.peyppicp.advance2.HibernateInfoRunner;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
@@ -56,10 +55,10 @@ public class CNNDecideEmojiMain {
     private static ArrayListMultimap<String, SampleIndexPair> emojiToSamples = ArrayListMultimap.create();
     //    public static final String OUTPUT = "/home/peyppicp/output/";
 //    public static final String PREFIX = "/home/peyppicp/data/new/";
-    public static final String PREFIX = "/home/panyuxiao/data/new/";
-    public static final String OUTPUT = "/home/panyuxiao/output/";
-//    public static final String PREFIX = "";
-//    public static final String OUTPUT = "";
+//    public static final String PREFIX = "/home/panyuxiao/data/new/";
+//    public static final String OUTPUT = "/home/panyuxiao/output/";
+    public static final String PREFIX = "";
+    public static final String OUTPUT = "";
 
     public static void main(String[] args) throws IOException {
         String prefix = "complex02";
@@ -83,7 +82,7 @@ public class CNNDecideEmojiMain {
         List<String> samples = FileUtils.readLines(new File(samplePath), Charsets.UTF_8);
         List<String> sampleLabels = FileUtils.readLines(new File(sampleLabelPath), Charsets.UTF_8);
         Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(new File(word2VecPath));
-        EmojiToIndex EmojiToIndex = new EmojiToIndex(sampleWithEmoji, 25);
+        EmojiToIndex emojiToIndex = new EmojiToIndex();
 
         int batchSize = 128;
         int vectorSize = word2Vec.getWordVector(word2Vec.vocab().wordAtIndex(0)).length;
@@ -133,7 +132,7 @@ public class CNNDecideEmojiMain {
                         .lossFunction(LossFunctions.LossFunction.MCXENT)
                         .activation(Activation.SOFTMAX)
                         .nIn(3 * cnnLayerFeatureMaps)
-                        .nOut(EmojiToIndex.getOutComesNum())    //2 classes: positive or negative
+                        .nOut(emojiToIndex.totalOutputNumber())    //2 classes: positive or negative
                         .build(), "globalPool")
                 .setOutputs("out")
                 .build();
@@ -145,8 +144,8 @@ public class CNNDecideEmojiMain {
         ComputationGraph net = new ComputationGraph(conf);
         net.init();
 
-        DataSetIterator trainIter = getDataSetIterator(true, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels, EmojiToIndex);
-        DataSetIterator testIter = getDataSetIterator(false, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels, EmojiToIndex);
+        DataSetIterator trainIter = getDataSetIterator(true, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels);
+        DataSetIterator testIter = getDataSetIterator(false, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels);
 
 //        net.setListeners(new StatsListener(statsStorage));
         log.info("Starting training");
@@ -158,7 +157,7 @@ public class CNNDecideEmojiMain {
             Evaluation evaluation = net.evaluate(testIter);
             System.out.println(evaluation.stats());
 //            trainIter = getDataSetIterator(true, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels, EmojiToIndex);
-            testIter = getDataSetIterator(false, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels, EmojiToIndex);
+            testIter = getDataSetIterator(false, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels);
             if (i % 10 == 0) {
                 executorService.submit(new HibernateInfoRunner(i, net, trainIter, prefix, evaluation));
             }
@@ -212,8 +211,7 @@ public class CNNDecideEmojiMain {
 
     public static DataSetIterator getDataSetIterator(boolean isTrain, WordVectors wordVectors,
                                                      int miniBatchSize, int maxSentenceLength, Random random,
-                                                     List<String> samples, List<String> sampleLabels,
-                                                     EmojiToIndex EmojiToIndex) {
+                                                     List<String> samples, List<String> sampleLabels) {
         List<List<String>> samplesLineAndLabel = getSamplesLineAndLabel(isTrain, samples, sampleLabels);
         CollectionLabeledSentenceProvider sentenceProvider = new CollectionLabeledSentenceProvider(samplesLineAndLabel.get(0),
                 samplesLineAndLabel.get(1), random);

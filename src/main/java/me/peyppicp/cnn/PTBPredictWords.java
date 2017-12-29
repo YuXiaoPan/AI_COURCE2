@@ -6,22 +6,12 @@ import me.peyppicp.Utils;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.nn.api.Model;
-import org.deeplearning4j.nn.api.OptimizationAlgorithm;
-import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
-import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.Updater;
-import org.deeplearning4j.nn.conf.WorkspaceMode;
-import org.deeplearning4j.nn.conf.layers.GravesLSTM;
-import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
-import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.api.IterationListener;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.util.ModelSerializer;
-import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +19,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * @author YuXiao Pan
@@ -65,6 +54,7 @@ public class PTBPredictWords {
         File originData = new File(PREFIX + Constants.MORE_STANDARD);
         File pairFile = new File(PREFIX + Constants.PAIR);
         if (!originData.exists() || !pairFile.exists()) {
+            log.info("Begin prepare data for train.");
             prepareDataForTrain();
         }
 
@@ -78,28 +68,29 @@ public class PTBPredictWords {
         PTBDataSetIterator rDataSetIterator = new PTBDataSetIterator(batchSize,
                 numberSteps, samples, wordToIndex, word2Vec);
 
-        MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
-                .trainingWorkspaceMode(WorkspaceMode.SINGLE)
-                .inferenceWorkspaceMode(WorkspaceMode.SINGLE)
-                .seed(new Random().nextInt(12))
-                .updater(Updater.ADAM)
-                .regularization(true)
-                .l2(1e-5)
-                .weightInit(WeightInit.XAVIER)
-//                .learningRate(0.1)
-                .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-                .iterations(1)
-                .list()
-                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(75)
-                        .activation(Activation.TANH).build())
-                .layer(1, new GravesLSTM.Builder().nIn(75).nOut(50).activation(Activation.TANH).build())
-                .layer(2, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(50).nOut(rDataSetIterator.totalOutcomes()).build())
-                .pretrain(false)
-                .backprop(true)
-                .build();
+//        MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
+//                .trainingWorkspaceMode(WorkspaceMode.SINGLE)
+//                .inferenceWorkspaceMode(WorkspaceMode.SINGLE)
+//                .seed(new Random().nextInt(12))
+//                .updater(Updater.ADAM)
+//                .regularization(true)
+//                .l2(1e-5)
+//                .weightInit(WeightInit.XAVIER)
+////                .learningRate(0.1)
+//                .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
+//                .iterations(1)
+//                .list()
+//                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(75)
+//                        .activation(Activation.TANH).build())
+//                .layer(1, new GravesLSTM.Builder().nIn(75).nOut(50).activation(Activation.TANH).build())
+//                .layer(2, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
+//                        .activation(Activation.SOFTMAX).nIn(50).nOut(rDataSetIterator.totalOutcomes()).build())
+//                .pretrain(false)
+//                .backprop(true)
+//                .build();
 
-        MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
+//        MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
+        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork(PREFIX + "ptb2.txt");
         multiLayerNetwork.init();
         multiLayerNetwork.setListeners(new IterationListener() {
             @Override
