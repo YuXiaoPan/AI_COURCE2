@@ -12,13 +12,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Data
 public class PTBEvaluation {
 
-    private AtomicInteger correctTop1Number;
-    private AtomicInteger totalTop1Number;
-    private AtomicInteger errorTop1Number;
+    private AtomicInteger correctTop1Number = new AtomicInteger();
+    private AtomicInteger totalTop1Number = new AtomicInteger();
+    private AtomicInteger errorTop1Number = new AtomicInteger();
 
-    private AtomicInteger correctTop3Number;
-    private AtomicInteger totalTop3Number;
-    private AtomicInteger errorTop3Number;
+    private AtomicInteger correctTop3Number = new AtomicInteger();
+    private AtomicInteger totalTop3Number = new AtomicInteger();
+    private AtomicInteger errorTop3Number = new AtomicInteger();
 
     private PTBEvaluation() {
 
