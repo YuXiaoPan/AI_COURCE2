@@ -58,7 +58,7 @@ public class RnnTest {
             INDArray currentVector = wordVectors.getWordVectorMatrix(currentToken);
             zeros.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, currentVector);
             INDArray output = ptbModel.rnnTimeStep(zeros);
-            List<String> top3Words = findTopNWords(output, topN).stream().filter(s -> !"<unknown>".equals(s)).limit(3).collect(Collectors.toList());
+            List<String> top3Words = findTopNWords(output, topN).stream().limit(3).collect(Collectors.toList());
             if (top3Words.contains(nextToken)) {
                 evaluation.plusTop3Current();
             } else {
