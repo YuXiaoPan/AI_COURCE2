@@ -46,6 +46,12 @@ public class PTBPredictWords {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
+//        CudaEnvironment.getInstance().getConfiguration()
+//                .setMaximumDeviceCacheableLength(1024 * 1024 * 1024L)
+//                .setMaximumDeviceCache(6L * 1024 * 1024 * 1024L)
+//                .setMaximumHostCacheableLength(1024 * 1024 * 1024L)
+//                .setMaximumHostCache(6L * 1024 * 1024 * 1024L);
+
         PREFIX = args[0];
         OUTPUT = args[1];
 
@@ -58,7 +64,7 @@ public class PTBPredictWords {
             prepareDataForTrain();
         }
 
-        String prefix = "ptb";
+        String prefix = "ptb1";
         int batchSize = 128;
         int nEpochs = 10;
         int numberSteps = 5;
@@ -90,7 +96,7 @@ public class PTBPredictWords {
 //                .build();
 
 //        MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
-        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork(PREFIX + "ptb2.txt");
+        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork("F:\\WorkSpace\\idea project location\\AI-Emoji\\src\\main\\resources\\model\\ptb2.txt");
         multiLayerNetwork.init();
         multiLayerNetwork.setListeners(new IterationListener() {
             @Override
