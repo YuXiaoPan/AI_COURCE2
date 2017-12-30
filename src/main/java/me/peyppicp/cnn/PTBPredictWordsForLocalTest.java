@@ -127,7 +127,7 @@ public class PTBPredictWordsForLocalTest {
         for (int j = 0; j < nEpochs; j++) {
             multiLayerNetwork.fit(rDataSetIterator);
             rDataSetIterator.reset();
-            rnnTest.generateTokensFromStr("happy birthday to you");
+            rnnTest.generateTokensFromStr("happy birthday to you",50);
         }
     }
 

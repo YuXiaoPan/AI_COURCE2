@@ -203,7 +203,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>me.peyppicp.cnn.PTBPredictWords</mainClass>
+                            <mainClass>me.peyppicp.cnn.PTBTestMain</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
