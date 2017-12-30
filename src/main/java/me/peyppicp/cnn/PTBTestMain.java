@@ -47,7 +47,7 @@ public class PTBTestMain {
         }
 
         ExecutorService executorService = Executors.newFixedThreadPool(threadNum);
-        for(int i = 0;i<threadNum;i++) {
+        for (int i = 0; i < threadNum; i++) {
             executorService.submit(new EvaluationRunner(ModelSerializer.restoreMultiLayerNetwork(prefix + "ptb2.txt"),
                     wordVectors, new WordToIndex(prefix + "pair.txt"), testDatas.get(i), tokenizerFactory));
         }

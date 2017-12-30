@@ -62,7 +62,7 @@ public class RnnTest {
             if (top3Words.contains(nextToken)) {
                 evaluation.plusTop3Current();
             } else {
-                evaluation.plusTop1Error();
+                evaluation.plusTop3Error();
             }
 
             if (top3Words.get(0).equals(nextToken)) {
