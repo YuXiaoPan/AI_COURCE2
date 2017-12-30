@@ -1,6 +1,7 @@
 package me.peyppicp.cnn;
 
 import com.google.common.base.Preconditions;
+import com.vdurmont.emoji.EmojiParser;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author YuXiao Pan
@@ -28,8 +30,7 @@ public class RnnTest {
     private final MultiLayerNetwork ptbModel;
     private final ComputationGraph emojiModel;
     private final int word2vecSize;
-    private final PTBEvaluation top1;
-    private final PTBEvaluation top3;
+    private final PTBEvaluation evaluation;
 
     public RnnTest(WordVectors wordVectors, WordToIndex wordToIndex, TokenizerFactory tokenizerFactory, MultiLayerNetwork ptbModel, ComputationGraph emojiModel) {
         this.wordVectors = wordVectors;
@@ -38,27 +39,52 @@ public class RnnTest {
         this.ptbModel = ptbModel;
         this.emojiModel = emojiModel;
         this.word2vecSize = wordVectors.getWordVector(wordVectors.vocab().wordAtIndex(0)).length;
-        this.top1 = new PTBEvaluation();
-        this.top3 = new PTBEvaluation();
+        this.evaluation = PTBEvaluation.getInstance();
     }
 
-    public void generateTokensFromStr(String sentence) {
+    public void generateTokensFromStr(String sentence, int topN) {
         ptbModel.rnnClearPreviousState();
+        sentence = EmojiParser.removeAllEmojis(sentence);
         List<String> tokens = tokenizerFactory.create(sentence).getTokens();
-        Preconditions.checkArgument(tokens.size() > 1);
-        for (String token : tokens) {
-            INDArray input = Nd4j.zeros(1, word2vecSize);
-            INDArray vectorMatrix = wordVectors.getWordVectorMatrix(token);
-            input.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, vectorMatrix);
-            INDArray output = ptbModel.rnnTimeStep(input);
-            System.out.println("current input:" + token);
-            System.out.println(output);
-            System.out.println(findTopNWords(output, 10));
+        if (tokens.size() <= 1) {
+//            top1.plusError();
+//            top3.plusError();
+            return;
         }
-        System.out.println();
+        for (int i = 0, j = 1; i < tokens.size() && j < tokens.size(); i++, j++) {
+            String currentToken = tokens.get(i);
+            String nextToken = tokens.get(j);
+            INDArray zeros = Nd4j.zeros(1, word2vecSize);
+            INDArray currentVector = wordVectors.getWordVectorMatrix(currentToken);
+            zeros.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, currentVector);
+            INDArray output = ptbModel.rnnTimeStep(zeros);
+            List<String> top3Words = findTopNWords(output, topN).stream().limit(3).collect(Collectors.toList());
+            if (top3Words.contains(nextToken)) {
+                evaluation.plusTop3Current();
+            } else {
+                evaluation.plusTop3Error();
+            }
+
+            if (top3Words.get(0).equals(nextToken)) {
+                evaluation.plusTop1Current();
+            } else {
+                evaluation.plusTop1Error();
+            }
+        }
+        System.out.println("Top1:" + evaluation.getCorrectTop1Rate() + ",Top3:" + evaluation.getCorrectTop3Rate());
+
+//        for (String token : tokens) {
+//            INDArray input = Nd4j.zeros(1, word2vecSize);
+//            INDArray vectorMatrix = wordVectors.getWordVectorMatrix(token);
+//            input.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, vectorMatrix);
+//            INDArray output = ptbModel.rnnTimeStep(input);
+//            System.out.println("current input:" + token);
+//            System.out.println(findTopNWords(output, topN));
+//        }
+//        System.out.println();
     }
 
-    public List<String> findTopNWords(INDArray output,int topN) {
+    public List<String> findTopNWords(INDArray output, int topN) {
         INDArray indArray = output.linearView();
         List<String> labels = wordToIndex.getLabels();
         Map<String, Float> top10WordsMap = new HashMap<>(labels.size());

@@ -2,6 +2,8 @@ package me.peyppicp.cnn;
 
 import lombok.Data;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * @author YuXiao Pan
  * @date 2017/12/28
@@ -10,40 +12,59 @@ import lombok.Data;
 @Data
 public class PTBEvaluation {
 
-    private int tpNumber;
-    private int fpNumber;
-    private int fnNumber;
-    private int tnNumber;
+    private AtomicInteger correctTop1Number = new AtomicInteger();
+    private AtomicInteger totalTop1Number = new AtomicInteger();
+    private AtomicInteger errorTop1Number = new AtomicInteger();
 
-    public void tpPlusOne() {
-        tpNumber++;
+    private AtomicInteger correctTop3Number = new AtomicInteger();
+    private AtomicInteger totalTop3Number = new AtomicInteger();
+    private AtomicInteger errorTop3Number = new AtomicInteger();
+
+    private PTBEvaluation() {
+
     }
 
-    public void fpPlusOne() {
-        fpNumber++;
+    public void plusTop1Current() {
+        correctTop1Number.incrementAndGet();
+        totalTop1Number.incrementAndGet();
     }
 
-    public void fnPlusOne() {
-        fnNumber++;
+    public void plusTop1Error() {
+        errorTop1Number.incrementAndGet();
+        totalTop1Number.incrementAndGet();
     }
 
-    public void tnPlusOne() {
-        tnNumber++;
+    public void plusTop3Current() {
+        correctTop3Number.incrementAndGet();
+        totalTop3Number.incrementAndGet();
     }
 
-    public double precision() {
-        return tpNumber / ((tpNumber + fpNumber) * 1.0d);
+    public void plusTop3Error() {
+        errorTop3Number.incrementAndGet();
+        totalTop3Number.incrementAndGet();
     }
 
-    public double accuracy() {
-        return (tpNumber + tnNumber) / ((tpNumber + fpNumber + fnNumber + tnNumber) * 1.0d);
+    public double getCorrectTop1Rate() {
+        return correctTop1Number.get() / totalTop1Number.doubleValue();
     }
 
-    public double recall() {
-        return tpNumber / ((tpNumber + fnNumber) * 1.0d);
+    public double getErrorTop1Rate() {
+        return errorTop1Number.get() / totalTop1Number.doubleValue();
     }
 
-    public double F1() {
-        return (2 * recall() * accuracy()) / ((recall() + accuracy()) * 1.0d);
+    public double getCorrectTop3Rate() {
+        return correctTop3Number.get() / totalTop3Number.doubleValue();
+    }
+
+    public double getErrorTop3Rate() {
+        return errorTop3Number.get() / totalTop3Number.doubleValue();
+    }
+
+    private static class Holder {
+        private static PTBEvaluation ptbEvaluation = new PTBEvaluation();
+    }
+
+    public static PTBEvaluation getInstance() {
+        return Holder.ptbEvaluation;
     }
 }
