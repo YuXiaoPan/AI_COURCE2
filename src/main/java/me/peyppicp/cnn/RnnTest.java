@@ -54,19 +54,24 @@ public class RnnTest {
         for (int i = 0, j = 1; i < tokens.size() && j < tokens.size(); i++, j++) {
             String currentToken = tokens.get(i);
             String nextToken = tokens.get(j);
+            if (wordToIndex.getIndex(currentToken) == -1 && wordToIndex.getIndex(nextToken) == -1) {
+                continue;
+            }
             INDArray zeros = Nd4j.zeros(1, word2vecSize);
             INDArray currentVector = wordVectors.getWordVectorMatrix(currentToken);
             zeros.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, currentVector);
             INDArray output = ptbModel.rnnTimeStep(zeros);
-            List<String> top3Words = findTopNWords(output, topN).stream().limit(3).collect(Collectors.toList());
+            List<String> top3Words = findTopNWords(output, topN).stream()
+                    .filter(s -> !"<unknown>".equals(s))
+                    .limit(3).collect(Collectors.toList());
             if (top3Words.contains(nextToken)) {
-                evaluation.plusTop3Current();
+                evaluation.plusTop3Correct();
             } else {
                 evaluation.plusTop3Error();
             }
 
             if (top3Words.get(0).equals(nextToken)) {
-                evaluation.plusTop1Current();
+                evaluation.plusTop1Correct();
             } else {
                 evaluation.plusTop1Error();
             }
@@ -87,7 +92,7 @@ public class RnnTest {
     public List<String> findTopNWords(INDArray output, int topN) {
         INDArray indArray = output.linearView();
         List<String> labels = wordToIndex.getLabels();
-        Map<String, Float> top10WordsMap = new HashMap<>(labels.size());
+        Map<String, Float> top10WordsMap = new HashMap<>(30000);
         List<String> top10Words = new ArrayList<>(topN);
         Preconditions.checkArgument(topN < labels.size());
         Preconditions.checkArgument(labels.size() == indArray.length());
@@ -95,7 +100,7 @@ public class RnnTest {
             top10WordsMap.put(labels.get(i), indArray.getFloat(i));
         }
         top10WordsMap.entrySet().parallelStream()
-                .sorted((e1, e2) -> -e1.getValue().compareTo(e2.getValue()))
+                .sorted((o1, o2) -> -o1.getValue().compareTo(o2.getValue()))
                 .limit(topN)
                 .forEachOrdered(entry -> top10Words.add(entry.getKey()));
         return top10Words;

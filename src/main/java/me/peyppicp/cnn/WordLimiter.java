@@ -74,7 +74,7 @@ public class WordLimiter {
 
     public void toFile(String path) throws IOException {
         List<String> list = new ArrayList<>();
-        wordCounter.entrySet().forEach(entry -> list.add(entry.getKey() + "," + entry.getValue()));
+        wordCounter.forEach((key, value) -> list.add(key + "," + value));
         Utils.writeLineToPath(list, path);
     }
 }

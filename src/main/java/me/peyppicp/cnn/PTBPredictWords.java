@@ -55,13 +55,15 @@ public class PTBPredictWords {
         PREFIX = args[0];
         OUTPUT = args[1];
 
-        Nd4j.getMemoryManager().setAutoGcWindow(5000);
+        System.out.println(2);
+        Nd4j.getMemoryManager().setAutoGcWindow(1000);
 
         File originData = new File(PREFIX + Constants.MORE_STANDARD);
         File pairFile = new File(PREFIX + Constants.PAIR);
         if (!originData.exists() || !pairFile.exists()) {
             log.info("Begin prepare data for train.");
             prepareDataForTrain();
+            log.info("Finish prepare data for train.");
         }
 
         String prefix = "ptb1";
@@ -86,17 +88,17 @@ public class PTBPredictWords {
 //                .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
 //                .iterations(1)
 //                .list()
-//                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(75)
+//                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(128)
 //                        .activation(Activation.TANH).build())
-//                .layer(1, new GravesLSTM.Builder().nIn(75).nOut(50).activation(Activation.TANH).build())
+//                .layer(1, new GravesLSTM.Builder().nIn(128).nOut(64).activation(Activation.TANH).build())
 //                .layer(2, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-//                        .activation(Activation.SOFTMAX).nIn(50).nOut(rDataSetIterator.totalOutcomes()).build())
+//                        .activation(Activation.SOFTMAX).nIn(64).nOut(rDataSetIterator.totalOutcomes()).build())
 //                .pretrain(false)
 //                .backprop(true)
 //                .build();
 
 //        MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
-        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork("F:\\WorkSpace\\idea project location\\AI-Emoji\\src\\main\\resources\\model\\ptb2.txt");
+        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork("ptb3.txt");
         multiLayerNetwork.init();
         multiLayerNetwork.setListeners(new IterationListener() {
             @Override
@@ -148,7 +150,7 @@ public class PTBPredictWords {
             if (!extractEmojis.isEmpty()) {
                 filteredTokens.add(EMOJI);
             } else {
-                filteredTokens.add(END);
+//                filteredTokens.add(END);
             }
             StringBuilder stringBuilder = new StringBuilder();
             filteredTokens.forEach(s -> stringBuilder.append(s).append(" "));

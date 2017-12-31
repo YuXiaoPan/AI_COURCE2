@@ -24,7 +24,7 @@ public class PTBEvaluation {
 
     }
 
-    public void plusTop1Current() {
+    public void plusTop1Correct() {
         correctTop1Number.incrementAndGet();
         totalTop1Number.incrementAndGet();
     }
@@ -34,7 +34,7 @@ public class PTBEvaluation {
         totalTop1Number.incrementAndGet();
     }
 
-    public void plusTop3Current() {
+    public void plusTop3Correct() {
         correctTop3Number.incrementAndGet();
         totalTop3Number.incrementAndGet();
     }
