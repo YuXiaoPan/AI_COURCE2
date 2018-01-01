@@ -112,22 +112,22 @@ public class PTBPredictWordsForLocalTest {
             @Override
             public void iterationDone(Model model, int i) {
 //                if (i % 10 == 0) {
-                    double loss = model.score();
-                    double exp = Math.exp(loss / i);
-                    System.out.println("PPL:" + exp + ",iterator:" + i);
+                double loss = model.score();
+                double exp = Math.exp(loss / i);
+                System.out.println("PPL:" + exp + ",iterator:" + i);
 //                }
             }
         });
 
         DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
         tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
-        RnnTest rnnTest = new RnnTest(word2Vec, wordToIndex, tokenizerFactory, multiLayerNetwork, null);
+        RnnTest rnnTest = new RnnTest(word2Vec, wordToIndex, tokenizerFactory, multiLayerNetwork, null, 3);
 
         System.out.println("begin train");
         for (int j = 0; j < nEpochs; j++) {
             multiLayerNetwork.fit(rDataSetIterator);
             rDataSetIterator.reset();
-            rnnTest.generateTokensFromStr("happy birthday to you",50);
+            rnnTest.generateTokensFromStr("happy birthday to you", 50);
         }
     }
 

@@ -23,19 +23,19 @@ public class PTBTestMain {
     public static void main(String[] args) throws IOException {
         String prefix = "";
         String output = "";
-        String fileToTest = "more_words11.txt";
+        String fileToTest = "ptb11.txt";
         System.out.println(fileToTest);
         MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(prefix + fileToTest);
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(prefix + "glove.twitter.27B.50d.txt");
         WordToIndex wordToIndex = new WordToIndex(prefix + "pair.txt");
         DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
         tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
-        RnnTest rnnTest = new RnnTest(wordVectors, wordToIndex, tokenizerFactory, model, null);
+        RnnTest rnnTest = new RnnTest(wordVectors, wordToIndex, tokenizerFactory, model, null, 4);
         List<String> collect = Utils.readLinesFromPath(prefix + "emoji_sample.txt")
                 .stream().limit(50000).collect(Collectors.toList());
         Collections.shuffle(collect);
         for (String s : collect) {
-            rnnTest.generateTokensFromStr(s,10);
+            rnnTest.generateTokensFromStr(s, 10);
         }
 //        int threadNum = 8;
 //        List<List<String>> testDatas = new ArrayList<>();
@@ -78,7 +78,7 @@ class EvaluationRunner implements Runnable {
 
     @Override
     public void run() {
-        RnnTest rnnTest = new RnnTest(wordVectors, wordToIndex, defaultTokenizerFactory, multiLayerNetwork, null);
+        RnnTest rnnTest = new RnnTest(wordVectors, wordToIndex, defaultTokenizerFactory, multiLayerNetwork, null, 3);
         for (String s : testData) {
             rnnTest.generateTokensFromStr(s, 10);
         }

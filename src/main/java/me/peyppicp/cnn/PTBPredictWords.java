@@ -66,7 +66,7 @@ public class PTBPredictWords {
             log.info("Finish prepare data for train.");
         }
 
-        String prefix = "ptb1";
+        String prefix = "ptb2";
         int batchSize = 128;
         int nEpochs = 10;
         int numberSteps = 5;
@@ -98,7 +98,7 @@ public class PTBPredictWords {
 //                .build();
 
 //        MultiLayerNetwork multiLayerNetwork = new MultiLayerNetwork(conf);
-        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork("ptb3.txt");
+        MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork("ptb11.txt");
         multiLayerNetwork.init();
         multiLayerNetwork.setListeners(new IterationListener() {
             @Override
