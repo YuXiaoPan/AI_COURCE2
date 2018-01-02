@@ -1,7 +1,6 @@
-package me.peyppicp.cnn;
+package me.peyppicp.ai;
 
 import lombok.Data;
-import me.peyppicp.advance2.EmojiToIndex;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 import org.nd4j.linalg.api.ndarray.INDArray;

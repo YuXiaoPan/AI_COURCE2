@@ -1,4 +1,4 @@
-package me.peyppicp.cnn;
+package me.peyppicp.ai;
 
 import lombok.Data;
 import me.peyppicp.Utils;

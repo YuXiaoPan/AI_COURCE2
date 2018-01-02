@@ -1,7 +1,8 @@
-package me.peyppicp.advance2;
+package me.peyppicp.ai;
 
 import com.vdurmont.emoji.EmojiParser;
 import lombok.Data;
+import me.peyppicp.Utils;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
@@ -9,14 +10,11 @@ import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Data
-public class EmojiToIndex {
+public class EmojiLimiter {
 
     public static final String UNKNOWN = "$UNKNOWN";
     public static final String STOP = "$STOP";
@@ -30,10 +28,20 @@ public class EmojiToIndex {
     private int outComesNum;
     private final int limitNum;
 
-    public EmojiToIndex(String samplesFilePath, int limitNum) throws IOException {
+    public EmojiLimiter(String samplesFilePath, int limitNum) throws IOException {
         this.samplesFilePath = samplesFilePath;
         this.limitNum = limitNum;
         init();
+    }
+
+    public void writeToFile() {
+        List<String> temp = new ArrayList<>();
+        wordIndexMap.forEach((s, integer) -> temp.add(s + "," + integer));
+        try {
+            Utils.writeLineToPath(temp, CNNDecideEmojiMain.PREFIX + "pair_for_emoji.txt");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void init() throws IOException {
@@ -64,27 +72,10 @@ public class EmojiToIndex {
         this.outComesNum = wordIndexMap.keySet().size();
     }
 
-    public int getIndex(String word) {
-//        return wordIndexMap.getOrDefault(word, wordIndexMap.get(UNKNOWN));
-        return wordIndexMap.getOrDefault(word, -1);
-    }
-
     public void addUnknown() {
         int size = wordIndexMap.values().size();
         wordIndexMap.putIfAbsent(UNKNOWN, size);
 //        wordIndexMap.putIfAbsent(STOP, ++size);
 //        wordIndexMap.putIfAbsent(STOP, ++size);
-    }
-
-    public String getEmoji(int index) {
-        return wordIndexMap.entrySet().parallelStream().filter(entry -> entry.getValue() == index).findFirst().get().getKey();
-    }
-
-    public int totalIndexNum() {
-        return wordIndexMap.values().size();
-    }
-
-    public List<String> totalLabels() {
-        return wordIndexMap.keySet().parallelStream().collect(Collectors.toList());
     }
 }

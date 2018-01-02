@@ -1,4 +1,4 @@
-package me.peyppicp.cnn;
+package me.peyppicp.ai;
 
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;

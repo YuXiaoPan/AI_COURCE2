@@ -1,7 +1,6 @@
-package me.peyppicp.cnn;
+package me.peyppicp.ai;
 
 import me.peyppicp.Utils;
-import me.peyppicp.advance2.EmojiToIndex;
 import org.deeplearning4j.api.storage.StatsStorage;
 import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;

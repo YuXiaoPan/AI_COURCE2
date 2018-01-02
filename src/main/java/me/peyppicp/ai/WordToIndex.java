@@ -1,4 +1,4 @@
-package me.peyppicp.cnn;
+package me.peyppicp.ai;
 
 import me.peyppicp.Utils;
 

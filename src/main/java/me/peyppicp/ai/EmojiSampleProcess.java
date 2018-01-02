@@ -1,8 +1,7 @@
-package me.peyppicp.cnn;
+package me.peyppicp.ai;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.vdurmont.emoji.EmojiParser;
-import me.peyppicp.advance2.EmojiToIndex;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 

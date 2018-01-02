@@ -1,4 +1,4 @@
-package me.peyppicp.cnn;
+package me.peyppicp.ai;
 
 import com.google.common.base.Preconditions;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;

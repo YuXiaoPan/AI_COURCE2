@@ -1,4 +1,4 @@
-package me.peyppicp.cnn;
+package me.peyppicp.ai;
 
 import com.google.common.collect.Lists;
 import com.vdurmont.emoji.EmojiParser;
