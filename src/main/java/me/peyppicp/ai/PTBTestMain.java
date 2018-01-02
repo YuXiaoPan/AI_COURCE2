@@ -23,7 +23,7 @@ public class PTBTestMain {
     public static void main(String[] args) throws IOException {
         String prefix = "";
         String output = "";
-        MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork("/Users/yuxiao.pan/IdeaProjects/AI_COURCE2/src/main/resources/model/more_words11.txt");
+        MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork("/Users/yuxiao.pan/IdeaProjects/AI_COURCE2/src/main/resources/model/final.txt");
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(prefix + "glove.twitter.27B.50d.txt");
         WordToIndex wordToIndex = new WordToIndex(prefix + "pair.txt");
         DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();

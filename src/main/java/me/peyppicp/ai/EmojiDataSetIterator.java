@@ -78,7 +78,7 @@ public class EmojiDataSetIterator implements DataSetIterator {
             maxLength = truncateLength;
         }
         INDArray features = Nd4j.create(new int[]{reviews.size(), vectorSize, maxLength}, 'f');
-        INDArray labels = Nd4j.create(new int[]{reviews.size(), emojiToIndex.getOutComesNum(), maxLength}, 'f');
+        INDArray labels = Nd4j.create(new int[]{reviews.size(), emojiToIndex.totalOutputNumber(), maxLength}, 'f');
         INDArray featureMask = Nd4j.zeros(reviews.size(), maxLength);
         INDArray labelMask = Nd4j.zeros(reviews.size(), maxLength);
 
@@ -112,7 +112,7 @@ public class EmojiDataSetIterator implements DataSetIterator {
     }
 
     public int totalOutcomes() {
-        return emojiToIndex.getOutComesNum();
+        return emojiToIndex.totalOutputNumber();
     }
 
     public boolean resetSupported() {

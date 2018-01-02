@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import me.peyppicp.Utils;
-import me.peyppicp.advance2.HibernateInfoRunner;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.deeplearning4j.eval.Evaluation;
@@ -158,9 +157,9 @@ public class CNNDecideEmojiMain {
             System.out.println(evaluation.stats());
 //            trainIter = getDataSetIterator(true, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels, EmojiToIndex);
             testIter = getDataSetIterator(false, word2Vec, batchSize, truncateReviewsToLength, rng, samples, sampleLabels);
-            if (i % 10 == 0) {
-                executorService.submit(new HibernateInfoRunner(i, net, trainIter, prefix, evaluation));
-            }
+//            if (i % 10 == 0) {
+//                executorService.submit(new HibernateInfoRunner(i, net, trainIter, prefix, evaluation));
+//            }
         }
     }
 
