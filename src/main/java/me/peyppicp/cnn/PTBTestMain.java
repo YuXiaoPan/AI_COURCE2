@@ -23,15 +23,13 @@ public class PTBTestMain {
     public static void main(String[] args) throws IOException {
         String prefix = "";
         String output = "";
-        String fileToTest = "ptb11.txt";
-        System.out.println(fileToTest);
-        MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork(prefix + fileToTest);
+        MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork("/Users/yuxiao.pan/IdeaProjects/AI_COURCE2/src/main/resources/model/more_words11.txt");
         WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(prefix + "glove.twitter.27B.50d.txt");
         WordToIndex wordToIndex = new WordToIndex(prefix + "pair.txt");
         DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
         tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
-        RnnTest rnnTest = new RnnTest(wordVectors, wordToIndex, tokenizerFactory, model, null, 4);
-        List<String> collect = Utils.readLinesFromPath(prefix + "emoji_sample.txt")
+        RnnTest rnnTest = new RnnTest(wordVectors, wordToIndex, tokenizerFactory, model, null, 3);
+        List<String> collect = Utils.readLinesFromPath(prefix + "emoji_sample_head.txt")
                 .stream().limit(50000).collect(Collectors.toList());
         Collections.shuffle(collect);
         for (String s : collect) {
