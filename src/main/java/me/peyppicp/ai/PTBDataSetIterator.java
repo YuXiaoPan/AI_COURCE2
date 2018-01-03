@@ -1,6 +1,7 @@
 package me.peyppicp.ai;
 
 import com.google.common.collect.Lists;
+import com.vdurmont.emoji.EmojiManager;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -75,7 +76,11 @@ public class PTBDataSetIterator implements DataSetIterator {
                 String nextToken = firstBatch.get(j);
                 input.put(new INDArrayIndex[]{NDArrayIndex.point(i),
                         NDArrayIndex.all(), NDArrayIndex.point(timeStep)}, currentVector);
-                labels.putScalar(new int[]{i, wordToIndex.getIndex(nextToken), timeStep}, 1.0);
+                if (EmojiManager.isEmoji(nextToken)) {
+                    labels.putScalar(new int[]{i, wordToIndex.getIndex(nextToken), timeStep}, 2.25);
+                } else {
+                    labels.putScalar(new int[]{i, wordToIndex.getIndex(nextToken), timeStep}, 1.0);
+                }
                 currentVector = wordVectors.getWordVectorMatrix(nextToken);
                 currentToken = nextToken;
             }

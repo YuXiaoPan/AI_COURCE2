@@ -24,12 +24,18 @@ public class PTBTestMain {
     public static void main(String[] args) throws IOException {
         String prefix = "";
         String output = "";
-        MultiLayerNetwork ptbModel = ModelSerializer.restoreMultiLayerNetwork("/Users/yuxiao.pan/IdeaProjects/AI_COURCE2/src/main/resources/model/changedLSTM1.txt");
-        WordVectors ptbWordVectors = WordVectorSerializer.readWord2VecModel(prefix + "glove.twitter.27B.50d.txt");
-        WordToIndex wordToIndex = new WordToIndex(prefix + "pair.txt");
+        String ptbModelPath = "";
+        String ptbWord2VecPath = "";
+        String ptbPairPath = "";
+        String cnnModelPath = "";
+        String cnnWord2VecPath = "";
+        String testDataPath = "";
+        MultiLayerNetwork ptbModel = ModelSerializer.restoreMultiLayerNetwork(ptbModelPath);
+        WordVectors ptbWordVectors = WordVectorSerializer.readWord2VecModel(ptbWord2VecPath);
+        WordToIndex wordToIndex = new WordToIndex(ptbPairPath);
 
-        ComputationGraph cnnModel = ModelSerializer.restoreComputationGraph("./src/main/resources/model/model-highLearningRate04-40.txt");
-        Word2Vec cnnWord2Vec = WordVectorSerializer.readWord2VecModel("glove.twitter.27B.100d.txt");
+        ComputationGraph cnnModel = ModelSerializer.restoreComputationGraph(cnnModelPath);
+        Word2Vec cnnWord2Vec = WordVectorSerializer.readWord2VecModel(cnnWord2VecPath);
         EmojiToIndex emojiToIndex = new EmojiToIndex();
 
         DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
@@ -37,7 +43,7 @@ public class PTBTestMain {
 
         RnnTest rnnTest = new RnnTest(ptbWordVectors, cnnWord2Vec,
                 wordToIndex, emojiToIndex, tokenizerFactory, ptbModel, cnnModel, 3);
-        List<String> collect = Utils.readLinesFromPath(prefix + "emoji_test_sample(1).txt")
+        List<String> collect = Utils.readLinesFromPath(testDataPath)
                 .stream().limit(5000).collect(Collectors.toList());
         for (String s : collect) {
             rnnTest.generateTokensFromStr(s, 200);
