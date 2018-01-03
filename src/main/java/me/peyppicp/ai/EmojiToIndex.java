@@ -6,6 +6,7 @@ import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFac
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,12 +24,25 @@ public class EmojiToIndex {
     private Map<Integer, String> indexToEmojiMap = new LinkedHashMap<>();
 
     public EmojiToIndex() throws IOException {
+        Map<String, String> input0 = new LinkedHashMap<>();
+        Map<String, String> input1 = new LinkedHashMap<>();
         List<String> pairs = Utils.readLinesFromPath(CNNDecideEmojiMain.PREFIX + "pair_for_emoji.txt");
         for (String pair : pairs) {
             String[] split = pair.split(",");
-            emojiToIndexMap.put(split[0], Integer.parseInt(split[1]));
-            indexToEmojiMap.put(Integer.parseInt(split[1]), split[0]);
+            input0.put(split[0], split[1]);
+            input1.put(split[1], split[0]);
         }
+
+        Map<String, Integer> temp0 = new LinkedHashMap<>();
+        Map<Integer, String> temp1 = new LinkedHashMap<>();
+        input0.entrySet().stream()
+                .sorted(Comparator.comparing(Map.Entry::getValue))
+                .forEachOrdered(entry -> temp0.put(entry.getKey(), Integer.parseInt(entry.getValue())));
+        input1.entrySet().stream()
+                .sorted(Comparator.comparing(Map.Entry::getKey))
+                .forEachOrdered(entry -> temp1.put(Integer.parseInt(entry.getKey()),entry.getValue()));
+        emojiToIndexMap = temp0;
+        indexToEmojiMap = temp1;
     }
 
     public int getIndex(String word) {

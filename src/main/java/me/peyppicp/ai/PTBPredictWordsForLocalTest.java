@@ -121,13 +121,13 @@ public class PTBPredictWordsForLocalTest {
 
         DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
         tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
-        RnnTest rnnTest = new RnnTest(word2Vec, wordToIndex, tokenizerFactory, multiLayerNetwork, null, 3);
+//        RnnTest rnnTest = new RnnTest(word2Vec, wordToIndex, tokenizerFactory, multiLayerNetwork, null, 3);
 
         System.out.println("begin train");
         for (int j = 0; j < nEpochs; j++) {
             multiLayerNetwork.fit(rDataSetIterator);
             rDataSetIterator.reset();
-            rnnTest.generateTokensFromStr("happy birthday to you", 50);
+//            rnnTest.generateTokensFromStr("happy birthday to you", 50);
         }
     }
 

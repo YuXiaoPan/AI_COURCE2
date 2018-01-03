@@ -3,13 +3,14 @@ package me.peyppicp.ai;
 import me.peyppicp.Utils;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
+import org.deeplearning4j.models.word2vec.Word2Vec;
+import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.util.ModelSerializer;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,17 +24,23 @@ public class PTBTestMain {
     public static void main(String[] args) throws IOException {
         String prefix = "";
         String output = "";
-        MultiLayerNetwork model = ModelSerializer.restoreMultiLayerNetwork("/Users/yuxiao.pan/IdeaProjects/AI_COURCE2/src/main/resources/model/final.txt");
-        WordVectors wordVectors = WordVectorSerializer.readWord2VecModel(prefix + "glove.twitter.27B.50d.txt");
+        MultiLayerNetwork ptbModel = ModelSerializer.restoreMultiLayerNetwork("/Users/yuxiao.pan/IdeaProjects/AI_COURCE2/src/main/resources/model/changedLSTM1.txt");
+        WordVectors ptbWordVectors = WordVectorSerializer.readWord2VecModel(prefix + "glove.twitter.27B.50d.txt");
         WordToIndex wordToIndex = new WordToIndex(prefix + "pair.txt");
+
+        ComputationGraph cnnModel = ModelSerializer.restoreComputationGraph("./src/main/resources/model/model-highLearningRate04-40.txt");
+        Word2Vec cnnWord2Vec = WordVectorSerializer.readWord2VecModel("glove.twitter.27B.100d.txt");
+        EmojiToIndex emojiToIndex = new EmojiToIndex();
+
         DefaultTokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
         tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
-        RnnTest rnnTest = new RnnTest(wordVectors, wordToIndex, tokenizerFactory, model, null, 3);
-        List<String> collect = Utils.readLinesFromPath(prefix + "emoji_sample_head.txt")
-                .stream().limit(50000).collect(Collectors.toList());
-        Collections.shuffle(collect);
+
+        RnnTest rnnTest = new RnnTest(ptbWordVectors, cnnWord2Vec,
+                wordToIndex, emojiToIndex, tokenizerFactory, ptbModel, cnnModel, 3);
+        List<String> collect = Utils.readLinesFromPath(prefix + "emoji_test_sample(1).txt")
+                .stream().limit(5000).collect(Collectors.toList());
         for (String s : collect) {
-            rnnTest.generateTokensFromStr(s, 10);
+            rnnTest.generateTokensFromStr(s, 200);
         }
 //        int threadNum = 8;
 //        List<List<String>> testDatas = new ArrayList<>();
@@ -76,9 +83,9 @@ class EvaluationRunner implements Runnable {
 
     @Override
     public void run() {
-        RnnTest rnnTest = new RnnTest(wordVectors, wordToIndex, defaultTokenizerFactory, multiLayerNetwork, null, 3);
-        for (String s : testData) {
-            rnnTest.generateTokensFromStr(s, 10);
-        }
+//        RnnTest rnnTest = new RnnTest(wordVectors, wordToIndex, defaultTokenizerFactory, multiLayerNetwork, null, 3);
+//        for (String s : testData) {
+//            rnnTest.generateTokensFromStr(s, 10);
+//        }
     }
 }

@@ -24,7 +24,7 @@ import java.util.Map;
 public class CNNTestMain {
 
     public static void main(String[] args) throws IOException {
-        ComputationGraph graph = ModelSerializer.restoreComputationGraph("./src/main/resources/model/model-highLearningRate02-50.txt");
+        ComputationGraph graph = ModelSerializer.restoreComputationGraph("./src/main/resources/model/model-highLearningRate04-40.txt");
         Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel("glove.twitter.27B.100d.txt");
         EmojiToIndex emojiToIndex = new EmojiToIndex();
         INDArray happy = word2Vec.getWordVectorMatrix("happy");

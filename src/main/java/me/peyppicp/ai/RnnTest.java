@@ -1,6 +1,5 @@
 package me.peyppicp.ai;
 
-import com.google.common.base.Preconditions;
 import com.vdurmont.emoji.EmojiParser;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.nn.graph.ComputationGraph;
@@ -24,101 +23,155 @@ import java.util.stream.Collectors;
  */
 public class RnnTest {
 
-    private final WordVectors wordVectors;
+    private final WordVectors ptbWordVectors;
+    private final WordVectors cnnWordVectors;
     private final WordToIndex wordToIndex;
+    private final EmojiToIndex emojiToIndex;
     private final TokenizerFactory tokenizerFactory;
     private final MultiLayerNetwork ptbModel;
-    private final ComputationGraph emojiModel;
-    private final int word2vecSize;
+    private final ComputationGraph cnnModel;
+    private final int ptbWord2VecSize;
+    private final int cnnWord2VecSize;
     private final PTBEvaluation evaluation;
     private final int numberSteps;
 
-    public RnnTest(WordVectors wordVectors, WordToIndex wordToIndex, TokenizerFactory tokenizerFactory, MultiLayerNetwork ptbModel, ComputationGraph emojiModel, int numberSteps) {
-        this.wordVectors = wordVectors;
+    public RnnTest(WordVectors ptbWordVectors, WordVectors cnnWordVectors,
+                   WordToIndex wordToIndex, EmojiToIndex emojiToIndex,
+                   TokenizerFactory tokenizerFactory, MultiLayerNetwork ptbModel,
+                   ComputationGraph cnnModel, int numberSteps) {
+        this.ptbWordVectors = ptbWordVectors;
+        this.cnnWordVectors = cnnWordVectors;
         this.wordToIndex = wordToIndex;
+        this.emojiToIndex = emojiToIndex;
         this.tokenizerFactory = tokenizerFactory;
         this.ptbModel = ptbModel;
-        this.emojiModel = emojiModel;
-        this.word2vecSize = wordVectors.getWordVector(wordVectors.vocab().wordAtIndex(0)).length;
+        this.cnnModel = cnnModel;
+        this.ptbWord2VecSize = ptbWordVectors.getWordVector(ptbWordVectors.vocab().wordAtIndex(0)).length;
+        this.cnnWord2VecSize = cnnWordVectors.getWordVector(cnnWordVectors.vocab().wordAtIndex(0)).length;
         this.evaluation = PTBEvaluation.getInstance();
         this.numberSteps = numberSteps;
     }
 
+    /**
+     * 根据输入语句进行预测并统计
+     *
+     * @param sentence
+     * @param topN
+     */
     public void generateTokensFromStr(String sentence, int topN) {
         ptbModel.rnnClearPreviousState();
+//        拿出emoji
+        List<String> extractEmojis = EmojiParser.extractEmojis(sentence)
+                .stream().distinct().collect(Collectors.toList());
+//        删除emoji
         sentence = EmojiParser.removeAllEmojis(sentence);
+//        分词，将所有输入小写并且去除标点符号
         List<String> tokens = tokenizerFactory.create(sentence).getTokens();
-        INDArray output = null;
+        boolean popupEmoji = false;
+        if (tokens.size() <= 1) {
+            return;
+        }
+        /*
+        构建输入
+        如果在第i个词之前有numberStep个词，则从i-numberStep开始重新构建输入
+        否则直接计算准确率
+         */
         for (int i = 0, j = 1; i < tokens.size() && j < tokens.size(); i++, j++) {
             int threshold = tokens.size() - numberSteps;
             if (threshold > 0 && i > numberSteps) {
                 ptbModel.rnnClearPreviousState();
-                for (int k = i - numberSteps + 1; k < i; k++) {
+                for (int k = i + 1 - numberSteps; k < i; k++) {
                     String previousToken = tokens.get(k);
-                    INDArray zeros = Nd4j.zeros(1, word2vecSize);
-                    INDArray vectorMatrix = wordVectors.getWordVectorMatrix(previousToken);
+                    INDArray zeros = Nd4j.zeros(1, ptbWord2VecSize);
+                    INDArray vectorMatrix;
+//                    if (hasToken(previousToken)) {
+                        vectorMatrix = ptbWordVectors.getWordVectorMatrix(previousToken);
+//                    } else {
+//                        vectorMatrix = ptbWordVectors.getWordVectorMatrix("<unknown>");
+//                    }
                     zeros.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, vectorMatrix);
                     ptbModel.rnnTimeStep(zeros);
                 }
             }
             String currentToken = tokens.get(i);
             String nextToken = tokens.get(j);
-            INDArray zeros = Nd4j.zeros(1, word2vecSize);
-            INDArray vectorMatrix = wordVectors.getWordVectorMatrix(currentToken);
+            INDArray zeros = Nd4j.zeros(1, ptbWord2VecSize);
+            INDArray vectorMatrix;
+//            if (hasToken(currentToken)) {
+                vectorMatrix = ptbWordVectors.getWordVectorMatrix(currentToken);
+//            } else {
+//                vectorMatrix = ptbWordVectors.getWordVectorMatrix("<unknown>");
+//            }
             zeros.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, vectorMatrix);
-            output = ptbModel.rnnTimeStep(zeros);
-            List<String> top3words = findTopNWords(output, topN)
+            INDArray output = ptbModel.rnnTimeStep(zeros);
+//            获得top3列表
+            List<String> top50words = findTopNWords(output, topN)
                     .stream()
-                    .filter(s -> !"<end>".equals(s) && !"<unknown>".equals(s))
-                    .limit(3)
+                    .filter(s -> !"<unknown>".equals(s))
+                    .limit(topN)
                     .collect(Collectors.toList());
+            popupEmoji = top50words.contains("<emoji>");
+            List<String> top3words = top50words.stream().limit(3).collect(Collectors.toList());
             if (top3words.get(0).equals(nextToken)) {
                 evaluation.plusTop1Correct();
-            } else {
-                evaluation.plusTop1Error();
             }
             if (top3words.contains(nextToken)) {
                 evaluation.plusTop3Correct();
-            } else {
-                evaluation.plusTop3Error();
             }
         }
-        System.out.println("Top1:" + evaluation.getCorrectTop1Rate() + ", top3:" + evaluation.getCorrectTop3Rate());
+
+        evaluation.plusTotalNumber(tokens.size());
+        evaluateEmojis(tokens, extractEmojis);
+        evaluation.plusEmojiTotalNumber(extractEmojis.size());
+        System.out.println("Top1:" + evaluation.getCorrectTop1Rate() * 100 + "%, top3:" + evaluation.getCorrectTop3Rate() * 100 + "%," +
+                "emoji:top1:" + evaluation.getCorrectEmojiTop1Rate() + ", top3:" + evaluation.getCorrectEmojiTop3Rate());
     }
 
-    public void prepareInputForPredict(List<String> input, String predictToken, int topN) {
-        ptbModel.rnnClearPreviousState();
-        INDArray indArray = null;
-        for (int i = 0; i < input.size(); i++) {
-            String previousToken = input.get(i);
-            INDArray zeros = Nd4j.zeros(1, word2vecSize);
-            INDArray previousVector = wordVectors.getWordVectorMatrix(previousToken);
-            zeros.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, previousVector);
-            indArray = ptbModel.rnnTimeStep(zeros);
-        }
+    public boolean hasToken(String token) {
+        return ptbWordVectors.hasWord(token) && -1 != wordToIndex.getIndex(token);
+    }
 
-        List<String> top3words = findTopNWords(indArray, topN).stream().filter(s -> !"<end>".equals(s) && !"<unknown>".equals(s))
-                .limit(3)
-                .collect(Collectors.toList());
-        if (top3words.get(0).equals(predictToken)) {
-            evaluation.plusTop1Correct();
-        } else {
-            evaluation.plusTop1Error();
+    public void evaluateEmojis(List<String> tokens, List<String> emojis) {
+        INDArray input = Nd4j.zeros(1, 1, tokens.size(), cnnWord2VecSize);
+        int i = 0;
+        for (String token : tokens) {
+            INDArray tokenVector = cnnWordVectors.getWordVectorMatrix(token);
+            input.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.point(0), NDArrayIndex.point(i++), NDArrayIndex.all()}, tokenVector);
         }
-        if (top3words.contains(predictToken)) {
-            evaluation.plusTop3Correct();
-        } else {
-            evaluation.plusTop3Error();
+        INDArray output = cnnModel.output(input)[0];
+        List<String> emojiTopN = new ArrayList<>();
+        Map<String, Float> scoreMap = new HashMap<>();
+        List<String> emojisIndex = new ArrayList<>(emojiToIndex.getEmojiToIndexMap().keySet());
+        for (int j = 0; j < output.length(); j++) {
+            scoreMap.put(emojisIndex.get(j), output.getFloat(j));
+        }
+        scoreMap.entrySet().stream().sorted(((o1, o2) -> -o1.getValue().compareTo(o2.getValue())))
+                .forEachOrdered(entry -> emojiTopN.add(entry.getKey()));
+        List<String> emojiTop3 = emojiTopN.stream().limit(3).collect(Collectors.toList());
+        for (String emoji : emojis) {
+            if (emojiTop3.contains(emoji)) {
+                evaluation.plusEmojiTop3Correct();
+            }
+        }
+        for (String emoji : emojis) {
+            if (emojiTop3.get(0).equals(emoji)) {
+                evaluation.plusEmojiTop1Correct();
+            }
         }
     }
 
+    /**
+     * 根据模型的输出结果获得对应的token
+     *
+     * @param output
+     * @param topN
+     * @return
+     */
     public List<String> findTopNWords(INDArray output, int topN) {
         INDArray indArray = output.linearView();
         List<String> labels = wordToIndex.getLabels();
         Map<String, Float> top10WordsMap = new HashMap<>(15000);
         List<String> top10Words = new ArrayList<>(topN);
-        Preconditions.checkArgument(topN < labels.size());
-        Preconditions.checkArgument(labels.size() == indArray.length());
         for (int i = 0; i < indArray.length(); i++) {
             top10WordsMap.put(labels.get(i), indArray.getFloat(i));
         }
