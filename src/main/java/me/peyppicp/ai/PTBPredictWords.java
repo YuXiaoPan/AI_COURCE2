@@ -49,7 +49,7 @@ public class PTBPredictWords {
 //    public static String OUTPUT = "/home/panyuxiao/output/";
     public static String PREFIX = "";
     public static String OUTPUT = "";
-    private static final int limitNum = 50000;
+    private static final int limitNum = 30000;
     private static final Logger log = LoggerFactory.getLogger(PTBPredictWords.class);
 
     /**
@@ -101,9 +101,9 @@ public class PTBPredictWords {
                 .list()
                 .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(80)
                         .activation(Activation.TANH).build())
-                .layer(1, new GravesLSTM.Builder().nIn(80).nOut(64).activation(Activation.TANH).build())
+                .layer(1, new GravesLSTM.Builder().nIn(80).nOut(50).activation(Activation.TANH).build())
                 .layer(2, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(64).nOut(rDataSetIterator.totalOutcomes()).build())
+                        .activation(Activation.SOFTMAX).nIn(50).nOut(rDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
                 .build();
