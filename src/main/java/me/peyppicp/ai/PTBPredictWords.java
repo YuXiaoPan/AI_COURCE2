@@ -80,7 +80,7 @@ public class PTBPredictWords {
         String prefix = "with-emoji";
         int batchSize = 64;
         int nEpochs = 10;
-        int numberSteps = 15;
+        int numberSteps = 35;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
         WordToIndex wordToIndex = new WordToIndex(PREFIX + Constants.PAIR);
         Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + Constants._50D);

@@ -77,7 +77,7 @@ public class PTBDataSetIterator implements DataSetIterator {
                 input.put(new INDArrayIndex[]{NDArrayIndex.point(i),
                         NDArrayIndex.all(), NDArrayIndex.point(timeStep)}, currentVector);
                 if (EmojiManager.isEmoji(nextToken)) {
-                    labels.putScalar(new int[]{i, wordToIndex.getIndex(nextToken), timeStep}, 2.25);
+                    labels.putScalar(new int[]{i, wordToIndex.getIndex(nextToken), timeStep}, 6.25);
                 } else {
                     labels.putScalar(new int[]{i, wordToIndex.getIndex(nextToken), timeStep}, 1.0);
                 }
