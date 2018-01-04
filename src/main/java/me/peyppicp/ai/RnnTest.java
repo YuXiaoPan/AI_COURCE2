@@ -1,5 +1,6 @@
 package me.peyppicp.ai;
 
+import com.google.common.base.Strings;
 import com.vdurmont.emoji.EmojiManager;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.nn.graph.ComputationGraph;
@@ -99,6 +100,9 @@ public class RnnTest {
             }
             String currentToken = tokens.get(i);
             String nextToken = tokens.get(j);
+            if (Strings.isNullOrEmpty(currentToken) || Strings.isNullOrEmpty(nextToken)) {
+                continue;
+            }
             INDArray zeros = Nd4j.zeros(1, ptbWord2VecSize);
             INDArray vectorMatrix;
             if (hasToken(currentToken)) {
@@ -136,7 +140,7 @@ public class RnnTest {
             }
             System.out.println("Index:" + i + ", finish rate:" + (i / (tokens.size() * 1.0f)) * 100 + "%, top1:" +
                     evaluation.getCorrectTop1Rate() * 100 + "%, top3:" + evaluation.getCorrectTop3Rate() * 100 + "%, " +
-                    "emoji:top1:" + evaluation.getCorrectEmojiTop1Rate()*100 + "%, top3:" + evaluation.getCorrectEmojiTop3Rate() *100+
+                    "emoji:top1:" + evaluation.getCorrectEmojiTop1Rate() * 100 + "%, top3:" + evaluation.getCorrectEmojiTop3Rate() * 100 +
                     "%, Current token:" + currentToken + ", nextToken:" + nextToken + ".");
         }
 //        evaluateEmojis(tokens, extractEmojis);
@@ -190,7 +194,11 @@ public class RnnTest {
         Map<String, Float> top10WordsMap = new HashMap<>(30000);
         List<String> top10Words = new ArrayList<>(topN);
         for (int i = 0; i < indArray.length(); i++) {
-            top10WordsMap.put(labels.get(i), indArray.getFloat(i));
+            String token = labels.get(i);
+            if (EmojiManager.isEmoji(token)) {
+                top10WordsMap.put(token, (float) Math.sqrt(Math.sqrt(indArray.getFloat(i) * 10) * 10));
+            }
+            top10WordsMap.put(token, indArray.getFloat(i));
         }
         top10WordsMap.entrySet().parallelStream()
                 .sorted((o1, o2) -> -o1.getValue().compareTo(o2.getValue()))
