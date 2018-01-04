@@ -95,7 +95,7 @@ public class RnnTest {
 //                    ptbModel.rnnTimeStep(zeros);
 //                }
 //            }
-            if (i % 5 == 0) {
+            if (i % 3 == 0) {
                 ptbModel.rnnClearPreviousState();
             }
             String currentToken = tokens.get(i);
@@ -123,8 +123,8 @@ public class RnnTest {
             if (EmojiManager.isEmoji(nextToken)) { //emoji
                 if (top3words.get(0).equals(nextToken)) {
                     evaluation.plusEmojiTop1Correct();
-                }
-                if (top3words.contains(nextToken)) {
+                    evaluation.plusEmojiTop3Correct();
+                } else if (top3words.contains(nextToken)) {
                     evaluation.plusEmojiTop3Correct();
                 }
                 evaluation.plusEmojiTotalNumber();
@@ -132,8 +132,8 @@ public class RnnTest {
                 //单词预测
                 if (top3words.get(0).equals(nextToken)) {
                     evaluation.plusTop1Correct();
-                }
-                if (top3words.contains(nextToken)) {
+                    evaluation.plusTop3Correct();
+                } else if (top3words.contains(nextToken)) {
                     evaluation.plusTop3Correct();
                 }
                 evaluation.plusTotalNumber();
