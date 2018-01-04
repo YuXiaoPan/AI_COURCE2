@@ -190,3 +190,4 @@ public class PTBPredictWords {
         Utils.writeLineToPath(data, output);
     }
 }
+

@@ -31,6 +31,10 @@ public class PTBEvaluation {
         correctEmojiTop3Number.incrementAndGet();
     }
 
+    public void plusEmojiTotalNumber() {
+        totalEmojiNumber.incrementAndGet();
+    }
+
     public void plusEmojiTotalNumber(int size) {
         totalEmojiNumber.addAndGet(size);
     }
@@ -41,6 +45,10 @@ public class PTBEvaluation {
 
     public void plusTop3Correct() {
         correctTop3Number.incrementAndGet();
+    }
+
+    public void plusTotalNumber() {
+        totalNumber.incrementAndGet();
     }
 
     public void plusTotalNumber(int tokenSize) {
