@@ -16,8 +16,10 @@ import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.api.IterationListener;
+import org.deeplearning4j.text.sentenceiterator.CollectionSentenceIterator;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
+import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.factory.Nd4j;
@@ -83,7 +85,21 @@ public class PTBPredictWords {
         int numberSteps = 35;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
         WordToIndex wordToIndex = new WordToIndex(PREFIX + Constants.PAIR);
-        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + Constants._50D);
+//        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + Constants._50D);
+        TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
+        tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
+        CollectionSentenceIterator collectionSentenceIterator = new CollectionSentenceIterator(samples);
+        Word2Vec word2Vec = new Word2Vec.Builder()
+                .minWordFrequency(5)
+                .iterations(1)
+                .layerSize(100)
+                .seed(41)
+                .windowSize(10)
+                .iterate(collectionSentenceIterator)
+                .tokenizerFactory(tokenizerFactory)
+                .build();
+
+        WordVectorSerializer.writeWordVectors(word2Vec, OUTPUT + "default.word2vec.txt");
         PTBDataSetIterator rDataSetIterator = new PTBDataSetIterator(batchSize,
                 numberSteps, samples, wordToIndex, word2Vec);
 
@@ -95,15 +111,16 @@ public class PTBPredictWords {
                 .regularization(true)
                 .l2(1e-5)
                 .weightInit(WeightInit.XAVIER)
+                .learningRate(0.1d)
 //                .learningRate(0.1)
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
-                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(80)
+                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(128)
                         .activation(Activation.TANH).build())
-                .layer(1, new GravesLSTM.Builder().nIn(80).nOut(50).activation(Activation.TANH).build())
+                .layer(1, new GravesLSTM.Builder().nIn(128).nOut(150).activation(Activation.TANH).build())
                 .layer(2, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(50).nOut(rDataSetIterator.totalOutcomes()).build())
+                        .activation(Activation.SOFTMAX).nIn(150).nOut(rDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
                 .build();

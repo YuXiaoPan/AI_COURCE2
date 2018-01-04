@@ -6,9 +6,11 @@ import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
+import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 import org.deeplearning4j.util.ModelSerializer;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,7 +45,7 @@ public class PTBTestMain {
         RnnTest rnnTest = new RnnTest(ptbWordVectors, null,
                 wordToIndex, null, tokenizerFactory, ptbModel, null, 5);
         List<String> collect = Utils.readLinesFromPath(testDataPath);
-        String data = preprocessData(collect);
+        List<String> data = preprocessData(collect, tokenizerFactory);
 //        for (String s : collect) {
 //            rnnTest.generateTokensFromStr(s, 100);
 //        }
@@ -72,10 +74,15 @@ public class PTBTestMain {
 //        System.out.println(PTBEvaluation.getInstance().getCorrectTop3Rate());
     }
 
-    public static String preprocessData(List<String> data) {
-        StringBuilder stringBuilder = new StringBuilder();
-        data.forEach(s -> stringBuilder.append(s).append(" "));
-        return stringBuilder.toString().trim();
+    public static List<String> preprocessData(List<String> testData, TokenizerFactory tokenizerFactory) {
+        List<String> allTokens = new ArrayList<>();
+        for (String data1 : testData) {
+            List<String> tokens = tokenizerFactory.create(data1).getTokens();
+            if (tokens.size() > 1) {
+                allTokens.addAll(tokens);
+            }
+        }
+        return allTokens;
     }
 }
 

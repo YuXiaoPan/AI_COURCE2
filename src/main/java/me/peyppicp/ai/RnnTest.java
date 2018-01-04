@@ -56,10 +56,10 @@ public class RnnTest {
     /**
      * 根据输入语句进行预测并统计
      *
-     * @param sentence
+     * @param tokens
      * @param topN
      */
-    public void generateTokensFromStr(String sentence, int topN) {
+    public void generateTokensFromStr(List<String> tokens, int topN) {
         ptbModel.rnnClearPreviousState();
 //        拿出emoji
 //        List<String> extractEmojis = EmojiParser.extractEmojis(sentence)
@@ -67,10 +67,10 @@ public class RnnTest {
 //        删除emoji
 //        sentence = EmojiParser.removeAllEmojis(sentence);
 //        分词，将所有输入小写并且去除标点符号
-        List<String> tokens = tokenizerFactory.create(sentence).getTokens();
-        if (tokens.size() <= 1) {
-            return;
-        }
+//        List<String> tokens = tokenizerFactory.create(sentence).getTokens();
+//        if (tokens.size() <= 1) {
+//            return;
+//        }
 
 //        evaluation.plusTotalNumber(tokens.size());
         /*
@@ -79,23 +79,23 @@ public class RnnTest {
         否则直接计算准确率
          */
         for (int i = 0, j = 1; i < tokens.size() && j < tokens.size(); i++, j++) {
-//            int threshold = tokens.size() - numberSteps;
-//            if (threshold > 0 && i > numberSteps) {
-//                ptbModel.rnnClearPreviousState();
-//                for (int k = i + 1 - numberSteps; k < i; k++) {
-//                    String previousToken = tokens.get(k);
-//                    INDArray zeros = Nd4j.zeros(1, ptbWord2VecSize);
-//                    INDArray vectorMatrix;
-//                    if (hasToken(previousToken)) {
-//                        vectorMatrix = ptbWordVectors.getWordVectorMatrix(previousToken);
-//                    } else {
-//                        vectorMatrix = ptbWordVectors.getWordVectorMatrix("<unknown>");
-//                    }
-//                    zeros.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, vectorMatrix);
-//                    ptbModel.rnnTimeStep(zeros);
-//                }
-//            }
-            if (i % 3 == 0) {
+            int threshold = tokens.size() - numberSteps;
+            if (threshold > 0 && i > numberSteps) {
+                ptbModel.rnnClearPreviousState();
+                for (int k = i + 1 - numberSteps; k < i; k++) {
+                    String previousToken = tokens.get(k);
+                    INDArray zeros = Nd4j.zeros(1, ptbWord2VecSize);
+                    INDArray vectorMatrix;
+                    if (hasToken(previousToken)) {
+                        vectorMatrix = ptbWordVectors.getWordVectorMatrix(previousToken);
+                    } else {
+                        vectorMatrix = ptbWordVectors.getWordVectorMatrix("<unknown>");
+                    }
+                    zeros.put(new INDArrayIndex[]{NDArrayIndex.point(0), NDArrayIndex.all()}, vectorMatrix);
+                    ptbModel.rnnTimeStep(zeros);
+                }
+            }
+            if (i % numberSteps == 0) {
                 ptbModel.rnnClearPreviousState();
             }
             String currentToken = tokens.get(i);
@@ -120,6 +120,7 @@ public class RnnTest {
                     .collect(Collectors.toList());
 //            System.out.println(top50words);
             List<String> top3words = top50words.stream().limit(3).collect(Collectors.toList());
+            System.out.println(top3words);
             if (EmojiManager.isEmoji(nextToken)) { //emoji
                 if (top3words.get(0).equals(nextToken)) {
                     evaluation.plusEmojiTop1Correct();
@@ -195,9 +196,10 @@ public class RnnTest {
         List<String> top10Words = new ArrayList<>(topN);
         for (int i = 0; i < indArray.length(); i++) {
             String token = labels.get(i);
-            if (EmojiManager.isEmoji(token)) {
-                top10WordsMap.put(token, (float) Math.sqrt(Math.sqrt(indArray.getFloat(i) * 10) * 10));
-            }
+//            if (EmojiManager.isEmoji(token)) {
+//                top10WordsMap.put(token, (float) Math.sqrt(indArray.getFloat(i)));
+//                top10WordsMap.put(token, (float) Math.sqrt(Math.sqrt(indArray.getFloat(i) * 10) * 10));
+//            }
             top10WordsMap.put(token, indArray.getFloat(i));
         }
         top10WordsMap.entrySet().parallelStream()
