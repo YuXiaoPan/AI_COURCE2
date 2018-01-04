@@ -111,7 +111,7 @@ public class PTBPredictWords {
                 .regularization(true)
                 .l2(1e-5)
                 .weightInit(WeightInit.XAVIER)
-                .learningRate(0.1d)
+//                .learningRate(0.1d)
 //                .learningRate(0.1)
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
