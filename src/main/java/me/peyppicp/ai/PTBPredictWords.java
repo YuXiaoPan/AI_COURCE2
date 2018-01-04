@@ -82,24 +82,25 @@ public class PTBPredictWords {
         String prefix = "with-emoji";
         int batchSize = 64;
         int nEpochs = 10;
-        int numberSteps = 35;
+        int numberSteps = 30;
         List<String> samples = Utils.readLinesFromPath(originData.getCanonicalPath());
         WordToIndex wordToIndex = new WordToIndex(PREFIX + Constants.PAIR);
 //        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + Constants._50D);
         TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
         tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
         BasicLineIterator basicLineIterator = new BasicLineIterator(PREFIX + "forWord2Vec.txt");
-        Word2Vec word2Vec = new Word2Vec.Builder()
-                .minWordFrequency(5)
-                .iterations(1)
-                .layerSize(100)
-                .seed(41)
-                .windowSize(10)
-                .iterate(basicLineIterator)
-                .tokenizerFactory(tokenizerFactory)
-                .build();
-        word2Vec.fit();
-        WordVectorSerializer.writeWordVectors(word2Vec, PREFIX + "default.word2vec.txt");
+//        Word2Vec word2Vec = new Word2Vec.Builder()
+//                .minWordFrequency(5)
+//                .iterations(1)
+//                .layerSize(100)
+//                .seed(41)
+//                .windowSize(10)
+//                .iterate(basicLineIterator)
+//                .tokenizerFactory(tokenizerFactory)
+//                .build();
+//        word2Vec.fit();
+//        WordVectorSerializer.writeWord2VecModel(word2Vec, PREFIX + "default.word2vec.txt");
+        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + "default.word2vec.txt");
         PTBDataSetIterator rDataSetIterator = new PTBDataSetIterator(batchSize,
                 numberSteps, samples, wordToIndex, word2Vec);
 
@@ -116,11 +117,11 @@ public class PTBPredictWords {
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .iterations(1)
                 .list()
-                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(128)
+                .layer(0, new GravesLSTM.Builder().nIn(rDataSetIterator.inputColumns()).nOut(100)
                         .activation(Activation.TANH).build())
-                .layer(1, new GravesLSTM.Builder().nIn(128).nOut(150).activation(Activation.TANH).build())
+                .layer(1, new GravesLSTM.Builder().nIn(100).nOut(128).activation(Activation.TANH).build())
                 .layer(2, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
-                        .activation(Activation.SOFTMAX).nIn(150).nOut(rDataSetIterator.totalOutcomes()).build())
+                        .activation(Activation.SOFTMAX).nIn(128).nOut(rDataSetIterator.totalOutcomes()).build())
                 .pretrain(false)
                 .backprop(true)
                 .build();
