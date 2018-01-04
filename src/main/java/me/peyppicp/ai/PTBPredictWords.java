@@ -16,7 +16,7 @@ import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.api.IterationListener;
-import org.deeplearning4j.text.sentenceiterator.CollectionSentenceIterator;
+import org.deeplearning4j.text.sentenceiterator.BasicLineIterator;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
@@ -88,14 +88,14 @@ public class PTBPredictWords {
 //        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + Constants._50D);
         TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
         tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
-        CollectionSentenceIterator collectionSentenceIterator = new CollectionSentenceIterator(samples);
+        BasicLineIterator basicLineIterator = new BasicLineIterator(PREFIX + "standard_emoji_samples.txt");
         Word2Vec word2Vec = new Word2Vec.Builder()
                 .minWordFrequency(5)
                 .iterations(1)
                 .layerSize(100)
                 .seed(41)
                 .windowSize(10)
-                .iterate(collectionSentenceIterator)
+                .iterate(basicLineIterator)
                 .tokenizerFactory(tokenizerFactory)
                 .build();
 
