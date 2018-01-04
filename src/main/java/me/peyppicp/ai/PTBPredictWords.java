@@ -88,7 +88,7 @@ public class PTBPredictWords {
 //        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(PREFIX + Constants._50D);
         TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
         tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
-        BasicLineIterator basicLineIterator = new BasicLineIterator(PREFIX + "standard_emoji_samples.txt");
+        BasicLineIterator basicLineIterator = new BasicLineIterator(PREFIX + "forWord2Vec.txt");
         Word2Vec word2Vec = new Word2Vec.Builder()
                 .minWordFrequency(5)
                 .iterations(1)
@@ -99,7 +99,7 @@ public class PTBPredictWords {
                 .tokenizerFactory(tokenizerFactory)
                 .build();
 
-        WordVectorSerializer.writeWordVectors(word2Vec, OUTPUT + "default.word2vec.txt");
+        WordVectorSerializer.writeWordVectors(word2Vec, PREFIX + "default.word2vec.txt");
         PTBDataSetIterator rDataSetIterator = new PTBDataSetIterator(batchSize,
                 numberSteps, samples, wordToIndex, word2Vec);
 
@@ -189,7 +189,9 @@ public class PTBPredictWords {
         WordLimiter wordLimiter = new WordLimiter(tempResults, limitNum);
         wordLimiter.toFile(PREFIX + Constants.PAIR);
         StringBuilder stringBuilder = new StringBuilder();
+        List<String> word2vecData = new ArrayList<>();
         for (String tempResult : tempResults) {
+            StringBuilder temp = new StringBuilder();
             List<String> tokens = tokenizerFactory.create(tempResult).getTokens();
             List<String> indexes = new ArrayList<>(tokens.size());
             for (String token : tokens) {
@@ -200,10 +202,14 @@ public class PTBPredictWords {
                 }
             }
             indexes.forEach(s -> stringBuilder.append(s).append(" "));
+            indexes.forEach(s -> temp.append(s).append(" "));
+            word2vecData.add(temp.toString().trim());
         }
         List<String> data = Lists.newArrayList();
         data.add(stringBuilder.toString().trim());
         String output = PREFIX + Constants.MORE_STANDARD;
+        String forWord2vec = PREFIX + "forWord2Vec.txt";
+        Utils.writeLineToPath(word2vecData, forWord2vec);
         Utils.writeLineToPath(data, output);
     }
 }
