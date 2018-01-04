@@ -98,7 +98,7 @@ public class PTBPredictWords {
                 .iterate(basicLineIterator)
                 .tokenizerFactory(tokenizerFactory)
                 .build();
-
+        word2Vec.fit();
         WordVectorSerializer.writeWordVectors(word2Vec, PREFIX + "default.word2vec.txt");
         PTBDataSetIterator rDataSetIterator = new PTBDataSetIterator(batchSize,
                 numberSteps, samples, wordToIndex, word2Vec);
